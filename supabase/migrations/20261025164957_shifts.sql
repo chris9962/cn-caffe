@@ -360,7 +360,12 @@ begin
     where employee_id = v_before.employee_id
       and id <> p_shift_id
       and status <> 'rejected'
-      and tstzrange(check_in_at, coalesce(check_out_at, 'infinity')) && tstzrange(p_check_in_at, p_check_out_at)
+      -- Only an open shift is still running; a shift abandoned without check out counts as its check-in instant.
+      and case
+        when check_out_at is not null then tstzrange(check_in_at, check_out_at)
+        when status = 'open' then tstzrange(check_in_at, null)
+        else tstzrange(check_in_at, check_in_at, '[]')
+      end && tstzrange(p_check_in_at, p_check_out_at)
   ) then
     raise exception using message = 'overlap', errcode = 'P0001';
   end if;
@@ -427,7 +432,11 @@ begin
     select 1 from public.shifts
     where employee_id = p_employee_id
       and status <> 'rejected'
-      and tstzrange(check_in_at, coalesce(check_out_at, 'infinity')) && tstzrange(p_check_in_at, p_check_out_at)
+      and case
+        when check_out_at is not null then tstzrange(check_in_at, check_out_at)
+        when status = 'open' then tstzrange(check_in_at, null)
+        else tstzrange(check_in_at, check_in_at, '[]')
+      end && tstzrange(p_check_in_at, p_check_out_at)
   ) then
     raise exception using message = 'overlap', errcode = 'P0001';
   end if;

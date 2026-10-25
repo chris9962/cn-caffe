@@ -1,20 +1,22 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(63);
+select plan(66);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'a@test.local'),
   ('00000000-0000-0000-0000-000000000002', 'm@test.local'),
   ('00000000-0000-0000-0000-000000000003', 'n@test.local'),
   ('00000000-0000-0000-0000-000000000004', 's@test.local'),
-  ('00000000-0000-0000-0000-000000000005', 't@test.local');
+  ('00000000-0000-0000-0000-000000000005', 't@test.local'),
+  ('00000000-0000-0000-0000-000000000006', 'u@test.local');
 
 insert into public.employees (id, full_name, phone, role) values
   ('00000000-0000-0000-0000-000000000001', 'Admin A', '84900000001', 'admin'),
   ('00000000-0000-0000-0000-000000000002', 'Manager M', '84900000002', 'manager'),
   ('00000000-0000-0000-0000-000000000003', 'Manager N', '84900000003', 'manager'),
   ('00000000-0000-0000-0000-000000000004', 'Staff S', '84900000004', 'staff'),
-  ('00000000-0000-0000-0000-000000000005', 'Staff T', '84900000005', 'staff');
+  ('00000000-0000-0000-0000-000000000005', 'Staff T', '84900000005', 'staff'),
+  ('00000000-0000-0000-0000-000000000006', 'Staff U', '84900000006', 'staff');
 
 insert into public.branches (id, name, latitude, longitude, radius_m, is_active) values
   ('00000000-0000-0000-0000-0000000000b1', 'B1', 10.7769, 106.7009, 100, true),
@@ -47,6 +49,17 @@ from (values
   ('00000000-0000-0000-0000-0000000000e4', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b1', 'valid', interval '17 days', interval '4 hours', '{}'),
   ('00000000-0000-0000-0000-0000000000e5', '00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-0000000000b1', 'valid', interval '15 days', interval '4 hours', '{}')
 ) as fixture (id, employee_id, branch_id, status, starts_ago, duration, fail_reasons);
+
+-- U's missing_checkout shift comes before U's later work, while U's open shift is still running.
+insert into public.shifts (id, employee_id, branch_id, work_date, status, source, check_in_at, check_out_at, fail_reasons, created_by)
+select id, '00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000b1',
+  ((now() - starts_ago) at time zone 'Asia/Ho_Chi_Minh')::date, status, 'check_in',
+  now() - starts_ago, now() - starts_ago + duration, fail_reasons, '00000000-0000-0000-0000-000000000006'
+from (values
+  ('00000000-0000-0000-0000-0000000000f1'::uuid, 'missing_checkout'::public.shift_status, interval '14 days', null::interval, '{}'::text[]),
+  ('00000000-0000-0000-0000-0000000000f2', 'pending_review', interval '13 days', interval '4 hours', '{outside_radius}'),
+  ('00000000-0000-0000-0000-0000000000f3', 'open', interval '3 hours', null, '{}')
+) as fixture (id, status, starts_ago, duration, fail_reasons);
 
 -- Runs before any check out or edit, which would otherwise create the 2026-10 row from table defaults.
 insert into public.monthly_configs (month, max_shift_minutes) values ('2026-09-01', 600);
@@ -358,6 +371,20 @@ select ok(
     where action = 'shift.created_manually' and before is null and after->>'source' = 'manual'
   ),
   'manual shift audits shift.created_manually'
+);
+select is(
+  (select status from public.edit_shift_times('00000000-0000-0000-0000-0000000000f2', now() - interval '13 days', now() - interval '13 days' + interval '5 hours')),
+  'pending_review'::public.shift_status,
+  'an earlier missing_checkout shift does not block editing a later shift'
+);
+select is(
+  (select source from public.add_manual_shift('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000b1', now() - interval '12 days', now() - interval '12 days' + interval '4 hours')),
+  'manual'::public.shift_source,
+  'an earlier missing_checkout shift does not block a later manual shift'
+);
+select throws_ok(
+  $$select public.add_manual_shift('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000b1', now() - interval '2 hours', now() - interval '1 hour')$$,
+  'P0001', 'overlap', 'an open shift blocks a manual shift during its run'
 );
 reset role;
 
