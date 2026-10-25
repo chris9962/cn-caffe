@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState, type RefObject } from "react";
 import { ShiftActions } from "@/components/shifts/shift-actions";
 import { ShiftTimeForm } from "@/components/shifts/shift-time-form";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -117,18 +117,19 @@ type ShiftViewProps = {
   user: CurrentUser;
   shift: Shift;
   auditLogs: AuditLog[];
+  headingRef: RefObject<HTMLHeadingElement | null>;
   onStart: () => void;
   onDone: () => void;
 };
 
-function ShiftView({ user, shift, auditLogs, onStart, onDone }: ShiftViewProps) {
+function ShiftView({ user, shift, auditLogs, headingRef, onStart, onDone }: ShiftViewProps) {
   // Managers never handle their own shifts; only an admin or director may.
   const canHandle = isAdmin(user) || shift.employeeId !== user.id;
 
   return (
     <>
       <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">
+        <h1 ref={headingRef} tabIndex={-1} className={`text-2xl font-semibold ${focusClass}`}>
           Ca ngày {formatDate(shift.workDate)} của {shift.employeeName}
         </h1>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
@@ -189,6 +190,7 @@ export function ShiftDetail({ shiftId }: { shiftId: string }) {
   const me = useFetch<CurrentUser>("/api/me");
   const detail = useFetch<ShiftDetailData>(`/api/shifts/${shiftId}`);
   const [saved, setSaved] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   function clearSaved() {
     setSaved(false);
@@ -197,6 +199,8 @@ export function ShiftDetail({ shiftId }: { shiftId: string }) {
   function handleDone() {
     setSaved(true);
     detail.reload();
+    // The used control unmounts on reload (approve button, review section, keyed time form), so focus goes to the heading.
+    headingRef.current?.focus();
   }
 
   const loadError = me.error ?? detail.error;
@@ -211,6 +215,7 @@ export function ShiftDetail({ shiftId }: { shiftId: string }) {
           user={me.data}
           shift={detail.data.shift}
           auditLogs={detail.data.auditLogs}
+          headingRef={headingRef}
           onStart={clearSaved}
           onDone={handleDone}
         />
