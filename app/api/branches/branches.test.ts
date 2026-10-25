@@ -161,6 +161,13 @@ describe("POST /api/admin/branches/resolve-map-link", () => {
     expect((await res.json()).error).toBe(NO_COORDINATES);
   });
 
+  it("rejects a link with a malformed percent escape", async () => {
+    await signInAsAdmin();
+    const res = await resolve("https://www.google.com/maps/place/%E0%A4%A/@1,2");
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe(NO_COORDINATES);
+  });
+
   it("rejects a non-Google link", async () => {
     await signInAsAdmin();
     const res = await resolve("https://example.com/maps/@10.7,106.7,15z");

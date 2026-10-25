@@ -24,6 +24,7 @@ describe("parseGoogleMapsCoordinates", () => {
     "https://example.com/maps/@10.7,106.7,15z",
     "https://www.google.com/maps/@95.0,106.7,15z",
     "not a url",
+    "https://www.google.com/maps/place/%E0%A4%A/@1,2",
   ])("returns null for %s", (url) => {
     expect(parseGoogleMapsCoordinates(url)).toBeNull();
   });

@@ -29,7 +29,12 @@ export function parseGoogleMapsCoordinates(url: string): Coordinates | null {
   const parsed = parseUrl(url);
   if (!parsed || !GOOGLE_HOSTS.has(parsed.hostname)) return null;
 
-  const path = decodeURIComponent(parsed.pathname);
+  let path: string;
+  try {
+    path = decodeURIComponent(parsed.pathname);
+  } catch {
+    return null;
+  }
   // `!3d!4d` is the pin itself; `@` is only the map viewport.
   const pin = /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/.exec(path);
   if (pin) return toCoordinates(pin[1], pin[2]);
