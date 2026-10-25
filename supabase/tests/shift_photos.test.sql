@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(17);
 
 -- storage.protect_delete blocks raw deletes unless this flag is set; the Storage API sets it itself.
 set local storage.allow_delete_query = 'true';
@@ -121,6 +121,33 @@ select is(
   (select count(*) from storage.objects where name = '00000000-0000-0000-0000-000000000004/y.jpg'),
   0::bigint,
   'the unreferenced object is gone'
+);
+
+-- Photo path constraint
+select throws_ok(
+  $$insert into public.shifts (employee_id, branch_id, work_date, status, source, check_in_at, check_in_photo_path, created_by)
+    values ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-0000000000b1', current_date, 'open', 'check_in', now(), '00000000-0000-0000-0000-000000000004/x.jpg', '00000000-0000-0000-0000-000000000005')$$,
+  '23514', null, 'a shift cannot reference a photo in another employee folder'
+);
+select throws_ok(
+  $$insert into public.shifts (employee_id, branch_id, work_date, status, source, check_in_at, check_out_photo_path, created_by)
+    values ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-0000000000b1', current_date, 'open', 'check_in', now(), '00000000-0000-0000-0000-000000000004/x.jpg', '00000000-0000-0000-0000-000000000005')$$,
+  '23514', null, 'a check out photo in another employee folder is refused'
+);
+select throws_ok(
+  $$insert into public.shifts (employee_id, branch_id, work_date, status, source, check_in_at, check_in_photo_path, created_by)
+    values ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-0000000000b1', current_date, 'open', 'check_in', now(), '00000000-0000-0000-0000-000000000005/../x.jpg', '00000000-0000-0000-0000-000000000005')$$,
+  '23514', null, 'a photo path with parent traversal is refused'
+);
+select throws_ok(
+  $$insert into public.shifts (employee_id, branch_id, work_date, status, source, check_in_at, check_in_photo_path, created_by)
+    values ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-0000000000b1', current_date, 'open', 'check_in', now(), '00000000-0000-0000-0000-000000000005/a/b.jpg', '00000000-0000-0000-0000-000000000005')$$,
+  '23514', null, 'a nested photo path is refused'
+);
+select lives_ok(
+  $$insert into public.shifts (employee_id, branch_id, work_date, status, source, check_in_at, check_in_photo_path, created_by)
+    values ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-0000000000b1', current_date, 'open', 'check_in', now(), '00000000-0000-0000-0000-000000000005/x.jpg', '00000000-0000-0000-0000-000000000005')$$,
+  'a photo path in the employee own folder is accepted'
 );
 
 select * from finish();

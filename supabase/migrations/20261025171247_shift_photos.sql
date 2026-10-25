@@ -34,3 +34,10 @@ using (
   and (storage.foldername(name))[1] = (select auth.uid())::text
   and not exists (select 1 from public.shifts s where s.check_in_photo_path = name or s.check_out_photo_path = name)
 );
+
+-- The storage policies above rely on shifts RLS showing the caller every shift that references a path in their folder.
+alter table public.shifts
+  add constraint shifts_check_in_photo_in_employee_folder
+    check (check_in_photo_path is null or check_in_photo_path ~ ('^' || employee_id::text || '/[^/]+$')),
+  add constraint shifts_check_out_photo_in_employee_folder
+    check (check_out_photo_path is null or check_out_photo_path ~ ('^' || employee_id::text || '/[^/]+$'));
