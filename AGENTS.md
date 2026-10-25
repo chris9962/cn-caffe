@@ -14,7 +14,8 @@ Mọi người và mọi AI agent làm việc trên repo này phải tuân theo 
 
 ## 1. Truy vấn database chỉ nằm trong Route Handler
 
-- Mọi truy vấn Supabase phải nằm trong `app/api/**/route.ts`. Truy vấn gồm `.from()`, `.rpc()`, `.storage` và `.auth`.
+- Mọi truy vấn Supabase phải nằm trong `app/api/`: Route Handler `route.ts` và helper dùng chung trong `app/api/_lib/`. Truy vấn gồm `.from()`, `.rpc()`, `.storage` và `.auth`.
+- Test trong `tests/` và script trong `scripts/` được dùng Supabase để chuẩn bị dữ liệu.
 - Page, layout, component, hook và Server Action không được import `@/lib/supabase/*` hoặc `@supabase/*`. ESLint báo lỗi khi gặp các import này.
 - FE lấy dữ liệu bằng `fetch("/api/...")` qua hook `useFetch`.
 - Route Handler gọi `createClient()` từ `@/lib/supabase/server` trong từng request. Route Handler không được lưu client vào biến toàn cục.

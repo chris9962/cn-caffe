@@ -8,7 +8,7 @@ const eslintConfig = defineConfig([
   {
     // Supabase is only reachable from Route Handlers; see AGENTS.md rule 1.
     files: ["**/*.{ts,tsx}"],
-    ignores: ["app/api/**", "lib/supabase/**", "proxy.ts"],
+    ignores: ["app/api/**", "lib/supabase/**", "proxy.ts", "tests/**", "scripts/**"],
     rules: {
       "no-restricted-imports": [
         "error",
