@@ -2,6 +2,9 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select plan(66);
 
+-- Real check outs create month rows that the config_for_month assertions assume are absent.
+delete from public.monthly_configs;
+
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000001', 'a@test.local'),
   ('00000000-0000-0000-0000-000000000002', 'm@test.local'),
@@ -11,12 +14,12 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000006', 'u@test.local');
 
 insert into public.employees (id, full_name, phone, role) values
-  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84900000001', 'admin'),
-  ('00000000-0000-0000-0000-000000000002', 'Manager M', '84900000002', 'manager'),
-  ('00000000-0000-0000-0000-000000000003', 'Manager N', '84900000003', 'manager'),
-  ('00000000-0000-0000-0000-000000000004', 'Staff S', '84900000004', 'staff'),
-  ('00000000-0000-0000-0000-000000000005', 'Staff T', '84900000005', 'staff'),
-  ('00000000-0000-0000-0000-000000000006', 'Staff U', '84900000006', 'staff');
+  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84000000001', 'admin'),
+  ('00000000-0000-0000-0000-000000000002', 'Manager M', '84000000002', 'manager'),
+  ('00000000-0000-0000-0000-000000000003', 'Manager N', '84000000003', 'manager'),
+  ('00000000-0000-0000-0000-000000000004', 'Staff S', '84000000004', 'staff'),
+  ('00000000-0000-0000-0000-000000000005', 'Staff T', '84000000005', 'staff'),
+  ('00000000-0000-0000-0000-000000000006', 'Staff U', '84000000006', 'staff');
 
 insert into public.branches (id, name, latitude, longitude, radius_m, is_active) values
   ('00000000-0000-0000-0000-0000000000b1', 'B1', 10.7769, 106.7009, 100, true),
@@ -89,7 +92,8 @@ select is(
   'branches_by_distance lists the nearest branch first'
 );
 select is(
-  (select count(*) from public.branches_by_distance(10.7769, 106.7009)),
+  -- Only fixture branches count, so branches already in the local database don't change the total.
+  (select count(*) from public.branches_by_distance(10.7769, 106.7009) where id::text like '00000000-0000-0000-0000-%'),
   2::bigint,
   'branches_by_distance skips inactive branches'
 );

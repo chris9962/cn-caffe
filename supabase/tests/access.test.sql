@@ -10,11 +10,11 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000005', 'x@test.local');
 
 insert into public.employees (id, full_name, phone, role, is_active) values
-  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84900000001', 'admin', true),
-  ('00000000-0000-0000-0000-000000000002', 'Director D', '84900000002', 'director', true),
-  ('00000000-0000-0000-0000-000000000003', 'Manager M', '84900000003', 'manager', true),
-  ('00000000-0000-0000-0000-000000000004', 'Staff S', '84900000004', 'staff', true),
-  ('00000000-0000-0000-0000-000000000005', 'Inactive X', '84900000005', 'staff', false);
+  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84000000001', 'admin', true),
+  ('00000000-0000-0000-0000-000000000002', 'Director D', '84000000002', 'director', true),
+  ('00000000-0000-0000-0000-000000000003', 'Manager M', '84000000003', 'manager', true),
+  ('00000000-0000-0000-0000-000000000004', 'Staff S', '84000000004', 'staff', true),
+  ('00000000-0000-0000-0000-000000000005', 'Inactive X', '84000000005', 'staff', false);
 
 insert into public.branches (id, name, latitude, longitude, is_active) values
   ('00000000-0000-0000-0000-0000000000b1', 'B1', 10.77, 106.70, true),
@@ -32,7 +32,8 @@ set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-000000000004', 'role', 'authenticated')::text, true);
 
 select is((select count(*) from public.employees), 1::bigint, 'staff sees only their own employee row');
-select is((select count(*) from public.branches), 2::bigint, 'staff sees only active branches');
+-- Totals count only fixture rows, so accounts and branches already in the local database don't change them.
+select is((select count(*) from public.branches where id::text like '00000000-0000-0000-0000-%'), 2::bigint, 'staff sees only active branches');
 select throws_ok(
   $$insert into public.branches (name, latitude, longitude) values ('B4', 10.8, 106.8)$$,
   '42501', null, 'staff cannot insert branches'
@@ -43,14 +44,14 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-000000000003', 'role', 'authenticated')::text, true);
 
-select is((select count(*) from public.employees), 5::bigint, 'manager sees all employees');
+select is((select count(*) from public.employees where id::text like '00000000-0000-0000-0000-%'), 5::bigint, 'manager sees all employees');
 reset role;
 
 -- Admin A
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-000000000001', 'role', 'authenticated')::text, true);
 
-select is((select count(*) from public.branches), 3::bigint, 'admin sees all branches, including inactive');
+select is((select count(*) from public.branches where id::text like '00000000-0000-0000-0000-%'), 3::bigint, 'admin sees all branches, including inactive');
 reset role;
 
 -- Inactive X
@@ -89,13 +90,13 @@ select is(
   'manager permissions are replaced'
 );
 select is(
-  (select count(*) from public.audit_logs where action = 'manager_access.set'),
+  (select count(*) from public.audit_logs where action = 'manager_access.set' and row_id = '00000000-0000-0000-0000-000000000003'),
   1::bigint,
   'set_manager_access writes one audit row'
 );
 select is(
   (select jsonb_build_object('actor_id', actor_id, 'table_name', table_name, 'row_id', row_id, 'before', before, 'after', after)
-     from public.audit_logs where action = 'manager_access.set'),
+     from public.audit_logs where action = 'manager_access.set' and row_id = '00000000-0000-0000-0000-000000000003'),
   jsonb_build_object(
     'actor_id', '00000000-0000-0000-0000-000000000001',
     'table_name', 'employees',
