@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { InstrumentList } from "@/components/instruments/instrument-list";
+
+export const metadata: Metadata = { title: "Instruments" };
 
 export default function InstrumentsPage() {
   return (

@@ -12,15 +12,16 @@ import { hasShiftPermission, managedBranches } from "@/lib/shifts/access";
 import { formatCheckOut, formatFailReasons } from "@/lib/shifts/labels";
 import type { Branch } from "@/types/branch";
 import type { CurrentUser } from "@/types/employee";
-import type { Shift } from "@/types/shift";
+import type { ShiftList } from "@/types/shift";
 
 const focusClass =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
 
 // A cleared month input gives "", which the API would reject as an invalid month.
-function shiftsUrl({ month, branchId, status }: ShiftFilterValues) {
+function shiftsUrl({ month, date, branchId, status }: ShiftFilterValues) {
   if (month === "") return null;
   const params = new URLSearchParams({ month });
+  if (date !== "") params.set("date", date);
   if (branchId !== "") params.set("branchId", branchId);
   if (status !== "") params.set("status", status);
   return `/api/shifts?${params}`;
@@ -31,10 +32,11 @@ export function ShiftBoard() {
   const branches = useFetch<Branch[]>("/api/branches");
   const [filters, setFilters] = useState<ShiftFilterValues>(() => ({
     month: currentMonth(),
+    date: "",
     branchId: "",
     status: "",
   }));
-  const shifts = useFetch<Shift[]>(shiftsUrl(filters));
+  const shifts = useFetch<ShiftList>(shiftsUrl(filters));
 
   const setupError = me.error ?? branches.error;
   if (setupError) return <ErrorMessage message={setupError} />;
@@ -51,11 +53,17 @@ export function ShiftBoard() {
         </Link>
       )}
       <ShiftFilters branches={managedBranches(me.data, branches.data)} value={filters} onChange={setFilters} />
+      {shifts.data && shifts.data.total > shifts.data.shifts.length && (
+        <p role="status">
+          Danh sách chỉ hiện {shifts.data.shifts.length}/{shifts.data.total} ca. Bạn lọc theo ngày, chi nhánh hoặc trạng
+          thái để xem đủ.
+        </p>
+      )}
       {shifts.isLoading ? (
         <Loading label="Đang tải..." />
       ) : shifts.error ? (
         <ErrorMessage message={shifts.error} />
-      ) : shifts.data?.length === 0 ? (
+      ) : shifts.data?.shifts.length === 0 ? (
         <p>Không có ca nào phù hợp.</p>
       ) : (
         shifts.data && (
@@ -75,7 +83,7 @@ export function ShiftBoard() {
                 </tr>
               </thead>
               <tbody>
-                {shifts.data.map((shift) => (
+                {shifts.data.shifts.map((shift) => (
                   <tr key={shift.id} className="border-b border-zinc-200">
                     <td className="p-2">
                       {shift.source === "manual" ? (

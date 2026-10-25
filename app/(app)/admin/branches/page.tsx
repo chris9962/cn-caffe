@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BranchList } from "@/components/branches/branch-list";
+
+export const metadata: Metadata = { title: "Chi nhánh" };
 
 export default function BranchesPage() {
   return (

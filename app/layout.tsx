@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Chấm công",
+  title: { template: "%s · Chấm công", default: "Chấm công" },
   description: "Chấm công và tính lương nhân viên",
 };
 

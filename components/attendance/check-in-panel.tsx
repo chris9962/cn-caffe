@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BranchPicker } from "@/components/attendance/branch-picker";
 import { CameraCapture } from "@/components/attendance/camera-capture";
 import { ErrorMessage } from "@/components/ui/error-message";
@@ -185,35 +185,55 @@ function AttendanceFlow({ openShift, onStart, onCancel, onDone }: AttendanceFlow
 }
 
 export function CheckInPanel() {
-  const { data, error, isLoading, reload } = useFetch<{ shift: Shift | null }>("/api/attendance/current");
+  const { data, error, reload } = useFetch<{ shift: Shift | null }>("/api/attendance/current");
   const [flowKey, setFlowKey] = useState(0);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   function resetFlow() {
     setFlowKey((key) => key + 1);
   }
 
+  // The pressed button unmounts when the step changes, so focus goes to the heading, which stays mounted.
+  function focusHeading() {
+    headingRef.current?.focus();
+  }
+
+  function handleStart() {
+    setOutcome(null);
+    focusHeading();
+  }
+
+  function handleCancel() {
+    resetFlow();
+    focusHeading();
+  }
+
   function handleDone(next: Outcome) {
     setOutcome(next);
     resetFlow();
+    if (next.isSuccess) focusHeading();
     // A failed attempt may mean the open shift changed on another device, so the buttons follow the server.
     reload();
   }
 
   return (
     <div className="flex flex-col gap-4">
+      <h1 ref={headingRef} tabIndex={-1} className={`w-fit rounded text-2xl font-semibold ${focusClass}`}>
+        Check in
+      </h1>
       <p role="status">{outcome?.isSuccess ? outcome.message : null}</p>
       {outcome && !outcome.isSuccess && <ErrorMessage message={outcome.message} />}
       {error ? (
         <ErrorMessage message={error} />
-      ) : isLoading || !data ? (
+      ) : !data ? (
         <Loading label="Đang tải..." />
       ) : (
         <AttendanceFlow
           key={flowKey}
           openShift={data.shift}
-          onStart={() => setOutcome(null)}
-          onCancel={resetFlow}
+          onStart={handleStart}
+          onCancel={handleCancel}
           onDone={handleDone}
         />
       )}

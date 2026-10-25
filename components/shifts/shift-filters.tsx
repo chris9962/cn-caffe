@@ -9,7 +9,7 @@ import type { ShiftStatus } from "@/types/shift";
 const selectClass =
   "w-fit rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
 
-export type ShiftFilterValues = { month: string; branchId: string; status: ShiftStatus | "" };
+export type ShiftFilterValues = { month: string; date: string; branchId: string; status: ShiftStatus | "" };
 
 type ShiftFiltersProps = {
   branches: Branch[];
@@ -17,11 +17,32 @@ type ShiftFiltersProps = {
   onChange: (value: ShiftFilterValues) => void;
 };
 
+// Day 0 of the next month is the last day of this one.
+function monthBounds(month: string) {
+  if (month === "") return {};
+  const [year, monthNumber] = month.split("-").map(Number);
+  const last = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  return { min: `${month}-01`, max: `${month}-${String(last).padStart(2, "0")}` };
+}
+
 export function ShiftFilters({ branches, value, onChange }: ShiftFiltersProps) {
   const id = useId();
   return (
     <div className="flex flex-wrap gap-4">
-      <MonthPicker value={value.month} onChange={(month) => onChange({ ...value, month })} />
+      <MonthPicker value={value.month} onChange={(month) => onChange({ ...value, month, date: "" })} />
+      <div className="flex flex-col gap-1">
+        <label htmlFor={`${id}-date`} className="font-medium">
+          Ngày
+        </label>
+        <input
+          id={`${id}-date`}
+          type="date"
+          value={value.date}
+          onChange={(event) => onChange({ ...value, date: event.target.value })}
+          {...monthBounds(value.month)}
+          className={selectClass}
+        />
+      </div>
       <div className="flex flex-col gap-1">
         <label htmlFor={`${id}-branch`} className="font-medium">
           Chi nhánh
