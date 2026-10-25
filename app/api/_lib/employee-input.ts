@@ -42,10 +42,14 @@ export function parsePassword(value: unknown): string | Response {
 
 export function parseEndDate(value: unknown): string | null | Response {
   if (value === null) return null;
+  const date = typeof value === "string" ? new Date(`${value}T00:00:00Z`) : null;
+  // The round trip rejects dates that Date rolls over, such as 2026-02-30.
   const valid =
     typeof value === "string" &&
     /^\d{4}-\d{2}-\d{2}$/.test(value) &&
-    new Date(`${value}T00:00:00Z`).toISOString().startsWith(value);
+    date !== null &&
+    !Number.isNaN(date.getTime()) &&
+    date.toISOString().startsWith(value);
   return valid ? value : errorResponse(400, "Ngày nghỉ việc không hợp lệ.");
 }
 

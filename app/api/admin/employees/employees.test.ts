@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST as changePasswordPOST } from "@/app/api/auth/change-password/route";
 import { POST as loginPOST } from "@/app/api/auth/login/route";
 import { GET as meGET } from "@/app/api/me/route";
@@ -8,7 +8,27 @@ import { PATCH } from "./[id]/route";
 import { POST as resetPasswordPOST } from "./[id]/reset-password/route";
 import { GET, POST } from "./route";
 
-beforeEach(signOut);
+const banFailure = vi.hoisted(() => ({ enabled: false }));
+
+vi.mock("@/lib/supabase/admin", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/supabase/admin")>();
+  return {
+    createAdminClient: () => {
+      const client = original.createAdminClient();
+      const updateUserById = client.auth.admin.updateUserById.bind(client.auth.admin);
+      client.auth.admin.updateUserById = (id, attributes) =>
+        banFailure.enabled && "ban_duration" in attributes
+          ? Promise.resolve({ data: { user: null }, error: new Error("ban failed") } as never)
+          : updateUserById(id, attributes);
+      return client;
+    },
+  };
+});
+
+beforeEach(() => {
+  banFailure.enabled = false;
+  signOut();
+});
 afterAll(cleanupFixtures);
 
 const login = (phone: string, password: string) =>
@@ -106,6 +126,30 @@ describe("employee admin API", () => {
     expect((await login(phone, "Init1234")).status).toBe(200);
   });
 
+  it("restores the row when the ban call fails", async () => {
+    await signInAsAdmin();
+    const phone = randomPhone();
+    const { id } = await (await createViaApi(phone)).json();
+
+    banFailure.enabled = true;
+    const res = await callRoute(PATCH, {
+      method: "PATCH",
+      params: { id },
+      json: { isActive: false, endDate: "2026-10-31", fullName: "Đổi tên" },
+    });
+    banFailure.enabled = false;
+    expect(res.status).toBe(500);
+
+    const list: { id: string; isActive: boolean; endDate: string | null; fullName: string }[] =
+      await (await callRoute(GET, {})).json();
+    expect(list.find((e) => e.id === id)).toMatchObject({
+      isActive: true,
+      endDate: null,
+      fullName: "Nguyễn Văn A",
+    });
+    expect((await login(phone, "Init1234")).status).toBe(200);
+  });
+
   it("changes the phone used to log in", async () => {
     await signInAsAdmin();
     const oldPhone = randomPhone();
@@ -131,6 +175,8 @@ describe("employee admin API", () => {
       return [res.status, (await res.json()).error];
     };
     expect(await patch({ endDate: "31/10/2026" })).toEqual([400, "Ngày nghỉ việc không hợp lệ."]);
+    expect(await patch({ endDate: "2026-13-45" })).toEqual([400, "Ngày nghỉ việc không hợp lệ."]);
+    expect(await patch({ endDate: "2026-02-30" })).toEqual([400, "Ngày nghỉ việc không hợp lệ."]);
     expect(await patch({ role: "root" })).toEqual([400, "Vai trò không hợp lệ."]);
     expect(await patch({ fullName: "" })).toEqual([400, "Họ tên không được để trống."]);
     expect(await patch({ phone: "12" })).toEqual([400, "Số điện thoại không hợp lệ."]);

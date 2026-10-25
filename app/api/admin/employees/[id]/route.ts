@@ -111,6 +111,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     });
     if (banError) {
       console.error(banError);
+      // A failed ban must not leave the row saying locked/unlocked while Auth says the opposite.
+      const previous = Object.fromEntries(
+        Object.keys(update).map((column) => [column, current[column as keyof typeof current]]),
+      );
+      const { error: restoreError } = await supabase.from("employees").update(previous).eq("id", id);
+      if (restoreError) console.error(restoreError);
+      if (phoneChanged) {
+        const { error: revertError } = await adminAuth.updateUserById(id, {
+          email: phoneToEmail(current.phone),
+          email_confirm: true,
+        });
+        if (revertError) console.error(revertError);
+      }
       return errorResponse(500, SERVER_ERROR);
     }
   }
