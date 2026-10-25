@@ -4,6 +4,7 @@ import { use, useState } from "react";
 import { EmployeeForm } from "@/components/employees/employee-form";
 import { EmployeeLockControl } from "@/components/employees/employee-lock-control";
 import { ResetPasswordForm } from "@/components/employees/reset-password-form";
+import { ManagerAccessForm } from "@/components/managers/manager-access-form";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
 import { useFetch } from "@/hooks/use-fetch";
@@ -46,8 +47,7 @@ export function EmployeeDetail({ params }: { params: Promise<{ id: string }> }) 
             onChanged={reload}
           />
           <ResetPasswordForm key={`${employee.id}-reset`} employeeId={employee.id} />
-          {/* Task 11 mounts <ManagerAccessForm managerId={employee.id} /> here. */}
-          {employee.role === "manager" && null}
+          {employee.role === "manager" && <ManagerAccessForm key={`${employee.id}-access`}managerId={employee.id} />}
         </>
       )}
     </div>
