@@ -11,5 +11,10 @@ export function parseInstant(value: unknown): string | Response {
   if (typeof value !== "string" || !ISO_WITH_OFFSET.test(value) || Number.isNaN(Date.parse(value))) {
     return errorResponse(400, "Thời gian không hợp lệ.");
   }
+  // Date.parse rolls 2026-02-30 over to March, but Postgres rejects it (22008), so the date must round-trip.
+  const day = value.slice(0, 10);
+  if (day.startsWith("0000") || !new Date(`${day}T00:00:00Z`).toISOString().startsWith(day)) {
+    return errorResponse(400, "Thời gian không hợp lệ.");
+  }
   return value;
 }

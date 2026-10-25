@@ -184,6 +184,13 @@ describe("PATCH /api/shifts/[id]", () => {
     expect(await res.json()).toEqual({ error: "Thời gian không hợp lệ." });
   });
 
+  it("rejects a date that does not exist", async () => {
+    await signInAs(manager);
+    const res = await edit(pendingShiftId, { checkInAt: at("02:00"), checkOutAt: "2026-02-30T10:00:00+07:00" });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Thời gian không hợp lệ." });
+  });
+
   it("rejects a non-object body", async () => {
     await signInAs(manager);
     const res = await edit(pendingShiftId, null);
@@ -214,6 +221,18 @@ describe("POST /api/shifts", () => {
     const res = await manual({ employeeId: staff.id, branchId: branch1.id, checkInAt: at("15:00"), checkOutAt: at("16:00") });
     expect(res.status).toBe(201);
     expect(await res.json()).toMatchObject({ source: "manual", employeeId: staff.id });
+  });
+
+  it("rejects a manual shift on a date that does not exist", async () => {
+    await signInAs(manager);
+    const res = await manual({
+      employeeId: staff.id,
+      branchId: branch1.id,
+      checkInAt: "2026-04-31T08:00:00+07:00",
+      checkOutAt: at("19:00"),
+    });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Thời gian không hợp lệ." });
   });
 
   it("returns 404 for a missing employee or branch and 400 for bad ids", async () => {
