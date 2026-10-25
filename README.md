@@ -20,7 +20,29 @@ npm run db:reset
 npm run dev
 ```
 
-Bạn mở `http://localhost:3000/instruments`. Trang hiện 3 dòng `violin`, `viola`, `cello` nghĩa là Next.js đã kết nối tới Supabase local.
+Sau `npm run dev`, bạn làm tiếp mục [Chấm công](#chấm-công) để tạo tài khoản admin và đăng nhập vào ứng dụng.
+
+## Chấm công
+
+> ⚠️ `npm run db:reset` xoá cả tài khoản đăng nhập. Sau mỗi lần reset, bạn chạy lại bước 2.
+
+1. Bạn lấy `SECRET_KEY` từ `npm run db:status`. Bạn điền giá trị này vào `SUPABASE_SECRET_KEY` trong `.env.local` (file copy từ `.env.example`). Các route admin và `npm test` cần key này.
+2. Bạn tạo admin đầu tiên: `npm run admin:create -- <phone> <password> "<name>"`.
+3. Bạn mở `http://localhost:3000/login` và đăng nhập bằng tài khoản vừa tạo.
+
+> ⚠️ Cổng 3000 có thể đã bị chiếm, ví dụ bởi Docker Desktop. Khi đó bạn chạy `npx next dev -p 3002`.
+
+Test gồm hai lệnh:
+
+- `npm test` chạy test của route handler trên Supabase local.
+- `npm run test:db` chạy test pgTAP cho schema và RLS.
+
+> ⚠️ Camera chỉ chạy trên HTTPS hoặc `localhost`. Trên điện thoại mở qua `http://` trong mạng LAN, trình duyệt chặn camera và ứng dụng hiện "Không mở được camera".
+
+Khi triển khai production:
+
+1. Bạn tắt đăng ký công khai trong project Supabase: Authentication settings, tắt "Allow new users to sign up".
+2. Bạn phục vụ ứng dụng qua HTTPS.
 
 ### Lệnh hằng ngày
 
