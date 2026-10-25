@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(18);
 
 -- storage.protect_delete blocks raw deletes unless this flag is set; the Storage API sets it itself.
 set local storage.allow_delete_query = 'true';
@@ -8,7 +8,8 @@ set local storage.allow_delete_query = 'true';
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000003', 'n@test.local'),
   ('00000000-0000-0000-0000-000000000004', 's@test.local'),
-  ('00000000-0000-0000-0000-000000000005', 't@test.local');
+  ('00000000-0000-0000-0000-000000000005', 't@test.local'),
+  ('00000000-0000-0000-0000-000000000007', 'x@test.local');
 
 insert into public.employees (id, full_name, phone, role) values
   ('00000000-0000-0000-0000-000000000003', 'Manager N', '84000000003', 'manager'),
@@ -149,6 +150,16 @@ select lives_ok(
     values ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-0000000000b1', current_date, 'open', 'check_in', now(), '00000000-0000-0000-0000-000000000005/x.jpg', '00000000-0000-0000-0000-000000000005')$$,
   'a photo path in the employee own folder is accepted'
 );
+
+-- User X has an auth account but no employee row
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-000000000007', 'role', 'authenticated')::text, true);
+
+select throws_ok(
+  $$insert into storage.objects (bucket_id, name) values ('shift-photos', '00000000-0000-0000-0000-000000000007/x.jpg')$$,
+  '42501', null, 'a user without an employee row cannot upload'
+);
+reset role;
 
 select * from finish();
 rollback;

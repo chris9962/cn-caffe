@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(66);
+select plan(68);
 
 -- Real check outs create month rows that the config_for_month assertions assume are absent.
 delete from public.monthly_configs;
@@ -42,7 +42,7 @@ select id, employee_id, branch_id, ((now() - starts_ago) at time zone 'Asia/Ho_C
 from (values
   ('00000000-0000-0000-0000-0000000000c1'::uuid, '00000000-0000-0000-0000-000000000004'::uuid, '00000000-0000-0000-0000-0000000000b1'::uuid, 'pending_review'::public.shift_status, interval '30 days', interval '4 hours', '{outside_radius}'::text[]),
   ('00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b1', 'valid', interval '29 days', interval '4 hours', '{}'),
-  ('00000000-0000-0000-0000-0000000000c3', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b1', 'pending_review', interval '28 days', null, '{location_unavailable}'),
+  ('00000000-0000-0000-0000-0000000000c3', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b1', 'missing_checkout', interval '28 days', null, '{location_unavailable}'),
   ('00000000-0000-0000-0000-0000000000c4', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b2', 'pending_review', interval '27 days', interval '4 hours', '{outside_radius}'),
   ('00000000-0000-0000-0000-0000000000c5', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000b1', 'pending_review', interval '26 days', interval '4 hours', '{outside_radius}'),
   ('00000000-0000-0000-0000-0000000000c6', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000000b1', 'pending_review', interval '25 days', interval '4 hours', '{outside_radius}'),
@@ -326,13 +326,13 @@ select throws_ok(
   'P0001', 'overlap', 'editing into another shift of the employee is refused'
 );
 select is(
-  (select work_date from public.edit_shift_times('00000000-0000-0000-0000-0000000000e5', '2026-11-01T00:30:00+07:00', '2026-11-01T03:00:00+07:00')),
-  '2026-11-01'::date,
+  (select work_date from public.edit_shift_times('00000000-0000-0000-0000-0000000000e5', '2026-09-01T00:30:00+07:00', '2026-09-01T03:00:00+07:00')),
+  '2026-09-01'::date,
   'work_date is the VN date of a check in after midnight'
 );
 select is(
-  (select work_date from public.edit_shift_times('00000000-0000-0000-0000-0000000000e5', '2026-10-31T23:59:00+07:00', '2026-11-01T02:00:00+07:00')),
-  '2026-10-31'::date,
+  (select work_date from public.edit_shift_times('00000000-0000-0000-0000-0000000000e5', '2026-08-31T23:59:00+07:00', '2026-09-01T02:00:00+07:00')),
+  '2026-08-31'::date,
   'work_date is the VN date of a check in before midnight'
 );
 select ok(
@@ -389,6 +389,14 @@ select is(
 select throws_ok(
   $$select public.add_manual_shift('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-0000000000b1', now() - interval '2 hours', now() - interval '1 hour')$$,
   'P0001', 'overlap', 'an open shift blocks a manual shift during its run'
+);
+select throws_ok(
+  $$select public.add_manual_shift('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-0000000000b1', now() - interval '1 hour', now() + interval '1 hour')$$,
+  'P0001', 'future_times', 'a manual shift ending in the future is refused'
+);
+select throws_ok(
+  $$select public.edit_shift_times('00000000-0000-0000-0000-0000000000e5', now() - interval '15 days', now() + interval '1 hour')$$,
+  'P0001', 'future_times', 'editing a shift to end in the future is refused'
 );
 reset role;
 

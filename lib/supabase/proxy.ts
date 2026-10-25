@@ -8,6 +8,8 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
+      // No browser code reads the session, so script access (XSS) gets no token.
+      cookieOptions: { httpOnly: true },
       cookies: {
         getAll() {
           return request.cookies.getAll();

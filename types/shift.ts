@@ -26,6 +26,8 @@ export type Shift = {
   checkOutPhotoUrl: string | null;
 };
 
+export type ShiftList = { shifts: Shift[]; total: number };
+
 export type AuditLog = {
   id: number;
   actorName: string | null;

@@ -7,6 +7,7 @@ const DB_ERRORS = new Map<string, { status: number; message: string }>([
   ["branch_not_found", { status: 404, message: "Không tìm thấy chi nhánh." }],
   ["invalid_status", { status: 409, message: "Trạng thái của ca không cho phép thao tác này." }],
   ["invalid_times", { status: 400, message: "Giờ check out phải sau giờ check in." }],
+  ["future_times", { status: 400, message: "Giờ vào và giờ ra không được ở tương lai." }],
   ["overlap", { status: 409, message: "Ca này trùng giờ với một ca khác của nhân viên." }],
   ["not_a_manager", { status: 400, message: "Nhân viên này không có vai trò quản lý." }],
   ["invalid_decision", { status: 400, message: "Thao tác không hợp lệ." }],

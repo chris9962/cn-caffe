@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { currentMonth } from "@/lib/date";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   cleanupFixtures,
@@ -16,7 +15,8 @@ import { GET as detailGET, PATCH as detailPATCH } from "./[id]/route";
 import { GET as listGET, POST as manualPOST } from "./route";
 
 const admin = createAdminClient();
-const month = currentMonth();
+// A past month, so fixture times stay in the past on every day (future times are refused).
+const month = "2026-01";
 const at = (time: string) => `${month}-01T${time}:00+07:00`;
 const NOT_FOUND_ID = "00000000-0000-4000-8000-000000000000";
 
@@ -91,17 +91,28 @@ describe("GET /api/shifts", () => {
     await signInAs(manager);
     const res = await list(`?month=${month}`);
     expect(res.status).toBe(200);
-    const shifts: { id: string; checkInPhotoUrl: string | null }[] = await res.json();
+    const { shifts, total }: { shifts: { id: string; checkInPhotoUrl: string | null }[]; total: number } =
+      await res.json();
     expect(shifts.map((shift) => shift.id)).toEqual([pendingShiftId]);
     expect(shifts[0].checkInPhotoUrl).toMatch(/^http/);
+    expect(total).toBe(1);
+  });
+
+  it("filters by day", async () => {
+    await signInAs(manager);
+    const sameDay = await (await list(`?month=${month}&date=${month}-01`)).json();
+    expect(sameDay.shifts.map((shift: { id: string }) => shift.id)).toEqual([pendingShiftId]);
+    expect(sameDay.total).toBe(1);
+    const otherDay = await (await list(`?month=${month}&date=${month}-02`)).json();
+    expect(otherDay).toEqual({ shifts: [], total: 0 });
   });
 
   it("filters by status", async () => {
     await signInAs(manager);
     const kept = await (await list(`?month=${month}&status=pending_review`)).json();
-    expect(kept).toHaveLength(1);
+    expect(kept.shifts).toHaveLength(1);
     const dropped = await (await list(`?month=${month}&status=valid`)).json();
-    expect(dropped).toHaveLength(0);
+    expect(dropped.shifts).toHaveLength(0);
   });
 
   it("rejects bad filters", async () => {
@@ -113,6 +124,11 @@ describe("GET /api/shifts", () => {
     expect(badStatus.status).toBe(400);
     expect(await badStatus.json()).toEqual({ error: "Bộ lọc không hợp lệ." });
     expect((await list("?branchId=abc")).status).toBe(400);
+    for (const date of ["2026-02-30", "2026-1-05", "abc"]) {
+      const badDate = await list(`?date=${date}`);
+      expect(badDate.status).toBe(400);
+      expect(await badDate.json()).toEqual({ error: "Ngày không hợp lệ." });
+    }
   });
 
   it("requires login", async () => {
@@ -198,6 +214,13 @@ describe("PATCH /api/shifts/[id]", () => {
     expect(await res.json()).toEqual({ error: "Dữ liệu gửi lên không hợp lệ." });
   });
 
+  it("rejects an end in the future", async () => {
+    await signInAs(manager);
+    const res = await edit(pendingShiftId, { checkInAt: at("02:30"), checkOutAt: new Date(Date.now() + 3_600_000).toISOString() });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Giờ vào và giờ ra không được ở tương lai." });
+  });
+
   it("edits times", async () => {
     await signInAs(manager);
     const res = await edit(pendingShiftId, { checkInAt: at("02:30"), checkOutAt: at("04:00") });
@@ -214,6 +237,18 @@ describe("POST /api/shifts", () => {
     const res = await manual({ employeeId: staff.id, branchId: branch1.id, checkInAt: at("03:00"), checkOutAt: at("05:00") });
     expect(res.status).toBe(409);
     expect(await res.json()).toEqual({ error: "Ca này trùng giờ với một ca khác của nhân viên." });
+  });
+
+  it("rejects a manual shift ending in the future", async () => {
+    await signInAs(manager);
+    const res = await manual({
+      employeeId: staff.id,
+      branchId: branch1.id,
+      checkInAt: at("20:00"),
+      checkOutAt: new Date(Date.now() + 3_600_000).toISOString(),
+    });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Giờ vào và giờ ra không được ở tương lai." });
   });
 
   it("creates a non-overlapping manual shift", async () => {

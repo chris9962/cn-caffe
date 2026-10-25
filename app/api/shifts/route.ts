@@ -2,7 +2,7 @@ import { requireEmployee } from "@/app/api/_lib/auth";
 import { isUuid, readJsonObject } from "@/app/api/_lib/employee-input";
 import { dbErrorResponse, errorResponse } from "@/app/api/_lib/errors";
 import { SHIFT_COLUMNS, type ShiftRow } from "@/app/api/_lib/mappers";
-import { invalidBodyResponse, parseInstant, SHIFT_STATUSES } from "@/app/api/_lib/shift-input";
+import { invalidBodyResponse, isCalendarDate, parseInstant, SHIFT_STATUSES } from "@/app/api/_lib/shift-input";
 import { shiftResponse, withPhotoUrls } from "@/app/api/_lib/shifts";
 import { currentMonth, monthRange } from "@/lib/date";
 
@@ -15,28 +15,28 @@ export async function GET(request: Request) {
   const range = monthRange(params.get("month") ?? currentMonth());
   if (!range) return errorResponse(400, "Tháng không hợp lệ.");
 
+  const date = params.get("date");
+  if (date !== null && !isCalendarDate(date)) return errorResponse(400, "Ngày không hợp lệ.");
+
   const branchId = params.get("branchId");
   const status = params.get("status");
   if ((branchId !== null && !isUuid(branchId)) || (status !== null && !SHIFT_STATUSES.has(status))) {
     return errorResponse(400, "Bộ lọc không hợp lệ.");
   }
 
-  let query = supabase
-    .from("shifts")
-    .select(SHIFT_COLUMNS)
-    .gte("work_date", range.from)
-    .lt("work_date", range.to);
+  const base = supabase.from("shifts").select(SHIFT_COLUMNS, { count: "exact" });
+  let query = date === null ? base.gte("work_date", range.from).lt("work_date", range.to) : base.eq("work_date", date);
   // Managers handle other people's shifts here; their own are never theirs to review.
   if (employee.role !== "admin" && employee.role !== "director") query = query.neq("employee_id", employee.id);
   if (branchId !== null) query = query.eq("branch_id", branchId);
   if (status !== null) query = query.eq("status", status);
 
-  const { data, error } = await query
+  const { data, count, error } = await query
     .order("check_in_at", { ascending: false })
     .overrideTypes<ShiftRow[], { merge: false }>();
   if (error) return dbErrorResponse(error);
 
-  return Response.json(await withPhotoUrls(supabase, data));
+  return Response.json({ shifts: await withPhotoUrls(supabase, data), total: count ?? data.length });
 }
 
 export async function POST(request: Request) {
