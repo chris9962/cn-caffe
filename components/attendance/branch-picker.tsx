@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import type { Branch, BranchWithDistance } from "@/types/branch";
 
 type BranchPickerProps = {
@@ -9,13 +10,15 @@ type BranchPickerProps = {
 };
 
 export function BranchPicker({ branches, value, onChange }: BranchPickerProps) {
+  // Next keeps visited pages mounted but hidden, so the check-in page and the manual shift form can coexist.
+  const id = useId();
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor="branch-picker" className="font-medium">
+      <label htmlFor={id} className="font-medium">
         Chi nhánh
       </label>
       <select
-        id="branch-picker"
+        id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"

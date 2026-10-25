@@ -5,17 +5,9 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { useFetch } from "@/hooks/use-fetch";
-import { currentMonth, formatDate, formatDateTime, formatDuration, formatTime, toVietnamLocalInput } from "@/lib/date";
-import { formatFailReasons, STATUS_LABELS } from "@/lib/shifts/labels";
+import { currentMonth, formatDate, formatDuration, formatTime } from "@/lib/date";
+import { formatCheckOut, formatFailReasons, STATUS_LABELS } from "@/lib/shifts/labels";
 import type { Shift } from "@/types/shift";
-
-function formatCheckOut(shift: Shift) {
-  if (!shift.checkOutAt) return "—";
-  // A night shift ends on the next day, and the time alone would read as earlier than the check in.
-  return toVietnamLocalInput(shift.checkOutAt).startsWith(shift.workDate)
-    ? formatTime(shift.checkOutAt)
-    : formatDateTime(shift.checkOutAt);
-}
 
 function formatShiftDuration(shift: Shift) {
   if (!shift.checkOutAt) return "—";
