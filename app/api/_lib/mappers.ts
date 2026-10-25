@@ -1,6 +1,6 @@
 import type { Branch } from "@/types/branch";
 import type { Employee, EmployeeRole } from "@/types/employee";
-import type { FailReason, Shift, ShiftStatus } from "@/types/shift";
+import type { AuditLog, FailReason, Shift, ShiftStatus } from "@/types/shift";
 
 export const EMPLOYEE_COLUMNS = "id, full_name, phone, role, is_active, end_date, must_change_password";
 
@@ -109,5 +109,25 @@ export function toShift(
     failReasons: row.fail_reasons,
     checkInPhotoUrl: photoUrls.checkIn,
     checkOutPhotoUrl: photoUrls.checkOut,
+  };
+}
+
+type AuditLogRow = {
+  id: number;
+  actor_id: string | null;
+  action: string;
+  created_at: string;
+  before: unknown;
+  after: unknown;
+};
+
+export function toAuditLog(row: AuditLogRow, actorNames: Map<string, string>): AuditLog {
+  return {
+    id: row.id,
+    actorName: row.actor_id === null ? null : (actorNames.get(row.actor_id) ?? null),
+    action: row.action,
+    createdAt: row.created_at,
+    before: row.before,
+    after: row.after,
   };
 }

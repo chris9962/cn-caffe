@@ -64,3 +64,25 @@ export async function findOpenShift(
   const [shift] = await withPhotoUrls(supabase, [data]);
   return { shift };
 }
+
+export async function findShiftById(supabase: ServerClient, id: string): Promise<Shift | null | Response> {
+  const { data, error } = await supabase
+    .from("shifts")
+    .select(SHIFT_COLUMNS)
+    .eq("id", id)
+    .maybeSingle()
+    .overrideTypes<ShiftRow, { merge: false }>();
+  if (error) return dbErrorResponse(error);
+  if (!data) return null;
+
+  const [shift] = await withPhotoUrls(supabase, [data]);
+  return shift;
+}
+
+// The rpc returns a bare row, so the response re-reads the shift to get branch and employee names.
+export async function shiftResponse(supabase: ServerClient, id: string, status = 200): Promise<Response> {
+  const shift = await findShiftById(supabase, id);
+  if (shift instanceof Response) return shift;
+  if (!shift) return errorResponse(404, "Không tìm thấy ca.");
+  return Response.json(shift, { status });
+}

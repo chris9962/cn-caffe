@@ -25,3 +25,12 @@ export type Shift = {
   checkInPhotoUrl: string | null;
   checkOutPhotoUrl: string | null;
 };
+
+export type AuditLog = {
+  id: number;
+  actorName: string | null;
+  action: string;
+  createdAt: string;
+  before: unknown;
+  after: unknown;
+};
