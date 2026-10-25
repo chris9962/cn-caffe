@@ -19,7 +19,7 @@ type BranchFormProps = {
   onSaved: (branch: Branch) => void;
 };
 
-function parseManualCoordinates(latitude: string, longitude: string): Coordinates | null {
+function parseCoordinates(latitude: string, longitude: string): Coordinates | null {
   if (latitude.trim() === "" || longitude.trim() === "") return null;
   const lat = Number(latitude);
   const lng = Number(longitude);
@@ -34,18 +34,24 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
   const [name, setName] = useState(branch?.name ?? "");
   const [address, setAddress] = useState(branch?.address ?? "");
   const [googleMapsUrl, setGoogleMapsUrl] = useState(branch?.googleMapsUrl ?? "");
-  const [linkCoordinates, setLinkCoordinates] = useState<Coordinates | null>(
-    branch ? { latitude: branch.latitude, longitude: branch.longitude } : null,
-  );
   const [isManual, setIsManual] = useState(false);
-  const [manualLatitude, setManualLatitude] = useState(branch ? String(branch.latitude) : "");
-  const [manualLongitude, setManualLongitude] = useState(branch ? String(branch.longitude) : "");
+  const [latitudeText, setLatitudeText] = useState(branch ? String(branch.latitude) : "");
+  const [longitudeText, setLongitudeText] = useState(branch ? String(branch.longitude) : "");
   const [radiusM, setRadiusM] = useState(String(branch?.radiusM ?? 100));
   const [isActive, setIsActive] = useState(branch?.isActive ?? true);
 
-  const coordinates = isManual
-    ? parseManualCoordinates(manualLatitude, manualLongitude)
-    : linkCoordinates;
+  const [radiusError, setRadiusError] = useState<string | null>(null);
+
+  const coordinates = parseCoordinates(latitudeText, longitudeText);
+
+  function handleLinkChange(value: string) {
+    setGoogleMapsUrl(value);
+    // The old coordinates belong to the old link; keeping them would let a new link be saved with a stale place.
+    if (!isManual) {
+      setLatitudeText("");
+      setLongitudeText("");
+    }
+  }
 
   async function handleResolve() {
     onStart?.();
@@ -58,22 +64,27 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
     } catch {
       return;
     }
-    setLinkCoordinates({ latitude: result.latitude, longitude: result.longitude });
-    setManualLatitude(String(result.latitude));
-    setManualLongitude(String(result.longitude));
+    setLatitudeText(String(result.latitude));
+    setLongitudeText(String(result.longitude));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!coordinates) return;
     onStart?.();
+    const radius = Number(radiusM);
+    if (radiusM.trim() === "" || !Number.isInteger(radius) || radius < 1) {
+      setRadiusError("Bán kính phải là số nguyên dương.");
+      return;
+    }
+    setRadiusError(null);
     const fields = {
       name,
       address,
       googleMapsUrl: googleMapsUrl.trim() === "" ? null : googleMapsUrl,
       latitude: coordinates.latitude,
       longitude: coordinates.longitude,
-      radiusM: Number(radiusM),
+      radiusM: radius,
     };
     let result: Branch;
     try {
@@ -127,7 +138,7 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
           type="url"
           autoComplete="off"
           value={googleMapsUrl}
-          onChange={(event) => setGoogleMapsUrl(event.target.value)}
+          onChange={(event) => handleLinkChange(event.target.value)}
           aria-describedby="branch-maps-hint"
           className={inputClass}
         />
@@ -145,7 +156,7 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
         {resolve.error && <ErrorMessage message={resolve.error} />}
       </div>
       <div className="flex flex-col gap-2">
-        <p>
+        <p role="status">
           <span className="font-medium">Toạ độ: </span>
           {coordinates
             ? `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`
@@ -172,8 +183,8 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
                 step="any"
                 min={-90}
                 max={90}
-                value={manualLatitude}
-                onChange={(event) => setManualLatitude(event.target.value)}
+                value={latitudeText}
+                onChange={(event) => setLatitudeText(event.target.value)}
                 className={inputClass}
               />
             </div>
@@ -187,8 +198,8 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
                 step="any"
                 min={-180}
                 max={180}
-                value={manualLongitude}
-                onChange={(event) => setManualLongitude(event.target.value)}
+                value={longitudeText}
+                onChange={(event) => setLongitudeText(event.target.value)}
                 className={inputClass}
               />
             </div>
@@ -202,13 +213,14 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
         <input
           id="branch-radius"
           type="number"
-          step={1}
+          step="any"
           min={1}
-          required
           value={radiusM}
           onChange={(event) => setRadiusM(event.target.value)}
+          aria-invalid={radiusError ? true : undefined}
           className={inputClass}
         />
+        {radiusError && <ErrorMessage message={radiusError} />}
       </div>
       {branch && (
         <label className="flex w-fit items-center gap-2">
