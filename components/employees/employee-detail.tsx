@@ -19,26 +19,30 @@ export function EmployeeDetail({ params }: { params: Promise<{ id: string }> }) 
     reload();
   }
 
+  function clearSaved() {
+    setSaved(false);
+  }
+
   // The API has no single-employee endpoint, so the list response is the source.
   const employee = data?.find((item) => item.id === id);
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Outside the loading branch: reload() unmounts the form, which would drop the message. */}
-      <div role="status">{saved ? "Đã lưu." : null}</div>
-      {isLoading ? (
-        <Loading label="Đang tải..." />
-      ) : error ? (
+            <div role="status">{saved ? "Đã lưu." : null}</div>
+      {error ? (
         <ErrorMessage message={error} />
+      ) : data === null && isLoading ? (
+        <Loading label="Đang tải..." />
       ) : !employee ? (
         <ErrorMessage message="Không tìm thấy nhân viên." />
       ) : (
         <>
           <h1 className="text-2xl font-semibold">{employee.fullName}</h1>
-          <EmployeeForm key={employee.id} employee={employee} onSaved={handleSaved} />
+          <EmployeeForm key={employee.id} employee={employee} onStart={clearSaved} onSaved={handleSaved} />
           <EmployeeLockControl
             key={`${employee.id}-${employee.isActive}`}
             employee={employee}
+            onStart={clearSaved}
             onChanged={reload}
           />
           <ResetPasswordForm key={`${employee.id}-reset`} employeeId={employee.id} />

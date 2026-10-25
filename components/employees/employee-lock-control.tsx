@@ -10,14 +10,16 @@ const buttonClass =
 
 type EmployeeLockControlProps = {
   employee: Employee;
+  onStart: () => void;
   onChanged: () => void;
 };
 
-export function EmployeeLockControl({ employee, onChanged }: EmployeeLockControlProps) {
+export function EmployeeLockControl({ employee, onStart, onChanged }: EmployeeLockControlProps) {
   const { mutate, isPending, error } = useMutation<Employee>();
   const [endDate, setEndDate] = useState("");
 
   async function update(body: { isActive: boolean; endDate?: string }) {
+    onStart();
     try {
       await mutate(`/api/admin/employees/${employee.id}`, { method: "PATCH", body });
     } catch {

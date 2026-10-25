@@ -10,6 +10,7 @@ function errorText(body: unknown) {
 }
 
 type FetchResult<T> = {
+  url: string;
   key: string;
   data: T | null;
   error: string | null;
@@ -30,13 +31,13 @@ export function useFetch<T>(url: string | null) {
         if (!response.ok) {
           throw new ApiError(errorText(body));
         }
-        setResult({ key, data: body as T, error: null });
+        setResult({ url, key, data: body as T, error: null });
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
         // Only errors thrown above carry Vietnamese text; network errors get the fallback.
         const message = error instanceof ApiError ? error.message : FALLBACK_ERROR;
-        setResult({ key, data: null, error: message });
+        setResult({ url, key, data: null, error: message });
       });
 
     return () => controller.abort();
@@ -45,8 +46,11 @@ export function useFetch<T>(url: string | null) {
   // Keying the result by url and reload count means a response for an old request never shows as current data.
   const isCurrent = result?.key === key;
 
+  // A reload of the same url keeps showing the last good data so callers do not unmount while refetching.
+  const staleData = result?.url === url ? result.data : null;
+
   return {
-    data: isCurrent ? result.data : null,
+    data: isCurrent ? result.data : staleData,
     error: isCurrent ? result.error : null,
     isLoading: url !== null && !isCurrent,
     reload: () => setReloadCount((count) => count + 1),

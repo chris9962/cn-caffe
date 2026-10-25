@@ -11,10 +11,11 @@ const inputClass =
 
 type EmployeeFormProps = {
   employee?: Employee;
+  onStart?: () => void;
   onSaved: (employee: Employee) => void;
 };
 
-export function EmployeeForm({ employee, onSaved }: EmployeeFormProps) {
+export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) {
   const { mutate, isPending, error } = useMutation<Employee>();
   const [fullName, setFullName] = useState(employee?.fullName ?? "");
   const [phone, setPhone] = useState(employee ? formatPhone(employee.phone) : "");
@@ -23,6 +24,7 @@ export function EmployeeForm({ employee, onSaved }: EmployeeFormProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    onStart?.();
     let result: Employee;
     try {
       result = employee
