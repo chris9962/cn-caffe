@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
 
+const FALLBACK_ERROR = "Không thể kết nối. Bạn thử lại sau.";
+
+class ApiError extends Error {}
+
+function errorText(body: unknown) {
+  const text = (body as { error?: unknown } | null)?.error;
+  return typeof text === "string" && text !== "" ? text : FALLBACK_ERROR;
+}
+
 type FetchResult<T> = {
   key: string;
   data: T | null;
@@ -17,16 +26,16 @@ export function useFetch<T>(url: string | null) {
 
     fetch(url, { signal: controller.signal })
       .then(async (response) => {
-        const body = await response.json();
+        const body = await response.json().catch(() => null);
         if (!response.ok) {
-          throw new Error(body.error ?? response.statusText);
+          throw new ApiError(errorText(body));
         }
         setResult({ key, data: body as T, error: null });
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
-        const message =
-          error instanceof Error ? error.message : "Request failed";
+        // Only errors thrown above carry Vietnamese text; network errors get the fallback.
+        const message = error instanceof ApiError ? error.message : FALLBACK_ERROR;
         setResult({ key, data: null, error: message });
       });
 

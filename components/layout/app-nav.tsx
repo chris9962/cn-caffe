@@ -26,7 +26,7 @@ function getNavItems(user: CurrentUser): NavItem[] {
 }
 
 const focusClass =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700";
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
 
 export function AppNav({ user }: { user: CurrentUser }) {
   const pathname = usePathname();

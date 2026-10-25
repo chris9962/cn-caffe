@@ -5,7 +5,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { useMutation } from "@/hooks/use-mutation";
 
 const inputClass =
-  "w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700";
+  "w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
 
 export function ChangePasswordForm({ onChanged }: { onChanged: () => void }) {
   const { mutate, isPending, error } = useMutation();
@@ -68,7 +68,7 @@ export function ChangePasswordForm({ onChanged }: { onChanged: () => void }) {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-60"
+        className="rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400 disabled:opacity-60"
       >
         Đổi mật khẩu
       </button>

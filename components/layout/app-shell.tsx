@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <ErrorMessage message="Phiên đăng nhập đã hết hạn." />
         <Link
           href="/login"
-          className="w-fit rounded underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+          className="w-fit rounded underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"
         >
           Đăng nhập lại
         </Link>

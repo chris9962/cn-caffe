@@ -1,5 +1,9 @@
 import { useState } from "react";
 
+const FALLBACK_ERROR = "Không thể kết nối. Bạn thử lại sau.";
+
+class ApiError extends Error {}
+
 type MutationOptions = {
   method: "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
@@ -23,14 +27,17 @@ export function useMutation<TResult = unknown>() {
         body:
           body === undefined || isFormData ? (body as FormData | undefined) : JSON.stringify(body),
       });
-      const responseBody = await response.json().catch(() => ({}));
+      const responseBody = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(responseBody.error ?? response.statusText);
+        const text = responseBody?.error;
+        throw new ApiError(
+          typeof text === "string" && text !== "" ? text : FALLBACK_ERROR,
+        );
       }
       return responseBody as TResult;
     } catch (caught) {
-      const message =
-        caught instanceof Error ? caught.message : "Request failed";
+      // Only errors thrown above carry Vietnamese text; network errors get the fallback.
+      const message = caught instanceof ApiError ? caught.message : FALLBACK_ERROR;
       setError(message);
       throw new Error(message);
     } finally {
