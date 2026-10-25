@@ -30,7 +30,17 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Keep getClaims() directly after createServerClient, otherwise sessions can drop at random.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+
+  const { pathname } = request.nextUrl;
+  if (!data?.claims && pathname !== "/login" && !pathname.startsWith("/api/")) {
+    const redirectResponse = NextResponse.redirect(new URL("/login", request.url));
+    // Copy refreshed cookies so the redirect does not drop a session update.
+    supabaseResponse.cookies
+      .getAll()
+      .forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
+  }
 
   // A different response must copy supabaseResponse's cookies, or browser and server sessions go out of sync.
   return supabaseResponse;
