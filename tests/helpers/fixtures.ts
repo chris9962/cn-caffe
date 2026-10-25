@@ -9,10 +9,22 @@ const admin = createAdminClient();
 const createdEmployeeIds: string[] = [];
 const createdBranchIds: string[] = [];
 
+export function randomPhone(): string {
+  return `84${randomInt(1e9).toString().padStart(9, "0")}`;
+}
+
+export function trackEmployee(id: string): void {
+  createdEmployeeIds.push(id);
+}
+
+export function trackBranch(id: string): void {
+  createdBranchIds.push(id);
+}
+
 export async function createTestEmployee(
   opts: { role?: EmployeeRole; password?: string; fullName?: string; isActive?: boolean } = {},
 ): Promise<{ id: string; phone: string; password: string }> {
-  const phone = `84${randomInt(1e9).toString().padStart(9, "0")}`;
+  const phone = randomPhone();
   const password = opts.password ?? "Test1234";
 
   const { data, error } = await admin.auth.admin.createUser({
