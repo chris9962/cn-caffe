@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { currentMonth, formatDateTime, formatDuration, monthRange, toVietnamIso, toVietnamLocalInput } from "./date";
+import {
+  currentMonth,
+  formatDate,
+  formatDateTime,
+  formatDuration,
+  formatTime,
+  monthRange,
+  toVietnamIso,
+  toVietnamLocalInput,
+} from "./date";
 
 describe("monthRange", () => {
   it("returns the first day of the month and of the next month", () => {
@@ -41,6 +50,19 @@ describe("formatDateTime", () => {
     expect(formatDateTime("2026-10-25T01:30:00Z")).toBe("25/10/2026 08:30");
     expect(formatDateTime("2026-10-31T17:05:00Z")).toBe("01/11/2026 00:05");
     expect(formatDateTime("2026-01-05T08:02:00+07:00")).toBe("05/01/2026 08:02");
+  });
+});
+
+describe("formatTime", () => {
+  it("formats an instant as HH:mm in Vietnam time", () => {
+    expect(formatTime("2026-10-25T01:02:00Z")).toBe("08:02");
+    expect(formatTime("2026-10-31T17:05:00Z")).toBe("00:05");
+  });
+});
+
+describe("formatDate", () => {
+  it("formats a yyyy-MM-dd date as dd/MM/yyyy", () => {
+    expect(formatDate("2026-10-05")).toBe("05/10/2026");
   });
 });
 

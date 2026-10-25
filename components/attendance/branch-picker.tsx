@@ -1,0 +1,32 @@
+"use client";
+
+import type { Branch, BranchWithDistance } from "@/types/branch";
+
+type BranchPickerProps = {
+  branches: Array<Branch | BranchWithDistance>;
+  value: string;
+  onChange: (branchId: string) => void;
+};
+
+export function BranchPicker({ branches, value, onChange }: BranchPickerProps) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor="branch-picker" className="font-medium">
+        Chi nhánh
+      </label>
+      <select
+        id="branch-picker"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"
+      >
+        {value === "" && <option value="">Chọn chi nhánh</option>}
+        {branches.map((branch) => (
+          <option key={branch.id} value={branch.id}>
+            {"distanceM" in branch ? `${branch.name} — ${Math.round(branch.distanceM)} m` : branch.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}

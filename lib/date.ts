@@ -47,6 +47,16 @@ export function formatDateTime(iso: string): string {
   return `${day}/${month}/${year} ${hour}:${minute}`;
 }
 
+export function formatTime(iso: string): string {
+  const { hour, minute } = vietnamParts(new Date(iso));
+  return `${hour}:${minute}`;
+}
+
+export function formatDate(date: string): string {
+  const [year, month, day] = date.split("-");
+  return `${day}/${month}/${year}`;
+}
+
 export function formatDuration(minutes: number): string {
   const total = Math.floor(minutes);
   const hours = Math.floor(total / 60);
