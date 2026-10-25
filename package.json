@@ -12,7 +12,8 @@
     "db:status": "supabase status",
     "db:reset": "supabase db reset",
     "test": "vitest run",
-    "test:db": "supabase test db"
+    "test:db": "supabase test db",
+    "admin:create": "node --experimental-strip-types --env-file=.env.local scripts/create-admin.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
