@@ -26,11 +26,11 @@ Sau `npm run dev`, bạn làm tiếp mục [Chấm công](#chấm-công) để t
 
 > ⚠️ `npm run db:reset` xoá cả tài khoản đăng nhập. Sau mỗi lần reset, bạn chạy lại bước 2.
 
+> ⚠️ Cổng 3000 có thể đã bị chiếm, ví dụ bởi Docker Desktop. Khi đó bạn chạy `npx next dev -p 3002` và dùng cổng 3002 ở bước 3.
+
 1. Bạn lấy `SECRET_KEY` từ `npm run db:status`. Bạn điền giá trị này vào `SUPABASE_SECRET_KEY` trong `.env.local` (file copy từ `.env.example`). Các route admin và `npm test` cần key này.
 2. Bạn tạo admin đầu tiên: `npm run admin:create -- <phone> <password> "<name>"`.
-3. Bạn mở `http://localhost:3000/login` và đăng nhập bằng tài khoản vừa tạo.
-
-> ⚠️ Cổng 3000 có thể đã bị chiếm, ví dụ bởi Docker Desktop. Khi đó bạn chạy `npx next dev -p 3002`.
+3. Bạn mở `http://localhost:3000/login`. Bạn đăng nhập bằng số điện thoại và mật khẩu của bước 2.
 
 Test gồm hai lệnh:
 

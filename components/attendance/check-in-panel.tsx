@@ -212,7 +212,7 @@ export function CheckInPanel() {
   function handleDone(next: Outcome) {
     setOutcome(next);
     resetFlow();
-    if (next.isSuccess) focusHeading();
+    focusHeading();
     // A failed attempt may mean the open shift changed on another device, so the buttons follow the server.
     reload();
   }
