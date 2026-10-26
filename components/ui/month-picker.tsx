@@ -10,8 +10,8 @@ type MonthPickerProps = {
 export function MonthPicker({ value, onChange }: MonthPickerProps) {
   const id = useId();
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="font-medium">
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="ui-label">
         Tháng
       </label>
       <input
@@ -19,7 +19,7 @@ export function MonthPicker({ value, onChange }: MonthPickerProps) {
         type="month"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-fit rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"
+        className="ui-field w-fit"
       />
     </div>
   );

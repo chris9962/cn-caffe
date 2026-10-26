@@ -8,8 +8,12 @@ export const metadata: Metadata = { title: "Ca của tôi" };
 
 export default function MyShiftsPage() {
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">Ca của tôi</h1>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <header>
+        <p className="ui-eyebrow mb-2">Sổ ca</p>
+        <h1 className="ui-title">Ca của tôi</h1>
+        <p className="ui-lead mt-2">Những buổi bạn đã ghé quán trong tháng.</p>
+      </header>
       <MyShiftList />
     </div>
   );

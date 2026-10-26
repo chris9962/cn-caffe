@@ -14,7 +14,7 @@ type ManagerAccess = { branchIds: string[]; permissions: ManagerPermission[] };
 const PERMISSIONS = Object.keys(PERMISSION_LABELS) as ManagerPermission[];
 
 const checkboxClass =
-  "size-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
+  "size-4 accent-[var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
 
 function toggle<T>(list: T[], item: T, checked: boolean) {
   return checked ? [...list, item] : list.filter((value) => value !== item);
@@ -49,9 +49,9 @@ function ManagerAccessFields({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 font-medium">Chi nhánh phụ trách</legend>
+        <legend className="ui-label mb-2">Chi nhánh phụ trách</legend>
         {branches.map((branch) => (
           <label key={branch.id} className="flex items-center gap-2">
             <input
@@ -65,7 +65,7 @@ function ManagerAccessFields({
         ))}
       </fieldset>
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 font-medium">Quyền</legend>
+        <legend className="ui-label mb-2">Quyền</legend>
         {PERMISSIONS.map((permission) => (
           <label key={permission} className="flex items-center gap-2">
             <input
@@ -79,11 +79,11 @@ function ManagerAccessFields({
         ))}
       </fieldset>
       {error && <ErrorMessage message={error} />}
-      <div role="status">{saved ? "Đã lưu." : null}</div>
+      <div role="status" className="ui-saved">{saved ? "Đã lưu." : null}</div>
       <button
         type="submit"
         disabled={isPending}
-        className="w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400 disabled:opacity-60"
+        className="ui-btn"
       >
         Lưu phân quyền
       </button>
@@ -96,8 +96,8 @@ export function ManagerAccessForm({ managerId }: { managerId: string }) {
   const access = useFetch<ManagerAccess>(`/api/admin/managers/${managerId}/access`);
 
   return (
-    <section aria-labelledby="manager-access-heading" className="flex flex-col gap-4">
-      <h2 id="manager-access-heading" className="text-xl font-semibold">
+    <section aria-labelledby="manager-access-heading" className="ui-card flex max-w-2xl flex-col gap-4">
+      <h2 id="manager-access-heading" className="ui-heading">
         Phân quyền quản lý
       </h2>
       {branches.error || access.error ? (

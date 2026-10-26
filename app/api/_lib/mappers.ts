@@ -1,5 +1,6 @@
 import type { Branch } from "@/types/branch";
 import type { Employee, EmployeeRole, EmploymentType } from "@/types/employee";
+import type { PayAdjustment, PayRate } from "@/types/payroll";
 import type { AuditLog, FailReason, Shift, ShiftStatus } from "@/types/shift";
 
 export const EMPLOYEE_COLUMNS =
@@ -134,5 +135,38 @@ export function toAuditLog(row: AuditLogRow, actorNames: Map<string, string>): A
     createdAt: row.created_at,
     before: row.before,
     after: row.after,
+  };
+}
+
+export const PAY_RATE_COLUMNS = "id, employment_type, amount, effective_from";
+
+type PayRateRow = { id: string; employment_type: EmploymentType; amount: number; effective_from: string };
+
+export function toPayRate(row: PayRateRow): PayRate {
+  return { id: row.id, employmentType: row.employment_type, amount: row.amount, effectiveFrom: row.effective_from };
+}
+
+export const PAY_ADJUSTMENT_COLUMNS = "id, employee_id, month, amount, note, created_at, employees(full_name)";
+
+// Untyped postgrest-js types the employees embed as an array, so queries use overrideTypes<PayAdjustmentRow>.
+export type PayAdjustmentRow = {
+  id: string;
+  employee_id: string;
+  month: string;
+  amount: number;
+  note: string;
+  created_at: string;
+  employees: { full_name: string } | null;
+};
+
+export function toPayAdjustment(row: PayAdjustmentRow): PayAdjustment {
+  return {
+    id: row.id,
+    employeeId: row.employee_id,
+    employeeName: row.employees?.full_name ?? "",
+    month: row.month.slice(0, 7),
+    amount: row.amount,
+    note: row.note,
+    createdAt: row.created_at,
   };
 }

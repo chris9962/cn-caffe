@@ -5,7 +5,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { useMutation } from "@/hooks/use-mutation";
 
 const inputClass =
-  "w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
+  "ui-field";
 
 export function ResetPasswordForm({ employeeId }: { employeeId: string }) {
   const { mutate, isPending, error } = useMutation();
@@ -28,10 +28,10 @@ export function ResetPasswordForm({ employeeId }: { employeeId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <h2 className="text-xl font-semibold">Đặt lại mật khẩu</h2>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="reset-password" className="font-medium">
+    <form onSubmit={handleSubmit} className="ui-card flex max-w-2xl flex-col gap-5">
+      <h2 className="ui-heading">Đặt lại mật khẩu</h2>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="reset-password" className="ui-label">
           Mật khẩu mới
         </label>
         <input
@@ -45,11 +45,11 @@ export function ResetPasswordForm({ employeeId }: { employeeId: string }) {
         />
       </div>
       {error && <ErrorMessage message={error} />}
-      <div role="status">{saved ? "Đã lưu." : null}</div>
+      <div role="status" className="ui-saved">{saved ? "Đã lưu." : null}</div>
       <button
         type="submit"
         disabled={isPending}
-        className="w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400 disabled:opacity-60"
+        className="ui-btn"
       >
         Đặt lại mật khẩu
       </button>

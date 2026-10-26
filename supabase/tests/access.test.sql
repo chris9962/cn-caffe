@@ -9,12 +9,12 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000004', 's@test.local'),
   ('00000000-0000-0000-0000-000000000005', 'x@test.local');
 
-insert into public.employees (id, full_name, phone, role, is_active) values
-  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84000000001', 'admin', true),
-  ('00000000-0000-0000-0000-000000000002', 'Director D', '84000000002', 'director', true),
-  ('00000000-0000-0000-0000-000000000003', 'Manager M', '84000000003', 'manager', true),
-  ('00000000-0000-0000-0000-000000000004', 'Staff S', '84000000004', 'staff', true),
-  ('00000000-0000-0000-0000-000000000005', 'Inactive X', '84000000005', 'staff', false);
+insert into public.employees (id, full_name, phone, role, is_active, requires_attendance) values
+  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84000000001', 'admin', true, false),
+  ('00000000-0000-0000-0000-000000000002', 'Director D', '84000000002', 'director', true, false),
+  ('00000000-0000-0000-0000-000000000003', 'Manager M', '84000000003', 'manager', true, true),
+  ('00000000-0000-0000-0000-000000000004', 'Staff S', '84000000004', 'staff', true, true),
+  ('00000000-0000-0000-0000-000000000005', 'Inactive X', '84000000005', 'staff', false, true);
 
 insert into public.branches (id, name, latitude, longitude, is_active) values
   ('00000000-0000-0000-0000-0000000000b1', 'B1', 10.77, 106.70, true),

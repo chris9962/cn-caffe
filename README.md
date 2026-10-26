@@ -44,6 +44,16 @@ Khi triển khai production:
 1. Bạn tắt đăng ký công khai trong project Supabase: Authentication settings, tắt "Allow new users to sign up".
 2. Bạn phục vụ ứng dụng qua HTTPS.
 
+### Tính lương
+
+1. Bạn nhập mức lương cho từng nhân viên ở **Nhân viên → chi tiết → Mức lương**. Mỗi mức có loại (bán thời gian theo giờ, toàn thời gian theo tháng) và ngày bắt đầu hiệu lực.
+2. Bạn đặt khung tăng ca và lương tăng ca ở **Cấu hình tháng**. Tháng chưa có cấu hình thì tự chép từ tháng trước.
+3. Trong tháng, **Bảng lương** hiện lương tạm tính. Bạn thêm khoản thưởng hoặc khoản trừ ở đây, mỗi khoản cần lý do.
+4. Khi tháng đã kết thúc và không còn ca đang làm, thiếu check out hoặc chờ duyệt, bạn bấm **Chốt lương tháng**. Sau khi chốt, ca, cấu hình và khoản cộng trừ của tháng đó bị khoá.
+5. Bạn tải file Excel của tháng đã chốt. Khi cần sửa, bạn mở lại tháng kèm lý do rồi chốt lại; phiên bản cũ vẫn xem được.
+
+Nhân viên xem lương ở **Lương của tôi**: tạm tính khi tháng còn mở, phiếu lương khi tháng đã chốt. Quản lý chi nhánh không xem được lương người khác.
+
 ### Lệnh hằng ngày
 
 > ⚠️ `npm run db:reset` xoá toàn bộ dữ liệu trong database local.

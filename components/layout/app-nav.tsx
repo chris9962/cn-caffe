@@ -7,7 +7,7 @@ import { AppMark } from "@/components/ui/app-mark";
 import { useMutation } from "@/hooks/use-mutation";
 import type { CurrentUser } from "@/types/employee";
 
-type NavIcon = "home" | "clock" | "calendar" | "review" | "people" | "branch";
+type NavIcon = "home" | "clock" | "calendar" | "review" | "people" | "branch" | "wallet" | "sliders";
 type NavItem = { href: string; label: string; shortLabel: string; icon: NavIcon };
 
 function getNavItems(user: CurrentUser): NavItem[] {
@@ -28,7 +28,11 @@ function getNavItems(user: CurrentUser): NavItem[] {
     items.push(
       { href: "/admin/employees", label: "Nhân viên", shortLabel: "Nhân sự", icon: "people" },
       { href: "/admin/branches", label: "Chi nhánh", shortLabel: "Chi nhánh", icon: "branch" },
+      { href: "/admin/payroll", label: "Bảng lương", shortLabel: "Lương", icon: "wallet" },
+      { href: "/admin/monthly-config", label: "Cấu hình tháng", shortLabel: "Cấu hình", icon: "sliders" },
     );
+  } else {
+    items.push({ href: "/my-pay", label: "Lương của tôi", shortLabel: "Lương", icon: "wallet" });
   }
   return items;
 }
@@ -70,6 +74,20 @@ const iconPaths: Record<NavIcon, ReactNode> = {
     <>
       <path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" />
       <circle cx="12" cy="9" r="2.5" />
+    </>
+  ),
+  wallet: (
+    <>
+      <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3" />
+      <path d="M4 7.5v10A2.5 2.5 0 0 0 6.5 20H20V8H6.5A2.5 2.5 0 0 1 4 5.5" />
+      <path d="M16 14h1.5" />
+    </>
+  ),
+  sliders: (
+    <>
+      <path d="M5 7h9M18 7h1M5 17h3M12 17h7" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="10" cy="17" r="2" />
     </>
   ),
 };
@@ -126,14 +144,14 @@ export function AppNav({ user }: { user: CurrentUser }) {
         <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0 text-right">
             <p className="truncate text-sm font-semibold">{user.fullName}</p>
-            <p className="text-xs text-[var(--muted)]">Đang làm việc</p>
+            <p className="text-xs text-[var(--muted)]">Chúc bạn một ngày êm</p>
           </div>
           <button
             type="button"
             onClick={handleLogout}
             disabled={isPending}
             aria-label="Đăng xuất"
-            className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--surface-strong)] text-xs font-bold ${focusClass} disabled:opacity-50`}
+            className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-strong)] ${focusClass} disabled:opacity-50`}
           >
             {initials}
           </button>
@@ -143,7 +161,10 @@ export function AppNav({ user }: { user: CurrentUser }) {
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-[var(--line)] bg-[var(--surface)] p-5 md:flex">
         <Link href={homeHref} className={`mb-10 flex w-fit items-center gap-3 rounded-2xl ${focusClass}`}>
           <AppMark />
-          <span className="text-xl font-extrabold tracking-[-0.04em]">Chấm công</span>
+          <span>
+            <span className="block font-[family-name:var(--font-display)] text-xl font-medium">Cỏ Ngọt</span>
+            <span className="block text-xs text-[var(--muted)]">sổ ca của quán</span>
+          </span>
         </Link>
 
         <nav aria-label="Điều hướng chính" className="flex-1">
@@ -153,7 +174,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
                 <Link
                   href={item.href}
                   aria-current={isActive(item.href) ? "page" : undefined}
-                  className={`flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-sm font-semibold transition-colors aria-[current=page]:bg-[var(--foreground)] aria-[current=page]:text-[var(--surface)] ${focusClass}`}
+                  className={`flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-sm font-semibold transition-colors text-[var(--muted)] hover:bg-[var(--background)] hover:text-[var(--foreground)] aria-[current=page]:bg-[var(--accent-soft)] aria-[current=page]:text-[var(--accent-strong)] ${focusClass}`}
                 >
                   <AppNavIcon name={item.icon} />
                   {item.label}
@@ -165,7 +186,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
 
         <div className="border-t border-[var(--line)] pt-5">
           <div className="mb-4 flex items-center gap-3">
-            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--surface-strong)] text-xs font-bold">
+            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-strong)]">
               {initials}
             </span>
             <div className="min-w-0">
@@ -177,9 +198,9 @@ export function AppNav({ user }: { user: CurrentUser }) {
             type="button"
             onClick={handleLogout}
             disabled={isPending}
-            className={`min-h-11 w-full rounded-xl border border-[var(--line)] px-4 text-sm font-semibold transition-colors hover:bg-[var(--surface-strong)] ${focusClass} disabled:opacity-50`}
+            className="ui-btn-quiet w-full"
           >
-            {isPending ? "Đang đăng xuất..." : "Đăng xuất"}
+            {isPending ? "Đang khép cửa..." : "Đăng xuất"}
           </button>
         </div>
       </aside>
@@ -194,9 +215,9 @@ export function AppNav({ user }: { user: CurrentUser }) {
               <Link
                 href={item.href}
                 aria-current={isActive(item.href) ? "page" : undefined}
-                className={`group relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[10px] font-semibold text-[var(--muted)] transition-colors aria-[current=page]:text-[var(--foreground)] ${focusClass}`}
+                className={`group relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[10px] font-semibold text-[var(--muted)] transition-colors aria-[current=page]:text-[var(--accent-strong)] ${focusClass}`}
               >
-                <span className="absolute top-0 h-0.5 w-6 scale-x-0 rounded-full bg-[var(--accent)] transition-transform group-aria-[current=page]:scale-x-100" />
+                <span className="absolute top-0 h-0.5 w-6 scale-x-0 rounded-full bg-[var(--bloom)] transition-transform group-aria-[current=page]:scale-x-100" />
                 <AppNavIcon name={item.icon} />
                 <span className="w-full truncate text-center">{item.shortLabel}</span>
               </Link>

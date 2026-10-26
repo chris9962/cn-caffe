@@ -30,6 +30,7 @@ const { error: insertError } = await supabase.from("employees").insert({
   full_name: fullName.trim(),
   phone,
   role: "admin",
+  requires_attendance: false,
   must_change_password: false,
 });
 if (insertError) {

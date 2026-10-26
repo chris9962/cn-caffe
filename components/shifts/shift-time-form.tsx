@@ -46,8 +46,8 @@ export function ShiftTimeForm({ shift, onStart, onSaved }: ShiftTimeFormProps) {
 
   return (
     // noValidate: Chrome blocks a half-filled datetime-local with an English bubble; the check below says it in Vietnamese.
-    <form onSubmit={handleSubmit} noValidate aria-labelledby={headingId} className="flex flex-col gap-4">
-      <h2 id={headingId} className="text-xl font-semibold">
+    <form onSubmit={handleSubmit} noValidate aria-labelledby={headingId} className="ui-card flex max-w-2xl flex-col gap-5">
+      <h2 id={headingId} className="ui-heading">
         Sửa giờ
       </h2>
       <ShiftTimeFields value={times} onChange={setTimes} />
@@ -55,7 +55,7 @@ export function ShiftTimeForm({ shift, onStart, onSaved }: ShiftTimeFormProps) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400 disabled:opacity-60"
+        className="ui-btn"
       >
         Lưu giờ
       </button>

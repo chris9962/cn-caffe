@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (isLoading) {
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-md items-center justify-center p-6">
-        <Loading label="Đang mở ứng dụng..." />
+        <Loading label="Đang pha cà phê, chờ chút nhé..." />
       </main>
     );
   }
@@ -46,10 +46,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (error || !user) {
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-4 p-6">
-        <ErrorMessage message="Phiên đăng nhập đã hết hạn." />
+        <ErrorMessage message="Bạn rời quán hơi lâu rồi, đăng nhập lại nhé." />
         <Link
           href="/login"
-          className="flex min-h-12 w-fit items-center rounded-full bg-[var(--foreground)] px-5 font-semibold text-[var(--surface)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          className="ui-btn"
         >
           Đăng nhập lại
         </Link>
@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (needsAttendanceRedirect) {
     return (
       <main className="mx-auto flex min-h-dvh w-full max-w-md items-center justify-center p-6">
-        <Loading label="Đang mở trang phù hợp..." />
+        <Loading label="Đang dẫn bạn tới đúng chỗ..." />
       </main>
     );
   }

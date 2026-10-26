@@ -68,16 +68,16 @@ export function ManualShiftForm() {
 
   return (
     // noValidate: Chrome blocks a half-filled datetime-local with an English bubble; the check below says it in Vietnamese.
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor={employeeSelectId} className="font-medium">
+    <form onSubmit={handleSubmit} noValidate className="ui-card flex max-w-2xl flex-col gap-5">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={employeeSelectId} className="ui-label">
           Nhân viên
         </label>
         <select
           id={employeeSelectId}
           value={employeeId}
           onChange={(event) => setEmployeeId(event.target.value)}
-          className="w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"
+          className="ui-field"
         >
           <option value="">Chọn nhân viên</option>
           {employeeOptions.map((employee) => (
@@ -93,7 +93,7 @@ export function ManualShiftForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400 disabled:opacity-60"
+        className="ui-btn"
       >
         Thêm ca
       </button>

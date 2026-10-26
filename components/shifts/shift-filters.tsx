@@ -7,7 +7,7 @@ import type { Branch } from "@/types/branch";
 import type { ShiftStatus } from "@/types/shift";
 
 const selectClass =
-  "w-fit rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
+  "ui-field w-fit";
 
 export type ShiftFilterValues = { month: string; date: string; branchId: string; status: ShiftStatus | "" };
 
@@ -28,10 +28,10 @@ function monthBounds(month: string) {
 export function ShiftFilters({ branches, value, onChange }: ShiftFiltersProps) {
   const id = useId();
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="ui-card flex flex-wrap items-end gap-4">
       <MonthPicker value={value.month} onChange={(month) => onChange({ ...value, month, date: "" })} />
-      <div className="flex flex-col gap-1">
-        <label htmlFor={`${id}-date`} className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${id}-date`} className="ui-label">
           Ngày
         </label>
         <input
@@ -43,8 +43,8 @@ export function ShiftFilters({ branches, value, onChange }: ShiftFiltersProps) {
           className={selectClass}
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor={`${id}-branch`} className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${id}-branch`} className="ui-label">
           Chi nhánh
         </label>
         <select
@@ -61,8 +61,8 @@ export function ShiftFilters({ branches, value, onChange }: ShiftFiltersProps) {
           ))}
         </select>
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor={`${id}-status`} className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${id}-status`} className="ui-label">
           Trạng thái
         </label>
         <select
