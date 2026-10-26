@@ -4,14 +4,14 @@ import Link from "next/link";
 import { use, useId, useState } from "react";
 import { PayslipView } from "@/components/payroll/payslip-view";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { ExpandableRow } from "@/components/ui/expandable-row";
 import { Loading } from "@/components/ui/loading";
+import { isRowControlClick, RowDetailButton } from "@/components/ui/row-detail-button";
+import { SideDrawer } from "@/components/ui/side-drawer";
 import { useFetch } from "@/hooks/use-fetch";
 import { currentMonth } from "@/lib/date";
 import { formatHours, formatMonthLabel, formatMoney, formatSignedMoney } from "@/lib/payroll/format";
 import type { EmployeePayHistory as PayHistory } from "@/types/payroll";
 
-const COLUMNS = 8;
 const YEARS_SHOWN = 5;
 
 type EmployeePayHistoryProps = {
@@ -28,9 +28,11 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
     return Number.isInteger(requested) && requested > 2000 && requested <= thisYear ? requested : thisYear;
   });
   const yearSelectId = useId();
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const { data, error, isLoading } = useFetch<PayHistory>(`/api/admin/payroll/employees/${id}?year=${year}`);
   const months = data?.year === year ? data.months : null;
   const yearTotal = months?.reduce((sum, item) => sum + item.payslip.totals.total, 0) ?? 0;
+  const selected = months?.find((item) => item.month === selectedMonth) ?? null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -43,12 +45,9 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
             · lịch sử
           </p>
           <h1 className="ui-title">{data?.employee.fullName ?? "Lương theo tháng"}</h1>
-          <p className="ui-lead mt-2">
-            Tháng đã chốt lấy từ phiếu lương, tháng còn mở là tạm tính.{" "}
-            <Link href={`/admin/employees/${id}`} className="ui-link">
-              Hồ sơ và mức lương
-            </Link>
-          </p>
+          <Link href={`/admin/employees/${id}`} className="ui-link mt-1 inline-block text-sm">
+            Hồ sơ và mức lương
+          </Link>
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor={yearSelectId} className="ui-label">
@@ -98,41 +97,37 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
                 const { totals } = payslip;
                 const adjustments = totals.additions + totals.deductions;
                 return (
-                  <ExpandableRow
+                  <tr
                     key={month}
-                    colSpan={COLUMNS}
-                    label={`phiếu lương ${formatMonthLabel(month).toLowerCase()}`}
-                    cells={
-                      <>
-                        <th scope="row" className="font-semibold whitespace-nowrap">
-                          {formatMonthLabel(month)}
-                        </th>
-                        <td>
-                          {version === null ? (
-                            <span className="rounded-full bg-[var(--bloom-soft)] px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-[var(--warning)]">
-                              Tạm tính
-                            </span>
-                          ) : (
-                            <span className="rounded-full bg-[var(--success-soft)] px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-[var(--success)]">
-                              Đã chốt · v{version}
-                            </span>
-                          )}
-                        </td>
-                        <td className="text-right whitespace-nowrap">
-                          {formatHours(totals.regularMinutes + totals.overtimeMinutes)}
-                        </td>
-                        <td className="text-right whitespace-nowrap">
-                          {formatMoney(totals.regularPay + totals.overtimePay)}
-                        </td>
-                        <td className="text-right whitespace-nowrap">{formatMoney(totals.fixedPay)}</td>
-                        <td className="text-right whitespace-nowrap">
-                          {adjustments === 0 ? "—" : formatSignedMoney(adjustments)}
-                        </td>
-                        <td className="text-right font-semibold whitespace-nowrap">{formatMoney(totals.total)}</td>
-                      </>
-                    }
-                    detail={<PayslipView payslip={payslip} />}
-                  />
+                    onClick={(event) => !isRowControlClick(event) && setSelectedMonth(month)}
+                    className="cursor-pointer"
+                  >
+                    <th scope="row" className="font-semibold whitespace-nowrap">
+                      {formatMonthLabel(month)}
+                    </th>
+                    <td>
+                      {version === null ? (
+                        <span className="rounded-full bg-[var(--bloom-soft)] px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-[var(--warning)]">
+                          Tạm tính
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-[var(--success-soft)] px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-[var(--success)]">
+                          Đã chốt · v{version}
+                        </span>
+                      )}
+                    </td>
+                    <td className="text-right whitespace-nowrap">{formatHours(totals.regularMinutes + totals.overtimeMinutes)}</td>
+                    <td className="text-right whitespace-nowrap">{formatMoney(totals.regularPay + totals.overtimePay)}</td>
+                    <td className="text-right whitespace-nowrap">{formatMoney(totals.fixedPay)}</td>
+                    <td className="text-right whitespace-nowrap">{adjustments === 0 ? "—" : formatSignedMoney(adjustments)}</td>
+                    <td className="text-right font-semibold whitespace-nowrap">{formatMoney(totals.total)}</td>
+                    <td className="w-12 text-right">
+                      <RowDetailButton
+                        label={`Xem phiếu lương ${formatMonthLabel(month).toLowerCase()}`}
+                        onClick={() => setSelectedMonth(month)}
+                      />
+                    </td>
+                  </tr>
                 );
               })}
             </tbody>
@@ -146,6 +141,23 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
           </table>
         </div>
       )}
+
+      <SideDrawer
+        open={selected !== null}
+        onClose={() => setSelectedMonth(null)}
+        title={
+          selected && (
+            <>
+              <p className="font-[family-name:var(--font-display)] text-xl font-medium">{formatMonthLabel(selected.month)}</p>
+              <p className="ui-hint">
+                {data?.employee.fullName} · {selected.version === null ? "tạm tính" : `đã chốt, phiên bản ${selected.version}`}
+              </p>
+            </>
+          )
+        }
+      >
+        {selected && <PayslipView payslip={selected.payslip} />}
+      </SideDrawer>
     </div>
   );
 }

@@ -29,37 +29,46 @@ export function PayrollBoard() {
     reload();
   }
 
+  // While another month loads, the old month's data must not show under the new month.
+  const payroll = data !== null && !(isLoading && data.month !== month) ? data : null;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+        <div className="flex items-center gap-3">
           <h1 className="ui-title">Bảng lương</h1>
-          <p className="ui-lead mt-2">Tạm tính trong tháng, chốt khi tháng kết thúc, rồi tải Excel.</p>
+          {payroll?.status === "closed" && (
+            <span className="rounded-full bg-[var(--success-soft)] px-3 py-1 text-xs font-semibold text-[var(--success)]">
+              Đã chốt
+            </span>
+          )}
         </div>
-        <MonthPicker value={month} onChange={setMonth} />
+        <div className="flex flex-wrap items-end gap-3">
+          <MonthPicker value={month} onChange={setMonth} />
+          {payroll && <PayrollActions payroll={payroll} onChanged={handleChanged} />}
+        </div>
       </div>
 
       {error ? (
         <ErrorMessage message={error} />
-      ) : !data || (isLoading && data.month !== month) ? (
+      ) : !payroll ? (
         <Loading label="Đang tính bảng lương..." />
       ) : (
         <>
-          <PayrollActions payroll={data} onChanged={handleChanged} />
-          {data.status !== "closed" && data.blockingShifts.length > 0 && <BlockingShiftList shifts={data.blockingShifts} />}
-          <PayslipTable month={data.month} payslips={data.payslips} isEstimate={data.shownVersion === null} />
+          {payroll.status !== "closed" && payroll.blockingShifts.length > 0 && <BlockingShiftList shifts={payroll.blockingShifts} />}
+          <PayslipTable month={payroll.month} payslips={payroll.payslips} isEstimate={payroll.shownVersion === null} />
           <div className="grid items-start gap-6 lg:grid-cols-2">
             <PayAdjustmentSection
-              key={data.month}
-              month={data.month}
-              isLocked={data.status !== "open"}
+              key={payroll.month}
+              month={payroll.month}
+              isLocked={payroll.status !== "open"}
               onChanged={reload}
             />
-            {data.versions.length > 0 && (
+            {payroll.versions.length > 0 && (
               <PayrollVersionList
-                versions={data.versions}
-                shownVersion={data.shownVersion}
-                onShow={(next) => setPicked({ month: data.month, version: next })}
+                versions={payroll.versions}
+                shownVersion={payroll.shownVersion}
+                onShow={(next) => setPicked({ month: payroll.month, version: next })}
                 onShowCurrent={version === null ? null : () => setPicked(null)}
               />
             )}

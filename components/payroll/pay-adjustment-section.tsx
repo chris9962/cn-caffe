@@ -51,12 +51,9 @@ export function PayAdjustmentSection({ month, isLocked, onChanged }: PayAdjustme
 
   return (
     <section aria-labelledby="adjustments-heading" className="ui-card flex flex-col gap-5">
-      <div>
-        <h2 id="adjustments-heading" className="ui-heading">
-          Khoản cộng, trừ
-        </h2>
-        <p className="ui-hint mt-1">Thưởng, phụ cấp, tạm ứng hay phạt của tháng. Mỗi khoản cần ghi lý do.</p>
-      </div>
+      <h2 id="adjustments-heading" className="ui-heading">
+        Khoản cộng, trừ
+      </h2>
 
       {adjustments.error ? (
         <ErrorMessage message={adjustments.error} />
