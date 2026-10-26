@@ -5,7 +5,7 @@ import { BlockingShiftList } from "@/components/payroll/blocking-shift-list";
 import { PayAdjustmentSection } from "@/components/payroll/pay-adjustment-section";
 import { PayrollActions } from "@/components/payroll/payroll-actions";
 import { PayrollVersionList } from "@/components/payroll/payroll-version-list";
-import { PayslipList } from "@/components/payroll/payslip-list";
+import { PayslipTable } from "@/components/payroll/payslip-table";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
 import { MonthPicker } from "@/components/ui/month-picker";
@@ -47,24 +47,22 @@ export function PayrollBoard() {
         <>
           <PayrollActions payroll={data} onChanged={handleChanged} />
           {data.status !== "closed" && data.blockingShifts.length > 0 && <BlockingShiftList shifts={data.blockingShifts} />}
-          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
-            <PayslipList payslips={data.payslips} isEstimate={data.shownVersion === null} />
-            <div className="flex flex-col gap-6">
-              <PayAdjustmentSection
-                key={data.month}
-                month={data.month}
-                isLocked={data.status !== "open"}
-                onChanged={reload}
+          <PayslipTable month={data.month} payslips={data.payslips} isEstimate={data.shownVersion === null} />
+          <div className="grid items-start gap-6 lg:grid-cols-2">
+            <PayAdjustmentSection
+              key={data.month}
+              month={data.month}
+              isLocked={data.status !== "open"}
+              onChanged={reload}
+            />
+            {data.versions.length > 0 && (
+              <PayrollVersionList
+                versions={data.versions}
+                shownVersion={data.shownVersion}
+                onShow={(next) => setPicked({ month: data.month, version: next })}
+                onShowCurrent={version === null ? null : () => setPicked(null)}
               />
-              {data.versions.length > 0 && (
-                <PayrollVersionList
-                  versions={data.versions}
-                  shownVersion={data.shownVersion}
-                  onShow={(next) => setPicked({ month: data.month, version: next })}
-                  onShowCurrent={version === null ? null : () => setPicked(null)}
-                />
-              )}
-            </div>
+            )}
           </div>
         </>
       )}

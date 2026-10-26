@@ -223,7 +223,7 @@ select {
     font-size: 0.9rem;
   }
 
-  .ui-table th {
+  .ui-table thead th {
     background: color-mix(in oklab, var(--surface-strong) 55%, var(--surface));
     padding: 0.8rem 1rem;
     font-size: 0.75rem;
@@ -234,13 +234,15 @@ select {
     white-space: nowrap;
   }
 
-  .ui-table td {
+  .ui-table td,
+  .ui-table tbody th,
+  .ui-table tfoot th {
     border-top: 1px solid var(--line);
     padding: 0.85rem 1rem;
     vertical-align: middle;
   }
 
-  .ui-table tbody tr:hover td {
+  .ui-table tbody tr:hover > * {
     background: color-mix(in oklab, var(--accent-soft) 40%, transparent);
   }
 

@@ -101,3 +101,16 @@ export type PayrollMonth = {
 };
 
 export type MyPay = { month: string; isEstimate: boolean; payslip: Payslip | null };
+
+export type PayHistoryMonth = {
+  month: string;
+  // The closed version the payslip comes from, or null for a live estimate of an open month.
+  version: number | null;
+  payslip: Payslip;
+};
+
+export type EmployeePayHistory = {
+  employee: { id: string; fullName: string };
+  year: number;
+  months: PayHistoryMonth[];
+};

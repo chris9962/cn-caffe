@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
@@ -58,7 +59,10 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
           Mức lương
         </h2>
         <p className="ui-hint mt-1">
-          Mỗi ca dùng mức lương có hiệu lực vào ngày của ca. Thêm mức mới khi tăng lương hoặc đổi loại nhân viên.
+          Mỗi ca dùng mức lương có hiệu lực vào ngày của ca. Thêm mức mới khi tăng lương hoặc đổi loại nhân viên.{" "}
+          <Link href={`/admin/payroll/employees/${employee.id}`} className="ui-link">
+            Xem lương các tháng
+          </Link>
         </p>
       </div>
 

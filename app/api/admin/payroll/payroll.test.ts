@@ -10,7 +10,7 @@ import {
 } from "@/tests/helpers/fixtures";
 import { callRoute } from "@/tests/helpers/route";
 import { currentMonth } from "@/lib/date";
-import type { MonthlyConfig, MyPay, PayAdjustment, PayRate, PayrollMonth } from "@/types/payroll";
+import type { EmployeePayHistory, MonthlyConfig, MyPay, PayAdjustment, PayRate, PayrollMonth } from "@/types/payroll";
 import { DELETE as rateDELETE } from "../employees/[id]/pay-rates/[rateId]/route";
 import { GET as ratesGET, POST as ratesPOST } from "../employees/[id]/pay-rates/route";
 import { GET as configGET, PUT as configPUT } from "../monthly-config/route";
@@ -18,6 +18,7 @@ import { DELETE as adjustmentDELETE } from "../pay-adjustments/[id]/route";
 import { GET as adjustmentsGET, POST as adjustmentsPOST } from "../pay-adjustments/route";
 import { GET as minePGET } from "../../payroll/mine/route";
 import { POST as closePOST } from "./close/route";
+import { GET as historyGET } from "./employees/[id]/route";
 import { GET as exportGET } from "./export/route";
 import { POST as reopenPOST } from "./reopen/route";
 import { GET as payrollGET } from "./route";
@@ -79,6 +80,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await cleanupPayrollMonth(monthDate);
+  // The history route creates a config row for every month of the year it estimates.
+  await db.from("monthly_configs").delete().gte("month", "2025-01-01").lt("month", "2026-01-01").throwOnError();
   await cleanupFixtures();
   signOut();
 });
@@ -242,5 +245,34 @@ describe("estimate, close and reopen", () => {
 
     await signInAs(staff);
     expect(((await (await mine()).json()) as MyPay).payslip?.totals.total).toBe(500_000);
+  });
+});
+
+describe("pay history of one employee", () => {
+  beforeEach(async () => {
+    await signInAs(admin);
+  });
+
+  const history = (id: string, year = "2025") =>
+    callRoute(historyGET, { url: `http://localhost/api/admin/payroll/employees/${id}?year=${year}`, params: { id } });
+
+  it("lists the closed month from its latest version and skips months where nothing happened", async () => {
+    const data = (await (await history(staff.id)).json()) as EmployeePayHistory;
+    expect(data.employee).toEqual({ id: staff.id, fullName: "Bán Thời Gian" });
+    expect(data.months.map((item) => [item.month, item.version, item.payslip.totals.total])).toEqual([
+      [month, 2, 500_000],
+    ]);
+  });
+
+  it("shows a full time employee's fixed pay as an estimate in every open month", async () => {
+    const data = (await (await history(fullTimer.id)).json()) as EmployeePayHistory;
+    const open = data.months.filter((item) => item.version === null);
+    expect(open).toHaveLength(11);
+    expect(open.every((item) => item.payslip.totals.fixedPay > 0)).toBe(true);
+  });
+
+  it("rejects a bad year and an unknown employee", async () => {
+    expect((await history(staff.id, "abc")).status).toBe(400);
+    expect((await history("00000000-0000-4000-8000-000000000000")).status).toBe(404);
   });
 });
