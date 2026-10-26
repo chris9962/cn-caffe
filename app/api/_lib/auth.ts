@@ -34,6 +34,27 @@ export async function requireAdmin(): Promise<AuthResult> {
   return auth;
 }
 
+// Admins and directors, plus managers given "payroll.view". Only admins and directors may change pay.
+export async function requirePayrollViewer(): Promise<
+  { supabase: ServerClient; employee: Employee; canManage: boolean } | { response: Response }
+> {
+  const auth = await requireEmployee();
+  if ("response" in auth) return auth;
+  const { supabase, employee } = auth;
+  if (employee.role === "admin" || employee.role === "director") return { ...auth, canManage: true };
+  if (employee.role === "manager") {
+    const { data, error } = await supabase
+      .from("manager_permissions")
+      .select("permission")
+      .eq("manager_id", employee.id)
+      .eq("permission", "payroll.view")
+      .maybeSingle();
+    if (error) return { response: dbErrorResponse(error) };
+    if (data) return { ...auth, canManage: false };
+  }
+  return { response: errorResponse(403, "Bạn không có quyền thực hiện thao tác này.") };
+}
+
 export async function requireAttendanceEmployee(): Promise<AuthResult> {
   const auth = await requireEmployee();
   if ("response" in auth) return auth;

@@ -276,3 +276,38 @@ describe("pay history of one employee", () => {
     expect((await history("00000000-0000-4000-8000-000000000000")).status).toBe(404);
   });
 });
+
+describe("a manager with the payroll.view permission", () => {
+  let manager: Person;
+
+  beforeAll(async () => {
+    manager = await createTestEmployee({ role: "manager", fullName: "Quản Lý Xem Lương" });
+  });
+
+  it("is refused without the permission", async () => {
+    await signInAs(manager);
+    expect((await payroll()).status).toBe(403);
+  });
+
+  it("reads the board, history and export but cannot change pay", async () => {
+    await db.from("manager_permissions").insert({ manager_id: manager.id, permission: "payroll.view" }).throwOnError();
+    await signInAs(manager);
+
+    const data = (await (await payroll()).json()) as PayrollMonth;
+    expect(data.canManage).toBe(false);
+    // The shifts sit at a branch this manager does not run, and still count.
+    expect(data.payslips.find((payslip) => payslip.employeeId === staff.id)?.totals.total).toBe(500_000);
+
+    const history = await callRoute(historyGET, {
+      url: `http://localhost/api/admin/payroll/employees/${staff.id}?year=2025`,
+      params: { id: staff.id },
+    });
+    expect(((await history.json()) as EmployeePayHistory).canManage).toBe(false);
+    expect((await callRoute(exportGET, { url: `http://localhost/api/admin/payroll/export?month=${month}` })).status).toBe(200);
+
+    expect((await reopen({ month, reason: "Thử" })).status).toBe(403);
+    expect((await addAdjustment({ employeeId: staff.id, month, amount: 1, note: "Thử" })).status).toBe(403);
+    expect((await addRate(staff.id, { employmentType: "part_time", amount: 1, effectiveFrom: "2031-01-01" })).status).toBe(403);
+  });
+});
+

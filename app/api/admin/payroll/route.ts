@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/app/api/_lib/auth";
+import { requirePayrollViewer } from "@/app/api/_lib/auth";
 import { dbErrorResponse, errorResponse } from "@/app/api/_lib/errors";
 import { computePayslips, loadPeriod, loadStoredPayslips } from "@/app/api/_lib/payroll";
 import { parseMonth } from "@/app/api/_lib/payroll-input";
@@ -11,9 +11,9 @@ const BLOCKING_LIMIT = 200;
 type BlockingRow = { id: string; work_date: string; status: ShiftStatus; employees: { full_name: string } | null };
 
 export async function GET(request: Request) {
-  const auth = await requireAdmin();
+  const auth = await requirePayrollViewer();
   if ("response" in auth) return auth.response;
-  const { supabase } = auth;
+  const { supabase, canManage } = auth;
 
   const searchParams = new URL(request.url).searchParams;
   const month = searchParams.get("month") ?? currentMonth();
@@ -85,6 +85,7 @@ export async function GET(request: Request) {
 
   const result: PayrollMonth = {
     month,
+    canManage,
     status: period.status,
     hasEnded: month < currentMonth(),
     versions,

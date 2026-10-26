@@ -91,6 +91,8 @@ export type BlockingShift = { id: string; employeeName: string; workDate: string
 
 export type PayrollMonth = {
   month: string;
+  // False for a manager who may only look: no closing, reopening or adjustments.
+  canManage: boolean;
   status: PayrollStatus;
   hasEnded: boolean;
   versions: PayrollVersion[];
@@ -111,6 +113,7 @@ export type PayHistoryMonth = {
 
 export type EmployeePayHistory = {
   employee: { id: string; fullName: string };
+  canManage: boolean;
   year: number;
   months: PayHistoryMonth[];
 };

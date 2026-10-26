@@ -45,9 +45,11 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
             · lịch sử
           </p>
           <h1 className="ui-title">{data?.employee.fullName ?? "Lương theo tháng"}</h1>
-          <Link href={`/admin/employees/${id}`} className="ui-link mt-1 inline-block text-sm">
-            Hồ sơ và mức lương
-          </Link>
+          {data?.canManage && (
+            <Link href={`/admin/employees/${id}`} className="ui-link mt-1 inline-block text-sm">
+              Hồ sơ và mức lương
+            </Link>
+          )}
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor={yearSelectId} className="ui-label">

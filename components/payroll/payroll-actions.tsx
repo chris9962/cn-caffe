@@ -121,8 +121,10 @@ export function PayrollActions({ payroll, onChanged }: PayrollActionsProps) {
           Tải Excel
         </a>
       )}
-      {payroll.status === "closed" && !isViewingOldVersion && <ReopenButton payroll={payroll} onChanged={onChanged} />}
-      {payroll.status !== "closed" && <CloseButton payroll={payroll} onChanged={onChanged} />}
+      {payroll.canManage && payroll.status === "closed" && !isViewingOldVersion && (
+        <ReopenButton payroll={payroll} onChanged={onChanged} />
+      )}
+      {payroll.canManage && payroll.status !== "closed" && <CloseButton payroll={payroll} onChanged={onChanged} />}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import ExcelJS from "exceljs";
-import { requireAdmin } from "@/app/api/_lib/auth";
+import { requirePayrollViewer } from "@/app/api/_lib/auth";
 import { errorResponse } from "@/app/api/_lib/errors";
 import { loadPeriod, loadStoredPayslips } from "@/app/api/_lib/payroll";
 import { parseMonth } from "@/app/api/_lib/payroll-input";
@@ -12,7 +12,7 @@ const hours = (minutes: number) => Math.round((minutes / 60) * 100) / 100;
 
 // Only a closed version is exported, so the file always matches what employees were paid.
 export async function GET(request: Request) {
-  const auth = await requireAdmin();
+  const auth = await requirePayrollViewer();
   if ("response" in auth) return auth.response;
 
   const searchParams = new URL(request.url).searchParams;

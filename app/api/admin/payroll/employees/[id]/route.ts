@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/app/api/_lib/auth";
+import { requirePayrollViewer } from "@/app/api/_lib/auth";
 import { isUuid } from "@/app/api/_lib/employee-input";
 import { dbErrorResponse, errorResponse } from "@/app/api/_lib/errors";
 import { computePayslips } from "@/app/api/_lib/payroll";
@@ -9,9 +9,9 @@ const NOT_FOUND = "Không tìm thấy nhân viên.";
 
 // One year of a person's pay: stored payslips for closed months, live estimates for open ones.
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireAdmin();
+  const auth = await requirePayrollViewer();
   if ("response" in auth) return auth.response;
-  const { supabase } = auth;
+  const { supabase, canManage } = auth;
 
   const { id } = await params;
   if (!isUuid(id)) return errorResponse(404, NOT_FOUND);
@@ -87,6 +87,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     if (payslip) history.push({ month, version: closedVersion.get(month) ?? null, payslip });
   }
 
-  const result: EmployeePayHistory = { employee: { id: employee.id, fullName: employee.full_name }, year, months: history };
+  const result: EmployeePayHistory = {
+    employee: { id: employee.id, fullName: employee.full_name },
+    canManage,
+    year,
+    months: history,
+  };
   return Response.json(result);
 }

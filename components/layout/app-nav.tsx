@@ -33,6 +33,9 @@ function getNavItems(user: CurrentUser): NavItem[] {
       { href: "/admin/monthly-config", label: "Cấu hình tháng", shortLabel: "Cấu hình", icon: "sliders" },
     );
   } else {
+    if (user.permissions.includes("payroll.view")) {
+      items.push({ href: "/admin/payroll", label: "Bảng lương", shortLabel: "Bảng lương", icon: "wallet" });
+    }
     items.push({ href: "/my-pay", label: "Lương của tôi", shortLabel: "Lương", icon: "wallet" });
   }
   return items;
