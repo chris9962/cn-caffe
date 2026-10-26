@@ -2,7 +2,32 @@ import { formatDate, formatTime } from "@/lib/date";
 import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employees/labels";
 import { formatHours, formatMoney, formatSignedMoney } from "@/lib/payroll/format";
 import { formatCheckOut } from "@/lib/shifts/labels";
-import type { Payslip } from "@/types/payroll";
+import type { Payslip, PayslipShift } from "@/types/payroll";
+
+type RateGroup = { rate: number; minutes: number; pay: number; firstDate: string; lastDate: string };
+
+// One line per hourly rate, so a raise in the middle of the month shows both rates and their hours.
+function groupByHourlyRate(shifts: PayslipShift[]): RateGroup[] {
+  const groups = new Map<number, RateGroup>();
+  for (const shift of shifts) {
+    if (shift.hourlyRate === null) continue;
+    const group = groups.get(shift.hourlyRate) ?? {
+      rate: shift.hourlyRate,
+      minutes: 0,
+      pay: 0,
+      firstDate: shift.workDate,
+      lastDate: shift.workDate,
+    };
+    group.minutes += shift.regularMinutes;
+    group.pay += shift.regularPay;
+    if (shift.workDate < group.firstDate) group.firstDate = shift.workDate;
+    if (shift.workDate > group.lastDate) group.lastDate = shift.workDate;
+    groups.set(shift.hourlyRate, group);
+  }
+  return [...groups.values()].sort((a, b) => a.firstDate.localeCompare(b.firstDate));
+}
+
+const shortDate = (date: string) => formatDate(date).slice(0, 5);
 
 function SummaryRow({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
@@ -19,6 +44,7 @@ function SummaryRow({ label, value, hint }: { label: string; value: string; hint
 export function PayslipView({ payslip }: { payslip: Payslip }) {
   const { totals, config } = payslip;
   const hasPartTime = payslip.shifts.some((shift) => shift.employmentType === "part_time");
+  const rateGroups = groupByHourlyRate(payslip.shifts);
   const unpaidShifts = payslip.shifts.filter((shift) => shift.employmentType === null).length;
 
   return (
@@ -26,14 +52,25 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
       <dl className="divide-y divide-[var(--line)] text-sm">
         {hasPartTime && (
           <>
-            <SummaryRow label="Giờ thường" value={formatHours(totals.regularMinutes)} />
-            <SummaryRow
-              label="Giờ tăng ca"
-              value={formatHours(totals.overtimeMinutes)}
-              hint={`Khung ${config.overtimeStart} – ${config.overtimeEnd}, ${formatMoney(config.overtimeHourlyRate)}/giờ`}
-            />
-            <SummaryRow label="Tiền giờ thường" value={formatMoney(totals.regularPay)} />
-            <SummaryRow label="Tiền tăng ca" value={formatMoney(totals.overtimePay)} />
+            {rateGroups.map((group) => (
+              <SummaryRow
+                key={group.rate}
+                label={`Giờ thường · ${formatMoney(group.rate)}/giờ`}
+                hint={`${formatHours(group.minutes)} · ca ${
+                  group.firstDate === group.lastDate
+                    ? shortDate(group.firstDate)
+                    : `${shortDate(group.firstDate)} – ${shortDate(group.lastDate)}`
+                }`}
+                value={formatMoney(group.pay)}
+              />
+            ))}
+            {totals.overtimeMinutes > 0 && (
+              <SummaryRow
+                label={`Giờ tăng ca · ${formatMoney(config.overtimeHourlyRate)}/giờ`}
+                hint={`${formatHours(totals.overtimeMinutes)} · khung ${config.overtimeStart} – ${config.overtimeEnd}`}
+                value={formatMoney(totals.overtimePay)}
+              />
+            )}
           </>
         )}
         {payslip.fixedSegments.map((segment) => (
@@ -96,6 +133,7 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
                   <th scope="col">Giờ</th>
                   <th scope="col">Thường</th>
                   <th scope="col">Tăng ca</th>
+                  <th scope="col">Mức lương</th>
                   <th scope="col">Tiền</th>
                 </tr>
               </thead>
@@ -109,6 +147,7 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
                     </td>
                     <td>{formatHours(shift.regularMinutes)}</td>
                     <td>{shift.overtimeMinutes > 0 ? formatHours(shift.overtimeMinutes) : "—"}</td>
+                    <td className="whitespace-nowrap">{shift.hourlyRate === null ? "—" : `${formatMoney(shift.hourlyRate)}/giờ`}</td>
                     <td className="whitespace-nowrap">
                       {shift.employmentType === "part_time"
                         ? formatMoney(shift.regularPay + shift.overtimePay)
