@@ -3,6 +3,9 @@ create extension if not exists pgtap with schema extensions;
 select plan(68);
 
 -- Real check outs create month rows that the config_for_month assertions assume are absent.
+-- A closed payroll month locks its config, so the periods go first; the rollback below restores everything.
+delete from public.payroll_versions;
+delete from public.payroll_periods;
 delete from public.monthly_configs;
 
 insert into auth.users (id, email) values

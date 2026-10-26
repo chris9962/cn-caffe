@@ -32,7 +32,7 @@ export function auditActionLabel(action: string) {
   return AUDIT_ACTION_LABELS.get(action) ?? action;
 }
 
-export function formatCheckOut(shift: Shift) {
+export function formatCheckOut(shift: Pick<Shift, "workDate" | "checkOutAt">) {
   if (!shift.checkOutAt) return "—";
   // A night shift ends on the next day, and the time alone would read as earlier than the check in.
   return toVietnamLocalInput(shift.checkOutAt).startsWith(shift.workDate)

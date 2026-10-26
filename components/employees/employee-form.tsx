@@ -137,7 +137,7 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
           ))}
         </select>
         <p className="ui-hint">
-          Hình thức làm việc dùng để xác định cách tính lương, không quyết định việc chấm công.
+          Dùng làm loại mặc định khi thêm mức lương. Cách tính lương theo từng mức lương, không quyết định việc chấm công.
         </p>
       </div>
       <div className="rounded-2xl border border-[var(--line)] bg-[var(--background)] p-4">

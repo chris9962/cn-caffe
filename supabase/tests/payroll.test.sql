@@ -60,7 +60,12 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-0000000000a1', 'role', 'authenticated')::text, true);
 
-select results_eq('select count(*)::int from public.payslips', array[3], 'admins read every payslip of every version');
+select results_eq(
+  $$select count(*)::int from public.payslips
+    where version_id in ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000f2')$$,
+  array[3],
+  'admins read every payslip of every version'
+);
 select throws_ok(
   $$insert into public.pay_adjustments (employee_id, month, amount, note)
     values ('00000000-0000-0000-0000-0000000000a3', '2024-05-01', 5, 'Muộn')$$,

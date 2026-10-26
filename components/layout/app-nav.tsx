@@ -7,7 +7,7 @@ import { AppMark } from "@/components/ui/app-mark";
 import { useMutation } from "@/hooks/use-mutation";
 import type { CurrentUser } from "@/types/employee";
 
-type NavIcon = "home" | "clock" | "calendar" | "review" | "people" | "branch";
+type NavIcon = "home" | "clock" | "calendar" | "review" | "people" | "branch" | "wallet" | "sliders";
 type NavItem = { href: string; label: string; shortLabel: string; icon: NavIcon };
 
 function getNavItems(user: CurrentUser): NavItem[] {
@@ -28,7 +28,11 @@ function getNavItems(user: CurrentUser): NavItem[] {
     items.push(
       { href: "/admin/employees", label: "Nhân viên", shortLabel: "Nhân sự", icon: "people" },
       { href: "/admin/branches", label: "Chi nhánh", shortLabel: "Chi nhánh", icon: "branch" },
+      { href: "/admin/payroll", label: "Bảng lương", shortLabel: "Lương", icon: "wallet" },
+      { href: "/admin/monthly-config", label: "Cấu hình tháng", shortLabel: "Cấu hình", icon: "sliders" },
     );
+  } else {
+    items.push({ href: "/my-pay", label: "Lương của tôi", shortLabel: "Lương", icon: "wallet" });
   }
   return items;
 }
@@ -70,6 +74,20 @@ const iconPaths: Record<NavIcon, ReactNode> = {
     <>
       <path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" />
       <circle cx="12" cy="9" r="2.5" />
+    </>
+  ),
+  wallet: (
+    <>
+      <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3" />
+      <path d="M4 7.5v10A2.5 2.5 0 0 0 6.5 20H20V8H6.5A2.5 2.5 0 0 1 4 5.5" />
+      <path d="M16 14h1.5" />
+    </>
+  ),
+  sliders: (
+    <>
+      <path d="M5 7h9M18 7h1M5 17h3M12 17h7" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="10" cy="17" r="2" />
     </>
   ),
 };
