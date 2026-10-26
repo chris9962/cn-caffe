@@ -128,7 +128,7 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
               type="number"
               inputMode="numeric"
               min={1}
-              step={1000}
+              step={1}
               required
               value={amount}
               onChange={(event) => setAmount(event.target.value)}

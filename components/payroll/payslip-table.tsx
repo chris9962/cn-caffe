@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { PayAdjustmentEditor } from "@/components/payroll/pay-adjustment-editor";
 import { PayslipView } from "@/components/payroll/payslip-view";
 import { isRowControlClick, RowDetailButton } from "@/components/ui/row-detail-button";
 import { SideDrawer } from "@/components/ui/side-drawer";
@@ -9,9 +10,15 @@ import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employees/labels";
 import { formatHours, formatMoney, formatMonthLabel, formatSignedMoney } from "@/lib/payroll/format";
 import type { Payslip } from "@/types/payroll";
 
-type PayslipTableProps = { month: string; payslips: Payslip[]; isEstimate: boolean };
+type PayslipTableProps = {
+  month: string;
+  payslips: Payslip[];
+  isEstimate: boolean;
+  // Set while the month is open; the drawer then lets the admin add and remove adjustments.
+  onAdjustmentsChanged: (() => void) | null;
+};
 
-export function PayslipTable({ month, payslips, isEstimate }: PayslipTableProps) {
+export function PayslipTable({ month, payslips, isEstimate, onAdjustmentsChanged }: PayslipTableProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = payslips.find((payslip) => payslip.employeeId === selectedId) ?? null;
   const sum = (pick: (payslip: Payslip) => number) => payslips.reduce((total, payslip) => total + pick(payslip), 0);
@@ -106,7 +113,14 @@ export function PayslipTable({ month, payslips, isEstimate }: PayslipTableProps)
           )
         }
       >
-        {selected && <PayslipView payslip={selected} />}
+        {selected && (
+          <div className="flex flex-col gap-6">
+            <PayslipView payslip={selected} />
+            {onAdjustmentsChanged && (
+              <PayAdjustmentEditor key={selected.employeeId} payslip={selected} onChanged={onAdjustmentsChanged} />
+            )}
+          </div>
+        )}
       </SideDrawer>
     </>
   );

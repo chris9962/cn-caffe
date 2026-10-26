@@ -90,7 +90,7 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
             type="number"
             inputMode="numeric"
             min={0}
-            step={1000}
+            step={1}
             required
             value={overtimeHourlyRate}
             onChange={(event) => setOvertimeHourlyRate(event.target.value)}

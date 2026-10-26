@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { BlockingShiftList } from "@/components/payroll/blocking-shift-list";
-import { PayAdjustmentSection } from "@/components/payroll/pay-adjustment-section";
 import { PayrollActions } from "@/components/payroll/payroll-actions";
-import { PayrollVersionList } from "@/components/payroll/payroll-version-list";
+import { PayrollVersionSelect } from "@/components/payroll/payroll-version-select";
 import { PayslipTable } from "@/components/payroll/payslip-table";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
@@ -12,6 +11,11 @@ import { MonthPicker } from "@/components/ui/month-picker";
 import { useFetch } from "@/hooks/use-fetch";
 import { currentMonth } from "@/lib/date";
 import type { PayrollMonth } from "@/types/payroll";
+
+// An open month offers its estimate plus every closed version; a closed month offers its versions.
+function hasVersionChoice(payroll: PayrollMonth) {
+  return payroll.versions.length + (payroll.status === "closed" ? 0 : 1) > 1;
+}
 
 export function PayrollBoard() {
   const [month, setMonth] = useState(() => currentMonth());
@@ -45,6 +49,12 @@ export function PayrollBoard() {
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <MonthPicker value={month} onChange={setMonth} />
+          {payroll && hasVersionChoice(payroll) && (
+            <PayrollVersionSelect
+              payroll={payroll}
+              onChange={(next) => setPicked(next === null ? null : { month: payroll.month, version: next })}
+            />
+          )}
           {payroll && <PayrollActions payroll={payroll} onChanged={handleChanged} />}
         </div>
       </div>
@@ -56,23 +66,12 @@ export function PayrollBoard() {
       ) : (
         <>
           {payroll.status !== "closed" && payroll.blockingShifts.length > 0 && <BlockingShiftList shifts={payroll.blockingShifts} />}
-          <PayslipTable month={payroll.month} payslips={payroll.payslips} isEstimate={payroll.shownVersion === null} />
-          <div className="grid items-start gap-6 lg:grid-cols-2">
-            <PayAdjustmentSection
-              key={payroll.month}
-              month={payroll.month}
-              isLocked={payroll.status !== "open"}
-              onChanged={reload}
-            />
-            {payroll.versions.length > 0 && (
-              <PayrollVersionList
-                versions={payroll.versions}
-                shownVersion={payroll.shownVersion}
-                onShow={(next) => setPicked({ month: payroll.month, version: next })}
-                onShowCurrent={version === null ? null : () => setPicked(null)}
-              />
-            )}
-          </div>
+          <PayslipTable
+            month={payroll.month}
+            payslips={payroll.payslips}
+            isEstimate={payroll.shownVersion === null}
+            onAdjustmentsChanged={payroll.status === "open" && payroll.shownVersion === null ? reload : null}
+          />
         </>
       )}
     </div>
