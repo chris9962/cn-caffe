@@ -43,19 +43,18 @@ export function LoginScreen() {
           <AppMark size="large" inverse />
           <div>
             <p className="font-[family-name:var(--font-display)] text-xl font-medium">Cỏ Ngọt</p>
-            <p className="text-xs text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">cà phê · sương sớm · đồi thông</p>
+            <p className="text-xs text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">Chấm công · Tính lương</p>
           </div>
         </div>
 
         <div className="relative z-10 mt-12 max-w-xl lg:my-auto">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--bloom)]">Một góc Đà Lạt nhỏ</p>
           <h1 className="font-[family-name:var(--font-display)] text-[clamp(2.3rem,8vw,4.2rem)] leading-[1.08] font-medium tracking-[-0.02em]">
-            Sương còn trên đồi,
+            Chấm công và xem lương
             <br />
-            <em className="font-normal">cà phê đã thơm rồi.</em>
+            <em className="font-normal">ngay trên điện thoại.</em>
           </h1>
           <p className="mt-5 max-w-md text-sm leading-7 text-[color-mix(in_oklab,var(--surface)_78%,transparent)] sm:text-base">
-            Ghé quán, mỉm cười một tấm ảnh nhỏ — phần còn lại để Cỏ Ngọt ghi nhớ giúp bạn.
+            Vào ca bằng một ảnh và vị trí. Xem lại ca đã làm và lương từng tháng.
           </p>
         </div>
       </section>
@@ -63,15 +62,14 @@ export function LoginScreen() {
       <section className="relative -mt-10 min-h-[calc(100dvh-21rem)] rounded-t-[2.25rem] bg-[var(--background)] px-5 pt-10 pb-10 sm:px-8 lg:mt-0 lg:flex lg:min-h-dvh lg:items-center lg:rounded-none lg:px-[clamp(3rem,8vw,8rem)]">
         <div className="mx-auto w-full max-w-md lg:mx-0">
           <div className="mb-8">
-            <p className="ui-eyebrow mb-2">Chào bạn</p>
             <h2 className="font-[family-name:var(--font-display)] text-3xl font-medium tracking-[-0.02em] sm:text-4xl">
-              Mời bạn vào quán
+              Đăng nhập
             </h2>
-            <p className="ui-lead mt-3">Đăng nhập bằng số điện thoại và mật khẩu quản lý đã gửi bạn.</p>
+            <p className="ui-lead mt-3">Dùng số điện thoại và mật khẩu quản lý cung cấp.</p>
           </div>
           <LoginForm />
           <p className="mt-8 text-center text-xs leading-5 text-[var(--muted)] lg:text-left">
-            Không vào được? Nhắn quản lý một tiếng nhé.
+            Quên mật khẩu? Liên hệ quản lý để đặt lại.
           </p>
         </div>
       </section>

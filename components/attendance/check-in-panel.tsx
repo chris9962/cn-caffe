@@ -78,11 +78,9 @@ function resultMessage(mode: Mode, shift: Shift) {
   const action = mode === "check-out" ? "check out" : "check in";
   const done = `Đã ${action} lúc ${formatTime(shift.checkOutAt ?? shift.checkInAt)}`;
   if (shift.failReasons.length > 0) {
-    return `${done}. Quản lý sẽ xem lại giúp bạn: ${formatFailReasons(shift.failReasons)}.`;
+    return `${done}, chờ quản lý duyệt: ${formatFailReasons(shift.failReasons)}.`;
   }
-  return mode === "check-out"
-    ? `${done}. Cảm ơn bạn, về nghỉ ngơi thật ấm nhé.`
-    : `${done}. Chúc bạn một ca thật êm.`;
+  return `${done}.`;
 }
 
 function AttendanceIcon({ name }: { name: "arrow" | "pin" | "camera" | "check" }) {
@@ -140,7 +138,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
           <span suppressHydrationWarning className="text-sm capitalize text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">{todayLabel}</span>
         </div>
 
-        <p className="relative text-sm text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">Bạn ghé quán lúc</p>
+        <p className="relative text-sm text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">Bắt đầu lúc</p>
         <p className="relative mt-1 font-[family-name:var(--font-display)] text-[clamp(3.25rem,15vw,5.5rem)] leading-none font-medium tracking-[-0.03em]">
           {formatTime(openShift.checkInAt)}
         </p>
@@ -155,7 +153,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
             onClick={() => onStart("check-out")}
             className="ui-btn min-h-14 w-full bg-[var(--surface)] text-base text-[var(--accent-strong)] hover:bg-[var(--accent-soft)]"
           >
-            Xong ca rồi, check out
+            Kết thúc ca
             <span className="ml-2"><AttendanceIcon name="arrow" /></span>
           </button>
           <button type="button" onClick={() => onStart("start-new")} className={secondaryButtonClass}>
@@ -176,13 +174,13 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
           {timeLabel}
         </p>
         <div className="mt-8 mb-7">
-          <h2 className="ui-heading text-2xl">Hôm nay mình bắt đầu nhé?</h2>
+          <h2 className="ui-heading text-2xl">Sẵn sàng vào ca?</h2>
           <p className="ui-lead mt-1">
-            Bật vị trí, rồi cười một chút cho tấm ảnh vào ca.
+            Bật vị trí và chuẩn bị chụp một ảnh xác nhận.
           </p>
         </div>
         <button type="button" onClick={() => onStart("check-in")} className={primaryButtonClass}>
-          Vào ca thôi
+          Vào ca
           <span className="ml-2"><AttendanceIcon name="arrow" /></span>
         </button>
       </div>
@@ -280,12 +278,12 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
     onDone({ isSuccess: true, message: resultMessage(mode, shift) });
   }
 
-  const title = mode === "check-out" ? "Tạm biệt ca hôm nay" : "Ghé quán hôm nay";
+  const title = mode === "check-out" ? "Xác nhận kết thúc ca" : "Xác nhận vào ca";
 
   return (
     <section className="ui-card rounded-[2rem]">
       <div className="mb-6">
-        <p className="ui-eyebrow mb-2">Một chút nữa thôi</p>
+        <p className="ui-eyebrow mb-2">Chấm công</p>
         <h2 className="ui-heading text-2xl">{title}</h2>
       </div>
       <AttendanceProgress step={step} />
@@ -295,8 +293,8 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
           <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
             <AttendanceIcon name="pin" />
           </span>
-          <p className="font-semibold">Đang tìm xem bạn ở đâu</p>
-          <p className="ui-lead mt-1 max-w-xs text-sm">Chờ mình vài giây nhé.</p>
+          <p className="font-semibold">Đang lấy vị trí</p>
+          <p className="ui-lead mt-1 max-w-xs text-sm">Giữ trang này mở trong vài giây.</p>
         </div>
       )}
 
@@ -305,8 +303,8 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
           <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent)] text-[var(--surface)]">
             <AttendanceIcon name="check" />
           </span>
-          <p className="font-semibold">Đang ghi lại ca của bạn</p>
-          <p className="ui-lead mt-1 text-sm">Ảnh và vị trí đang được gửi đi an toàn.</p>
+          <p className="font-semibold">Đang ghi nhận ca</p>
+          <p className="ui-lead mt-1 text-sm">Ảnh và vị trí đang được gửi.</p>
         </div>
       )}
 
@@ -319,11 +317,11 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
           >
             <span className="mt-0.5"><AttendanceIcon name="pin" /></span>
             <div>
-              <p className="font-semibold">{location ? "Đã thấy bạn rồi" : "Chưa tìm được vị trí"}</p>
+              <p className="font-semibold">{location ? "Đã lấy được vị trí" : "Không lấy được vị trí"}</p>
               <p className="mt-0.5 leading-5">
                 {location
                   ? `Độ chính xác khoảng ${Math.round(location.accuracyM)} m.`
-                  : "Không sao, bạn cứ tiếp tục — quản lý sẽ xem lại ca này."}
+                  : "Bạn vẫn tiếp tục được, ca này sẽ chờ quản lý duyệt."}
               </p>
             </div>
           </div>
@@ -332,9 +330,9 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
             (branches.error ? (
               <ErrorMessage message={branches.error} />
             ) : branches.data === null ? (
-              <Loading label="Đang tìm quán gần bạn..." />
+              <Loading label="Đang tìm chi nhánh gần bạn..." />
             ) : branches.data.length === 0 ? (
-              <ErrorMessage message="Chưa có chi nhánh nào. Bạn nhắn quản lý giúp nhé." />
+              <ErrorMessage message="Chưa có chi nhánh nào. Bạn báo quản lý." />
             ) : (
               <BranchPicker branches={branches.data} value={branchId} onChange={setChosenBranchId} />
             ))}
@@ -357,7 +355,7 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
               onClick={onCancel}
               className={`flex min-h-12 w-full items-center justify-center rounded-full px-4 text-sm font-semibold text-[var(--muted)] hover:bg-[var(--surface-strong)] ${focusClass}`}
             >
-              Để sau
+              Huỷ
             </button>
           </div>
         </div>
@@ -409,7 +407,7 @@ export function CheckInPanel() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <header>
-        <p className="ui-eyebrow mb-2">Cỏ Ngọt · hôm nay</p>
+        <p className="ui-eyebrow mb-2">Hôm nay</p>
         <h1
           ref={headingRef}
           tabIndex={-1}
@@ -418,7 +416,7 @@ export function CheckInPanel() {
         >
           {greeting(now)}
         </h1>
-        <p className="ui-lead mt-2">Một tấm ảnh, một chút vị trí — vậy là quán biết bạn đã tới.</p>
+        <p className="ui-lead mt-2">Chụp một ảnh và bật vị trí để vào ca.</p>
       </header>
 
       {outcome && (
@@ -437,7 +435,7 @@ export function CheckInPanel() {
         <ErrorMessage message={error} />
       ) : !data ? (
         <div className="ui-card rounded-[2rem]">
-          <Loading label="Đang xem ca của bạn..." />
+          <Loading label="Đang kiểm tra ca hiện tại..." />
         </div>
       ) : activeMode ? (
         <AttendanceFlow key={flowKey} mode={activeMode} onCancel={handleCancel} onDone={handleDone} />
@@ -447,7 +445,7 @@ export function CheckInPanel() {
 
       {!activeMode && data && (
         <p className="text-center text-xs leading-5 text-[var(--muted)]">
-          Giờ được ghi theo giờ Việt Nam.
+          Thời gian được ghi theo giờ Việt Nam.
         </p>
       )}
     </div>

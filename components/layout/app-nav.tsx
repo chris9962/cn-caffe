@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppMark } from "@/components/ui/app-mark";
+import { ROLE_LABELS } from "@/lib/employees/labels";
 import { useMutation } from "@/hooks/use-mutation";
 import type { CurrentUser } from "@/types/employee";
 
@@ -144,7 +145,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
         <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0 text-right">
             <p className="truncate text-sm font-semibold">{user.fullName}</p>
-            <p className="text-xs text-[var(--muted)]">Chúc bạn một ngày êm</p>
+            <p className="text-xs text-[var(--muted)]">{ROLE_LABELS[user.role]}</p>
           </div>
           <button
             type="button"
@@ -163,7 +164,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
           <AppMark />
           <span>
             <span className="block font-[family-name:var(--font-display)] text-xl font-medium">Cỏ Ngọt</span>
-            <span className="block text-xs text-[var(--muted)]">sổ ca của quán</span>
+            <span className="block text-xs text-[var(--muted)]">Chấm công · Tính lương</span>
           </span>
         </Link>
 
@@ -200,7 +201,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
             disabled={isPending}
             className="ui-btn-quiet w-full"
           >
-            {isPending ? "Đang khép cửa..." : "Đăng xuất"}
+            {isPending ? "Đang đăng xuất..." : "Đăng xuất"}
           </button>
         </div>
       </aside>

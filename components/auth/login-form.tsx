@@ -109,7 +109,7 @@ export function LoginForm() {
         disabled={isPending}
         className="ui-btn min-h-14 w-full text-base"
       >
-        {isPending ? "Đang mở cửa..." : "Vào quán"}
+        {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
       </button>
     </form>
   );

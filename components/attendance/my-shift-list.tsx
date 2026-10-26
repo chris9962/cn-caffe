@@ -26,11 +26,11 @@ export function MyShiftList() {
     <div className="flex flex-col gap-5">
       <MonthPicker value={month} onChange={setMonth} />
       {isLoading ? (
-        <Loading label="Đang lật sổ ca..." />
+        <Loading label="Đang tải..." />
       ) : error ? (
         <ErrorMessage message={error} />
       ) : data?.length === 0 ? (
-        <p className="ui-card ui-lead text-center">Tháng này chưa có ca nào. Hẹn gặp bạn ở quán nhé.</p>
+        <p className="ui-card ui-lead text-center">Chưa có ca nào trong tháng này.</p>
       ) : (
         data && (
           <ul aria-label="Danh sách ca của tôi" className="flex flex-col gap-3">

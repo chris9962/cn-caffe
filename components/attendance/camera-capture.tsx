@@ -79,11 +79,11 @@ export function CameraCapture({ onCapture }: CameraCaptureProps) {
     <div className="flex flex-col gap-3">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="font-semibold">Một tấm ảnh nhỏ</p>
-          <p className="ui-hint mt-0.5">Nhìn vào camera và cười một chút nhé.</p>
+          <p className="font-semibold">Ảnh xác nhận</p>
+          <p className="ui-hint mt-0.5">Đưa khuôn mặt vào giữa khung hình.</p>
         </div>
         {previewUrl && (
-          <span className="rounded-full bg-[var(--success-soft)] px-3 py-1 text-xs font-semibold text-[var(--success)]">Xinh rồi</span>
+          <span className="rounded-full bg-[var(--success-soft)] px-3 py-1 text-xs font-semibold text-[var(--success)]">Đã chụp</span>
         )}
       </div>
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] bg-[#33493a]">
