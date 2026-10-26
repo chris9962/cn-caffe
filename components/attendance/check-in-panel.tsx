@@ -7,7 +7,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
-import { formatTime } from "@/lib/date";
+import { formatDate, formatTime, toVietnamLocalInput } from "@/lib/date";
 import { formatFailReasons } from "@/lib/shifts/labels";
 import type { Branch, BranchWithDistance } from "@/types/branch";
 import type { Shift } from "@/types/shift";
@@ -18,7 +18,6 @@ const LOCATION_GIVE_UP_MS = 20000;
 
 const focusClass = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
 const primaryButtonClass = "ui-btn min-h-14 w-full text-base";
-const secondaryButtonClass = `flex min-h-12 w-full items-center justify-center rounded-full border border-[color-mix(in_oklab,var(--surface)_35%,transparent)] px-4 text-sm font-semibold transition-colors hover:bg-[color-mix(in_oklab,var(--surface)_10%,transparent)] ${focusClass}`;
 
 const todayFormatter = new Intl.DateTimeFormat("vi-VN", {
   timeZone: "Asia/Ho_Chi_Minh",
@@ -74,13 +73,15 @@ function requestLocation(): Promise<Location | null> {
   });
 }
 
-function resultMessage(mode: Mode, shift: Shift) {
-  const action = mode === "check-out" ? "check out" : "check in";
-  const done = `Đã ${action} lúc ${formatTime(shift.checkOutAt ?? shift.checkInAt)}`;
-  if (shift.failReasons.length > 0) {
-    return `${done}, chờ quản lý duyệt: ${formatFailReasons(shift.failReasons)}.`;
-  }
-  return `${done}.`;
+const shortDate = (date: string) => formatDate(date).slice(0, 5);
+
+function resultMessage(mode: Mode, shift: Shift, unfinishedDate: string | null) {
+  const action = mode === "check-out" ? "Đã check out" : mode === "start-new" ? "Đã vào ca mới" : "Đã check in";
+  const done = `${action} lúc ${formatTime(shift.checkOutAt ?? shift.checkInAt)}`;
+  const review = shift.failReasons.length > 0 ? `, chờ quản lý duyệt: ${formatFailReasons(shift.failReasons)}` : "";
+  const unfinished =
+    mode === "start-new" && unfinishedDate ? ` Ca ngày ${shortDate(unfinishedDate)} chờ quản lý nhập giờ ra.` : "";
+  return `${done}${review}.${unfinished}`;
 }
 
 function AttendanceIcon({ name }: { name: "arrow" | "pin" | "camera" | "check" }) {
@@ -125,6 +126,37 @@ type AttendanceOverviewProps = {
 function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps) {
   const timeLabel = now ? clockFormatter.format(now) : "--:--";
   const todayLabel = now ? todayFormatter.format(now) : "Hôm nay";
+  const today = now ? toVietnamLocalInput(now.toISOString()).slice(0, 10) : null;
+
+  // A shift still open from an earlier day almost always means the employee forgot to check out.
+  if (openShift && today !== null && openShift.workDate < today) {
+    const day = shortDate(openShift.workDate);
+    return (
+      <section className="ui-card flex flex-col gap-5 rounded-[2rem] border-[var(--bloom)] bg-[var(--bloom-soft)]">
+        <div className="flex flex-col gap-1">
+          <p className="ui-eyebrow text-[var(--warning)]">Chưa kết thúc ca</p>
+          <h2 className="ui-heading text-2xl">Ca ngày {day} chưa kết thúc</h2>
+          <p className="text-sm text-[var(--muted)]">
+            Bắt đầu lúc {formatTime(openShift.checkInAt)}, {day}
+            {openShift.branchName ? ` · ${openShift.branchName}` : ""}
+          </p>
+        </div>
+        <p className="text-sm leading-6">
+          Nếu ca đó đã xong, bấm <strong>Vào ca mới</strong>. Quản lý sẽ nhập giờ ra cho ca {day}; ca đó chưa được tính lương
+          cho tới khi có giờ ra.
+        </p>
+        <div className="flex flex-col gap-3">
+          <button type="button" onClick={() => onStart("start-new")} className={primaryButtonClass}>
+            Vào ca mới
+            <span className="ml-2"><AttendanceIcon name="arrow" /></span>
+          </button>
+          <button type="button" onClick={() => onStart("check-out")} className="ui-btn-quiet min-h-12 w-full">
+            Kết thúc ca {day} bây giờ
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   if (openShift) {
     return (
@@ -147,7 +179,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
           <span className="font-semibold">{openShift.branchName ?? "Chưa có tên chi nhánh"}</span>
         </div>
 
-        <div className="relative mt-8 flex flex-col gap-3 sm:flex-row">
+        <div className="relative mt-8">
           <button
             type="button"
             onClick={() => onStart("check-out")}
@@ -155,9 +187,6 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
           >
             Kết thúc ca
             <span className="ml-2"><AttendanceIcon name="arrow" /></span>
-          </button>
-          <button type="button" onClick={() => onStart("start-new")} className={secondaryButtonClass}>
-            Quên check out ca trước
           </button>
         </div>
       </section>
@@ -218,11 +247,13 @@ function AttendanceProgress({ step }: { step: Step }) {
 
 type AttendanceFlowProps = {
   mode: Mode;
+  // The work date of the shift left open, named in the message after starting a new shift.
+  unfinishedDate: string | null;
   onCancel: () => void;
   onDone: (outcome: Outcome) => void;
 };
 
-function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
+function AttendanceFlow({ mode, unfinishedDate, onCancel, onDone }: AttendanceFlowProps) {
   const { mutate } = useMutation<Shift>();
   const [step, setStep] = useState<Step>("locating");
   const [location, setLocation] = useState<Location | null>(null);
@@ -275,10 +306,10 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
       onDone({ isSuccess: false, message: (error as Error).message });
       return;
     }
-    onDone({ isSuccess: true, message: resultMessage(mode, shift) });
+    onDone({ isSuccess: true, message: resultMessage(mode, shift, unfinishedDate) });
   }
 
-  const title = mode === "check-out" ? "Xác nhận kết thúc ca" : "Xác nhận vào ca";
+  const title = mode === "check-out" ? "Xác nhận kết thúc ca" : mode === "start-new" ? "Vào ca mới" : "Xác nhận vào ca";
 
   return (
     <section className="ui-card rounded-[2rem]">
@@ -438,7 +469,13 @@ export function CheckInPanel() {
           <Loading label="Đang kiểm tra ca hiện tại..." />
         </div>
       ) : activeMode ? (
-        <AttendanceFlow key={flowKey} mode={activeMode} onCancel={handleCancel} onDone={handleDone} />
+        <AttendanceFlow
+          key={flowKey}
+          mode={activeMode}
+          unfinishedDate={data.shift?.workDate ?? null}
+          onCancel={handleCancel}
+          onDone={handleDone}
+        />
       ) : (
         <AttendanceOverview now={now} openShift={data.shift} onStart={handleStart} />
       )}
