@@ -11,6 +11,13 @@ const DB_ERRORS = new Map<string, { status: number; message: string }>([
   ["overlap", { status: 409, message: "Ca này trùng giờ với một ca khác của nhân viên." }],
   ["not_a_manager", { status: 400, message: "Nhân viên này không có vai trò quản lý." }],
   ["invalid_decision", { status: 400, message: "Thao tác không hợp lệ." }],
+  ["invalid_month", { status: 400, message: "Tháng không hợp lệ." }],
+  ["month_closed", { status: 409, message: "Tháng này đã chốt lương nên không sửa được. Mở lại tháng trước khi sửa." }],
+  ["month_not_ended", { status: 409, message: "Tháng chưa kết thúc nên chưa chốt được." }],
+  ["blocking_shifts", { status: 409, message: "Tháng còn ca đang làm, thiếu check out hoặc chờ duyệt." }],
+  ["not_closing", { status: 409, message: "Tháng này không ở trạng thái đang chốt. Bạn thử chốt lại." }],
+  ["month_not_closed", { status: 409, message: "Tháng này chưa chốt." }],
+  ["reason_required", { status: 400, message: "Bạn cần nhập lý do mở lại tháng." }],
 ]);
 
 export function errorResponse(status: number, message: string): Response {

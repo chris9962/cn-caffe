@@ -13,13 +13,13 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000005', 't@test.local'),
   ('00000000-0000-0000-0000-000000000006', 'u@test.local');
 
-insert into public.employees (id, full_name, phone, role) values
-  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84000000001', 'admin'),
-  ('00000000-0000-0000-0000-000000000002', 'Manager M', '84000000002', 'manager'),
-  ('00000000-0000-0000-0000-000000000003', 'Manager N', '84000000003', 'manager'),
-  ('00000000-0000-0000-0000-000000000004', 'Staff S', '84000000004', 'staff'),
-  ('00000000-0000-0000-0000-000000000005', 'Staff T', '84000000005', 'staff'),
-  ('00000000-0000-0000-0000-000000000006', 'Staff U', '84000000006', 'staff');
+insert into public.employees (id, full_name, phone, role, requires_attendance) values
+  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84000000001', 'admin', false),
+  ('00000000-0000-0000-0000-000000000002', 'Manager M', '84000000002', 'manager', true),
+  ('00000000-0000-0000-0000-000000000003', 'Manager N', '84000000003', 'manager', true),
+  ('00000000-0000-0000-0000-000000000004', 'Staff S', '84000000004', 'staff', true),
+  ('00000000-0000-0000-0000-000000000005', 'Staff T', '84000000005', 'staff', true),
+  ('00000000-0000-0000-0000-000000000006', 'Staff U', '84000000006', 'staff', true);
 
 insert into public.branches (id, name, latitude, longitude, radius_m, is_active) values
   ('00000000-0000-0000-0000-0000000000b1', 'B1', 10.7769, 106.7009, 100, true),
@@ -45,7 +45,7 @@ from (values
   ('00000000-0000-0000-0000-0000000000c3', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b1', 'missing_checkout', interval '28 days', null, '{location_unavailable}'),
   ('00000000-0000-0000-0000-0000000000c4', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b2', 'pending_review', interval '27 days', interval '4 hours', '{outside_radius}'),
   ('00000000-0000-0000-0000-0000000000c5', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000b1', 'pending_review', interval '26 days', interval '4 hours', '{outside_radius}'),
-  ('00000000-0000-0000-0000-0000000000c6', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000000b1', 'pending_review', interval '25 days', interval '4 hours', '{outside_radius}'),
+  ('00000000-0000-0000-0000-0000000000c6', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000b1', 'pending_review', interval '25 days', interval '4 hours', '{outside_radius}'),
   ('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b1', 'missing_checkout', interval '20 days', null, '{}'),
   ('00000000-0000-0000-0000-0000000000e2', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b1', 'pending_review', interval '19 days', interval '4 hours', '{outside_radius}'),
   ('00000000-0000-0000-0000-0000000000e3', '00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-0000000000b1', 'rejected', interval '18 days', interval '4 hours', '{}'),
@@ -407,7 +407,7 @@ select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-
 select is(
   (select status from public.review_shift('00000000-0000-0000-0000-0000000000c6', 'approve')),
   'valid'::public.shift_status,
-  'admin can review own shift'
+  'admin can review a manager''s shift (admins have no shifts of their own)'
 );
 select lives_ok(
   $$insert into public.monthly_configs (month, overtime_hourly_rate) values ('2027-01-01', 30000)$$,

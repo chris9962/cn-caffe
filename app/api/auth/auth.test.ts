@@ -66,6 +66,8 @@ describe("GET /api/me", () => {
       fullName: "Nguyễn Văn A",
       phone: user.phone,
       role: "staff",
+      employmentType: "part_time",
+      requiresAttendance: true,
       isActive: true,
       endDate: null,
       mustChangePassword: true,

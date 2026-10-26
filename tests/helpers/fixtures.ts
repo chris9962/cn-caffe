@@ -96,6 +96,14 @@ export async function grantManagerAccess(
     .throwOnError();
 }
 
+// Closed months refuse shift and adjustment deletes, so a test that closes a month reopens it here first.
+export async function cleanupPayrollMonth(monthDate: string): Promise<void> {
+  await admin.from("payroll_versions").delete().eq("month", monthDate).throwOnError();
+  await admin.from("payroll_periods").delete().eq("month", monthDate).throwOnError();
+  await admin.from("monthly_configs").delete().eq("month", monthDate).throwOnError();
+  await admin.from("audit_logs").delete().eq("row_id", monthDate).throwOnError();
+}
+
 // Deletes children before parents because shifts and manager rows reference employees and branches.
 export async function cleanupFixtures(): Promise<void> {
   const employeeIds = createdEmployeeIds.splice(0);
@@ -120,6 +128,9 @@ export async function cleanupFixtures(): Promise<void> {
   await admin.from("audit_logs").delete().in("actor_id", employeeIds).throwOnError();
   await admin.from("audit_logs").delete().in("row_id", auditRowIds).throwOnError();
   await admin.from("shifts").delete().in("employee_id", employeeIds).throwOnError();
+  await admin.from("payslips").delete().in("employee_id", employeeIds).throwOnError();
+  await admin.from("pay_adjustments").delete().in("employee_id", employeeIds).throwOnError();
+  await admin.from("pay_rates").delete().in("employee_id", employeeIds).throwOnError();
   await admin.from("manager_branches").delete().in("manager_id", employeeIds).throwOnError();
   await admin.from("manager_permissions").delete().in("manager_id", employeeIds).throwOnError();
   await admin.from("employees").delete().in("id", employeeIds).throwOnError();
