@@ -7,10 +7,5 @@ export const instant = false;
 export const metadata: Metadata = { title: "Quản lý ca" };
 
 export default function ManageShiftsPage() {
-  return (
-    <div className="flex flex-col gap-4">
-      <h1 className="ui-title">Quản lý ca</h1>
-      <ShiftBoard />
-    </div>
-  );
+  return <ShiftBoard />;
 }

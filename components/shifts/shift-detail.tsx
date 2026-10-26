@@ -144,7 +144,7 @@ function ShiftView({ user, shift, auditLogs, headingRef, onStart, onDone }: Shif
           <dt className="ui-hint">Lý do</dt>
           <dd>{shift.failReasons.length > 0 ? formatFailReasons(shift.failReasons) : "—"}</dd>
           <dt className="ui-hint">Nguồn</dt>
-          <dd>{shift.source === "manual" ? "Nhập tay" : "Check in"}</dd>
+          <dd>{shift.source === "manual" ? "Thủ công" : "Check in"}</dd>
         </dl>
       </div>
       <CheckPointSection

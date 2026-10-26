@@ -20,7 +20,7 @@ const AUDIT_ACTION_LABELS = new Map<string, string>([
   ["shift.approved", "Duyệt"],
   ["shift.rejected", "Từ chối"],
   ["shift.edited", "Sửa giờ"],
-  ["shift.created_manually", "Thêm bằng tay"],
+  ["shift.created_manually", "Thêm thủ công"],
   ["shift.abandoned", "Bắt đầu ca mới khi chưa check out"],
 ]);
 
