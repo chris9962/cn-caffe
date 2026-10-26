@@ -3,8 +3,10 @@ import {
   duplicatePhoneResponse,
   isDuplicateAuthEmail,
   parseFullName,
+  parseEmploymentType,
   parsePassword,
   parsePhone,
+  parseRequiresAttendance,
   parseRole,
   readJsonObject,
 } from "@/app/api/_lib/employee-input";
@@ -41,6 +43,16 @@ export async function POST(request: Request) {
   if (role instanceof Response) return role;
   const password = parsePassword(body.password);
   if (password instanceof Response) return password;
+  const employmentType = parseEmploymentType(body.employmentType ?? "part_time");
+  if (employmentType instanceof Response) return employmentType;
+  const attendanceAllowed = role !== "admin" && role !== "director";
+  const requiresAttendance = parseRequiresAttendance(
+    body.requiresAttendance ?? attendanceAllowed,
+  );
+  if (requiresAttendance instanceof Response) return requiresAttendance;
+  if (!attendanceAllowed && requiresAttendance) {
+    return errorResponse(400, "Admin và giám đốc không chấm công.");
+  }
 
   const adminAuth = createAdminClient().auth.admin;
   const { data: created, error: createError } = await adminAuth.createUser({
@@ -56,7 +68,14 @@ export async function POST(request: Request) {
 
   const { data: row, error } = await auth.supabase
     .from("employees")
-    .insert({ id: created.user.id, full_name: fullName, phone, role })
+    .insert({
+      id: created.user.id,
+      full_name: fullName,
+      phone,
+      role,
+      employment_type: employmentType,
+      requires_attendance: attendanceAllowed && requiresAttendance,
+    })
     .select(EMPLOYEE_COLUMNS)
     .single();
   if (error) {

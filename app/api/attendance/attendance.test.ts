@@ -344,4 +344,21 @@ describe("authentication", () => {
     expect((await current()).status).toBe(401);
     expect((await mine()).status).toBe(401);
   });
+
+  it("forbids all attendance routes when attendance is not required", async () => {
+    const employee = await createTestEmployee({ requiresAttendance: false });
+    const branch = await createTestBranch();
+    await signInAs(employee);
+
+    for (const response of [
+      await checkIn({ branchId: branch.id, ...AT_BRANCH }),
+      await checkOut(AT_BRANCH),
+      await current(),
+      await mine(),
+    ]) {
+      expect(response.status).toBe(403);
+      expect((await response.json()).error).toBe("Tài khoản này không cần chấm công.");
+    }
+    expect(await photoCount(employee.id)).toBe(0);
+  });
 });

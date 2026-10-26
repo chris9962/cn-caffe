@@ -1,8 +1,8 @@
-import { requireEmployee } from "@/app/api/_lib/auth";
+import { requireAttendanceEmployee } from "@/app/api/_lib/auth";
 import { findOpenShift } from "@/app/api/_lib/shifts";
 
 export async function GET() {
-  const auth = await requireEmployee();
+  const auth = await requireAttendanceEmployee();
   if ("response" in auth) return auth.response;
 
   const open = await findOpenShift(auth.supabase, auth.employee.id);

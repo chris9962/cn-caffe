@@ -33,3 +33,12 @@ export async function requireAdmin(): Promise<AuthResult> {
   }
   return auth;
 }
+
+export async function requireAttendanceEmployee(): Promise<AuthResult> {
+  const auth = await requireEmployee();
+  if ("response" in auth) return auth;
+  if (!auth.employee.requiresAttendance) {
+    return { response: errorResponse(403, "Tài khoản này không cần chấm công.") };
+  }
+  return auth;
+}

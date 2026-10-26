@@ -1,11 +1,11 @@
 import { parseAttendanceFields, readMultipartForm } from "@/app/api/_lib/attendance-input";
-import { requireEmployee } from "@/app/api/_lib/auth";
+import { requireAttendanceEmployee } from "@/app/api/_lib/auth";
 import { dbErrorResponse } from "@/app/api/_lib/errors";
 import { SHIFT_COLUMNS, type ShiftRow } from "@/app/api/_lib/mappers";
 import { removeShiftPhoto, uploadShiftPhoto, withPhotoUrls } from "@/app/api/_lib/shifts";
 
 export async function POST(request: Request) {
-  const auth = await requireEmployee();
+  const auth = await requireAttendanceEmployee();
   if ("response" in auth) return auth.response;
   const { supabase, employee } = auth;
 

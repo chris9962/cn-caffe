@@ -1,11 +1,11 @@
-import { requireEmployee } from "@/app/api/_lib/auth";
+import { requireAttendanceEmployee } from "@/app/api/_lib/auth";
 import { dbErrorResponse, errorResponse } from "@/app/api/_lib/errors";
 import { SHIFT_COLUMNS, type ShiftRow } from "@/app/api/_lib/mappers";
 import { withPhotoUrls } from "@/app/api/_lib/shifts";
 import { currentMonth, monthRange } from "@/lib/date";
 
 export async function GET(request: Request) {
-  const auth = await requireEmployee();
+  const auth = await requireAttendanceEmployee();
   if ("response" in auth) return auth.response;
   const { supabase, employee } = auth;
 

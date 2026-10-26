@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
 import { useFetch } from "@/hooks/use-fetch";
-import { formatPhone, ROLE_LABELS } from "@/lib/employees/labels";
+import { EMPLOYMENT_TYPE_LABELS, formatPhone, ROLE_LABELS } from "@/lib/employees/labels";
 import type { Employee } from "@/types/employee";
 
 const focusClass =
@@ -25,6 +25,8 @@ export function EmployeeList() {
             <th scope="col" className="p-2">Họ tên</th>
             <th scope="col" className="p-2">Số điện thoại</th>
             <th scope="col" className="p-2">Vai trò</th>
+            <th scope="col" className="p-2">Hình thức</th>
+            <th scope="col" className="p-2">Chấm công</th>
             <th scope="col" className="p-2">Trạng thái</th>
           </tr>
         </thead>
@@ -41,6 +43,8 @@ export function EmployeeList() {
               </td>
               <td className="p-2">{formatPhone(employee.phone)}</td>
               <td className="p-2">{ROLE_LABELS[employee.role]}</td>
+              <td className="p-2">{EMPLOYMENT_TYPE_LABELS[employee.employmentType]}</td>
+              <td className="p-2">{employee.requiresAttendance ? "Có" : "Không"}</td>
               <td className="p-2">{employee.isActive ? "Đang làm" : "Đã khoá"}</td>
             </tr>
           ))}

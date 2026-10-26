@@ -1,26 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light dark;
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #f3f0e8;
+  --surface: #fffdf7;
+  --surface-strong: #e9e4d8;
+  --foreground: #172019;
+  --muted: #667066;
+  --line: #d9d4c8;
+  --accent: #ff6b35;
+  --accent-strong: #e94f1b;
+  --success: #226b45;
+  --danger: #b52b2b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: ui-rounded, "Avenir Next", "Segoe UI", sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-family: ui-rounded, "Avenir Next", "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+a,
+select,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+a,
+select {
+  cursor: pointer;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 30%, transparent);
 }

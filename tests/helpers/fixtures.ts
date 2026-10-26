@@ -2,7 +2,7 @@ import { randomInt } from "node:crypto";
 import { createServerClient } from "@supabase/ssr";
 import { phoneToEmail } from "@/lib/auth/phone";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { EmployeeRole, ManagerPermission } from "@/types/employee";
+import type { EmployeeRole, EmploymentType, ManagerPermission } from "@/types/employee";
 import { cookieJar } from "./cookie-jar";
 
 const admin = createAdminClient();
@@ -22,7 +22,14 @@ export function trackBranch(id: string): void {
 }
 
 export async function createTestEmployee(
-  opts: { role?: EmployeeRole; password?: string; fullName?: string; isActive?: boolean } = {},
+  opts: {
+    role?: EmployeeRole;
+    password?: string;
+    fullName?: string;
+    isActive?: boolean;
+    employmentType?: EmploymentType;
+    requiresAttendance?: boolean;
+  } = {},
 ): Promise<{ id: string; phone: string; password: string }> {
   const phone = randomPhone();
   const password = opts.password ?? "Test1234";
@@ -35,13 +42,17 @@ export async function createTestEmployee(
   if (error) throw error;
   createdEmployeeIds.push(data.user.id);
 
+  const role = opts.role ?? "staff";
   await admin
     .from("employees")
     .insert({
       id: data.user.id,
       full_name: opts.fullName ?? "Test Employee",
       phone,
-      role: opts.role ?? "staff",
+      role,
+      employment_type: opts.employmentType ?? "part_time",
+      requires_attendance:
+        opts.requiresAttendance ?? (role !== "admin" && role !== "director"),
       // Only the row is locked, not the Auth user, so signInAs still works for a locked employee's live session.
       is_active: opts.isActive ?? true,
     })

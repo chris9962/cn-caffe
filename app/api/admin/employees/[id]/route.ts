@@ -4,9 +4,11 @@ import {
   isDuplicateAuthEmail,
   isUuid,
   parseEndDate,
+  parseEmploymentType,
   parseFullName,
   parsePhone,
   parseRole,
+  parseRequiresAttendance,
   readJsonObject,
 } from "@/app/api/_lib/employee-input";
 import { dbErrorResponse, errorResponse } from "@/app/api/_lib/errors";
@@ -53,6 +55,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (typeof body.isActive !== "boolean") return errorResponse(400, "Dữ liệu không hợp lệ.");
     update.is_active = body.isActive;
   }
+  if ("employmentType" in body) {
+    const employmentType = parseEmploymentType(body.employmentType);
+    if (employmentType instanceof Response) return employmentType;
+    update.employment_type = employmentType;
+  }
 
   const { supabase } = auth;
   const { data: current, error: findError } = await supabase
@@ -62,6 +69,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     .maybeSingle();
   if (findError) return dbErrorResponse(findError);
   if (!current) return errorResponse(404, NOT_FOUND);
+
+  const nextRole = (update.role ?? current.role) as typeof current.role;
+  if ("requiresAttendance" in body) {
+    const requiresAttendance = parseRequiresAttendance(body.requiresAttendance);
+    if (requiresAttendance instanceof Response) return requiresAttendance;
+    if ((nextRole === "admin" || nextRole === "director") && requiresAttendance) {
+      return errorResponse(400, "Admin và giám đốc không chấm công.");
+    }
+    update.requires_attendance = requiresAttendance;
+  }
+  if (nextRole === "admin" || nextRole === "director") {
+    update.requires_attendance = false;
+  }
   if (Object.keys(update).length === 0) return Response.json(toEmployee(current));
 
   const adminAuth = createAdminClient().auth.admin;

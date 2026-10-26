@@ -3,8 +3,12 @@
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { useMutation } from "@/hooks/use-mutation";
-import { formatPhone, ROLE_LABELS } from "@/lib/employees/labels";
-import type { Employee, EmployeeRole } from "@/types/employee";
+import {
+  EMPLOYMENT_TYPE_LABELS,
+  formatPhone,
+  ROLE_LABELS,
+} from "@/lib/employees/labels";
+import type { Employee, EmployeeRole, EmploymentType } from "@/types/employee";
 
 const inputClass =
   "w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
@@ -20,7 +24,14 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
   const [fullName, setFullName] = useState(employee?.fullName ?? "");
   const [phone, setPhone] = useState(employee ? formatPhone(employee.phone) : "");
   const [role, setRole] = useState<EmployeeRole>(employee?.role ?? "staff");
+  const [employmentType, setEmploymentType] = useState<EmploymentType>(
+    employee?.employmentType ?? "part_time",
+  );
+  const [requiresAttendance, setRequiresAttendance] = useState(
+    employee?.requiresAttendance ?? true,
+  );
   const [password, setPassword] = useState("");
+  const attendanceLocked = role === "admin" || role === "director";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,11 +41,24 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
       result = employee
         ? await mutate(`/api/admin/employees/${employee.id}`, {
             method: "PATCH",
-            body: { fullName, phone, role },
+            body: {
+              fullName,
+              phone,
+              role,
+              employmentType,
+              requiresAttendance: attendanceLocked ? false : requiresAttendance,
+            },
           })
         : await mutate("/api/admin/employees", {
             method: "POST",
-            body: { fullName, phone, role, password },
+            body: {
+              fullName,
+              phone,
+              role,
+              employmentType,
+              requiresAttendance: attendanceLocked ? false : requiresAttendance,
+              password,
+            },
           });
     } catch {
       return;
@@ -80,7 +104,13 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
         <select
           id="employee-role"
           value={role}
-          onChange={(event) => setRole(event.target.value as EmployeeRole)}
+          onChange={(event) => {
+            const nextRole = event.target.value as EmployeeRole;
+            setRole(nextRole);
+            if (nextRole === "admin" || nextRole === "director") {
+              setRequiresAttendance(false);
+            }
+          }}
           className={inputClass}
         >
           {(Object.keys(ROLE_LABELS) as EmployeeRole[]).map((value) => (
@@ -89,6 +119,45 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
             </option>
           ))}
         </select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor="employee-employment-type" className="font-medium">
+          Hình thức làm việc
+        </label>
+        <select
+          id="employee-employment-type"
+          value={employmentType}
+          onChange={(event) => setEmploymentType(event.target.value as EmploymentType)}
+          className={inputClass}
+        >
+          {(Object.keys(EMPLOYMENT_TYPE_LABELS) as EmploymentType[]).map((value) => (
+            <option key={value} value={value}>
+              {EMPLOYMENT_TYPE_LABELS[value]}
+            </option>
+          ))}
+        </select>
+        <p className="text-sm text-zinc-600">
+          Hình thức làm việc dùng để xác định cách tính lương, không quyết định việc chấm công.
+        </p>
+      </div>
+      <div className="rounded-xl border border-zinc-300 p-3">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={!attendanceLocked && requiresAttendance}
+            disabled={attendanceLocked}
+            onChange={(event) => setRequiresAttendance(event.target.checked)}
+            className="mt-1 size-4"
+          />
+          <span>
+            <span className="block font-medium">Cần chấm công</span>
+            <span className="block text-sm text-zinc-600">
+              {attendanceLocked
+                ? "Admin và giám đốc không chấm công."
+                : "Bật để nhân viên dùng Chấm công và Ca của tôi."}
+            </span>
+          </span>
+        </label>
       </div>
       {!employee && (
         <div className="flex flex-col gap-1">

@@ -73,7 +73,45 @@ describe("employee admin API", () => {
     const body = await res.json();
     expect(body.phone).toBe(phone);
     expect(body.mustChangePassword).toBe(true);
+    expect(body).toMatchObject({ employmentType: "part_time", requiresAttendance: true });
     expect((await login(phone, "Init1234")).status).toBe(200);
+  });
+
+  it("stores employment type separately from attendance", async () => {
+    await signInAsAdmin();
+    const phone = randomPhone();
+    const created = await callRoute(POST, {
+      method: "POST",
+      json: {
+        fullName: "Nhân viên toàn thời gian",
+        phone: local(phone),
+        role: "staff",
+        employmentType: "full_time",
+        requiresAttendance: false,
+        password: "Init1234",
+      },
+    });
+    expect(created.status).toBe(201);
+    const employee = await created.json();
+    trackEmployee(employee.id);
+    expect(employee).toMatchObject({ employmentType: "full_time", requiresAttendance: false });
+  });
+
+  it("never allows admin or director to require attendance", async () => {
+    await signInAsAdmin();
+    const res = await callRoute(POST, {
+      method: "POST",
+      json: {
+        fullName: "Giám đốc",
+        phone: local(randomPhone()),
+        role: "director",
+        employmentType: "full_time",
+        requiresAttendance: true,
+        password: "Init1234",
+      },
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Admin và giám đốc không chấm công.");
   });
 
   it("rejects invalid input with 400", async () => {
@@ -178,6 +216,10 @@ describe("employee admin API", () => {
     expect(await patch({ endDate: "2026-13-45" })).toEqual([400, "Ngày nghỉ việc không hợp lệ."]);
     expect(await patch({ endDate: "2026-02-30" })).toEqual([400, "Ngày nghỉ việc không hợp lệ."]);
     expect(await patch({ role: "root" })).toEqual([400, "Vai trò không hợp lệ."]);
+    expect(await patch({ employmentType: "freelance" })).toEqual([
+      400,
+      "Hình thức làm việc không hợp lệ.",
+    ]);
     expect(await patch({ fullName: "" })).toEqual([400, "Họ tên không được để trống."]);
     expect(await patch({ phone: "12" })).toEqual([400, "Số điện thoại không hợp lệ."]);
     expect((await patch(null))[0]).toBe(400);

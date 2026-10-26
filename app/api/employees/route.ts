@@ -9,6 +9,7 @@ export async function GET() {
     .from("employees")
     .select("id, full_name")
     .eq("is_active", true)
+    .eq("requires_attendance", true)
     .order("full_name");
   if (error) return dbErrorResponse(error);
 

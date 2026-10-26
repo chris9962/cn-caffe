@@ -58,12 +58,15 @@ export async function POST(request: Request) {
   // Checked up front so a bad id returns 404 instead of surfacing as a foreign key error.
   const { data: employee, error: employeeError } = await supabase
     .from("employees")
-    .select("id")
+    .select("id, requires_attendance")
     .eq("id", employeeId)
     .eq("is_active", true)
     .maybeSingle();
   if (employeeError) return dbErrorResponse(employeeError);
   if (!employee) return errorResponse(404, "Không tìm thấy nhân viên.");
+  if (!employee.requires_attendance) {
+    return errorResponse(400, "Nhân viên này không cần chấm công.");
+  }
 
   const { data: branch, error: branchError } = await supabase
     .from("branches")

@@ -76,7 +76,17 @@ export function CameraCapture({ onCapture }: CameraCaptureProps) {
   if (cameraError) return <ErrorMessage message={cameraError} />;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <p className="font-bold">Ảnh xác nhận</p>
+          <p className="mt-0.5 text-sm text-[var(--muted)]">Đưa khuôn mặt vào giữa khung hình.</p>
+        </div>
+        {previewUrl && (
+          <span className="rounded-full bg-[#e0f1e7] px-3 py-1 text-xs font-bold text-[#174d32]">Đã chụp</span>
+        )}
+      </div>
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] bg-[var(--foreground)]">
       {/* Kept mounted while the preview shows, so "Chụp lại" reuses the running stream. */}
       <video
         ref={videoRef}
@@ -86,18 +96,24 @@ export function CameraCapture({ onCapture }: CameraCaptureProps) {
         playsInline
         hidden={previewUrl !== null}
         onLoadedData={() => setIsReady(true)}
-        className="w-full max-w-sm rounded bg-zinc-200 dark:bg-zinc-800"
+        className="h-full w-full object-cover"
       />
       {previewUrl && (
         // eslint-disable-next-line @next/next/no-img-element -- next/image cannot optimise a local data URL.
-        <img src={previewUrl} alt="Ảnh vừa chụp" className="w-full max-w-sm rounded" />
+        <img src={previewUrl} alt="Ảnh vừa chụp" className="h-full w-full object-cover" />
       )}
+        {!previewUrl && !isReady && (
+          <p role="status" className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-[var(--surface)]">
+            Đang mở camera...
+          </p>
+        )}
+      </div>
       {/* One button for both actions keeps keyboard focus in place when the label changes. */}
       <button
         type="button"
         onClick={previewUrl ? handleRetake : handleCapture}
         disabled={!previewUrl && !isReady}
-        className="w-fit rounded border border-blue-700 px-4 py-2 font-medium text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-60 dark:border-blue-400 dark:text-blue-400 dark:focus-visible:outline-blue-400"
+        className="flex min-h-12 w-full items-center justify-center rounded-2xl border border-[var(--foreground)] px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-50"
       >
         {previewUrl ? "Chụp lại" : "Chụp ảnh"}
       </button>

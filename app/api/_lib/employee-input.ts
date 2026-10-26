@@ -1,8 +1,9 @@
 import { normalizePhone } from "@/lib/auth/phone";
-import type { EmployeeRole } from "@/types/employee";
+import type { EmployeeRole, EmploymentType } from "@/types/employee";
 import { errorResponse } from "./errors";
 
 const ROLES = new Set<string>(["admin", "director", "manager", "staff"]);
+const EMPLOYMENT_TYPES = new Set<string>(["full_time", "part_time"]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const DUPLICATE_PHONE = "Số điện thoại đã được dùng.";
@@ -32,6 +33,18 @@ export function parseRole(value: unknown): EmployeeRole | Response {
   return typeof value === "string" && ROLES.has(value)
     ? (value as EmployeeRole)
     : errorResponse(400, "Vai trò không hợp lệ.");
+}
+
+export function parseEmploymentType(value: unknown): EmploymentType | Response {
+  return typeof value === "string" && EMPLOYMENT_TYPES.has(value)
+    ? (value as EmploymentType)
+    : errorResponse(400, "Hình thức làm việc không hợp lệ.");
+}
+
+export function parseRequiresAttendance(value: unknown): boolean | Response {
+  return typeof value === "boolean"
+    ? value
+    : errorResponse(400, "Thiết lập chấm công không hợp lệ.");
 }
 
 export function parsePassword(value: unknown): string | Response {

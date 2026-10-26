@@ -1,14 +1,17 @@
 import type { Branch } from "@/types/branch";
-import type { Employee, EmployeeRole } from "@/types/employee";
+import type { Employee, EmployeeRole, EmploymentType } from "@/types/employee";
 import type { AuditLog, FailReason, Shift, ShiftStatus } from "@/types/shift";
 
-export const EMPLOYEE_COLUMNS = "id, full_name, phone, role, is_active, end_date, must_change_password";
+export const EMPLOYEE_COLUMNS =
+  "id, full_name, phone, role, employment_type, requires_attendance, is_active, end_date, must_change_password";
 
 type EmployeeRow = {
   id: string;
   full_name: string;
   phone: string;
   role: EmployeeRole;
+  employment_type: EmploymentType;
+  requires_attendance: boolean;
   is_active: boolean;
   end_date: string | null;
   must_change_password: boolean;
@@ -20,6 +23,8 @@ export function toEmployee(row: EmployeeRow): Employee {
     fullName: row.full_name,
     phone: row.phone,
     role: row.role,
+    employmentType: row.employment_type,
+    requiresAttendance: row.requires_attendance,
     isActive: row.is_active,
     endDate: row.end_date,
     mustChangePassword: row.must_change_password,
