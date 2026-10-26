@@ -6,7 +6,7 @@ import { useMutation } from "@/hooks/use-mutation";
 import type { Employee } from "@/types/employee";
 
 const buttonClass =
-  "w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400 disabled:opacity-60";
+  "ui-btn";
 
 type EmployeeLockControlProps = {
   employee: Employee;
@@ -29,14 +29,14 @@ export function EmployeeLockControl({ employee, onStart, onChanged }: EmployeeLo
   }
 
   return (
-    <section aria-labelledby="lock-heading" className="flex flex-col gap-4">
-      <h2 id="lock-heading" className="text-xl font-semibold">
+    <section aria-labelledby="lock-heading" className="ui-card flex max-w-2xl flex-col gap-4">
+      <h2 id="lock-heading" className="ui-heading">
         Trạng thái tài khoản
       </h2>
       {employee.isActive ? (
         <>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="employee-end-date" className="font-medium">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="employee-end-date" className="ui-label">
               Ngày nghỉ việc
             </label>
             <input
@@ -45,7 +45,7 @@ export function EmployeeLockControl({ employee, onStart, onChanged }: EmployeeLo
               required
               value={endDate}
               onChange={(event) => setEndDate(event.target.value)}
-              className="w-fit rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"
+              className="ui-field w-fit"
             />
           </div>
           <button

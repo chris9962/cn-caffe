@@ -5,7 +5,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { useMutation } from "@/hooks/use-mutation";
 
 const inputClass =
-  "w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
+  "ui-field";
 
 export function ChangePasswordForm({ onChanged }: { onChanged: () => void }) {
   const { mutate, isPending, error } = useMutation();
@@ -32,11 +32,14 @@ export function ChangePasswordForm({ onChanged }: { onChanged: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">Đổi mật khẩu</h1>
-      <p>Bạn phải đổi mật khẩu trước khi tiếp tục.</p>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="new-password" className="font-medium">
+    <form onSubmit={handleSubmit} className="ui-card flex max-w-2xl flex-col gap-5">
+      <div>
+        <p className="ui-eyebrow mb-2">Lần đầu ghé quán</p>
+        <h1 className="ui-title">Đặt mật khẩu của riêng bạn</h1>
+        <p className="ui-lead mt-2">Chọn một mật khẩu chỉ mình bạn biết, rồi mình vào quán nhé.</p>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="new-password" className="ui-label">
           Mật khẩu mới
         </label>
         <input
@@ -49,8 +52,8 @@ export function ChangePasswordForm({ onChanged }: { onChanged: () => void }) {
           className={inputClass}
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="confirm-password" className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="confirm-password" className="ui-label">
           Nhập lại mật khẩu mới
         </label>
         <input
@@ -68,9 +71,9 @@ export function ChangePasswordForm({ onChanged }: { onChanged: () => void }) {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400 disabled:opacity-60"
+        className="ui-btn"
       >
-        Đổi mật khẩu
+        Lưu và vào quán
       </button>
     </form>
   );

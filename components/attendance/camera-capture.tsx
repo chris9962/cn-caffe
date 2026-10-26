@@ -79,14 +79,14 @@ export function CameraCapture({ onCapture }: CameraCaptureProps) {
     <div className="flex flex-col gap-3">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="font-bold">Ảnh xác nhận</p>
-          <p className="mt-0.5 text-sm text-[var(--muted)]">Đưa khuôn mặt vào giữa khung hình.</p>
+          <p className="font-semibold">Một tấm ảnh nhỏ</p>
+          <p className="ui-hint mt-0.5">Nhìn vào camera và cười một chút nhé.</p>
         </div>
         {previewUrl && (
-          <span className="rounded-full bg-[#e0f1e7] px-3 py-1 text-xs font-bold text-[#174d32]">Đã chụp</span>
+          <span className="rounded-full bg-[var(--success-soft)] px-3 py-1 text-xs font-semibold text-[var(--success)]">Xinh rồi</span>
         )}
       </div>
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] bg-[var(--foreground)]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] bg-[#33493a]">
       {/* Kept mounted while the preview shows, so "Chụp lại" reuses the running stream. */}
       <video
         ref={videoRef}
@@ -113,7 +113,7 @@ export function CameraCapture({ onCapture }: CameraCaptureProps) {
         type="button"
         onClick={previewUrl ? handleRetake : handleCapture}
         disabled={!previewUrl && !isReady}
-        className="flex min-h-12 w-full items-center justify-center rounded-2xl border border-[var(--foreground)] px-4 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-50"
+        className="ui-btn-quiet w-full"
       >
         {previewUrl ? "Chụp lại" : "Chụp ảnh"}
       </button>

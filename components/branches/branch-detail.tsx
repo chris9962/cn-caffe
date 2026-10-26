@@ -22,7 +22,7 @@ export function BranchDetail({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div role="status">{saved ? "Đã lưu." : null}</div>
+      <div role="status" className="ui-saved">{saved ? "Đã lưu." : null}</div>
       {error ? (
         <ErrorMessage message={error} />
       ) : data === null && isLoading ? (
@@ -31,7 +31,7 @@ export function BranchDetail({ params }: { params: Promise<{ id: string }> }) {
         <ErrorMessage message="Không tìm thấy chi nhánh." />
       ) : (
         <>
-          <h1 className="text-2xl font-semibold">{branch.name}</h1>
+          <h1 className="ui-title">{branch.name}</h1>
           <BranchForm
             key={branch.id}
             branch={branch}

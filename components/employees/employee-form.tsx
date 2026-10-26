@@ -11,7 +11,7 @@ import {
 import type { Employee, EmployeeRole, EmploymentType } from "@/types/employee";
 
 const inputClass =
-  "w-full rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
+  "ui-field";
 
 type EmployeeFormProps = {
   employee?: Employee;
@@ -67,9 +67,9 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="employee-full-name" className="font-medium">
+    <form onSubmit={handleSubmit} className="ui-card flex max-w-2xl flex-col gap-5">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="employee-full-name" className="ui-label">
           Họ tên
         </label>
         <input
@@ -82,8 +82,8 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
           className={inputClass}
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="employee-phone" className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="employee-phone" className="ui-label">
           Số điện thoại
         </label>
         <input
@@ -97,8 +97,8 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
           className={inputClass}
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="employee-role" className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="employee-role" className="ui-label">
           Vai trò
         </label>
         <select
@@ -120,8 +120,8 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
           ))}
         </select>
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="employee-employment-type" className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="employee-employment-type" className="ui-label">
           Hình thức làm việc
         </label>
         <select
@@ -136,22 +136,22 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
             </option>
           ))}
         </select>
-        <p className="text-sm text-zinc-600">
+        <p className="ui-hint">
           Hình thức làm việc dùng để xác định cách tính lương, không quyết định việc chấm công.
         </p>
       </div>
-      <div className="rounded-xl border border-zinc-300 p-3">
+      <div className="rounded-2xl border border-[var(--line)] bg-[var(--background)] p-4">
         <label className="flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
             checked={!attendanceLocked && requiresAttendance}
             disabled={attendanceLocked}
             onChange={(event) => setRequiresAttendance(event.target.checked)}
-            className="mt-1 size-4"
+            className="mt-1 size-4 accent-[var(--accent)]"
           />
           <span>
-            <span className="block font-medium">Cần chấm công</span>
-            <span className="block text-sm text-zinc-600">
+            <span className="block font-semibold">Cần chấm công</span>
+            <span className="block ui-hint">
               {attendanceLocked
                 ? "Admin và giám đốc không chấm công."
                 : "Bật để nhân viên dùng Chấm công và Ca của tôi."}
@@ -160,8 +160,8 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
         </label>
       </div>
       {!employee && (
-        <div className="flex flex-col gap-1">
-          <label htmlFor="employee-password" className="font-medium">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="employee-password" className="ui-label">
             Mật khẩu ban đầu
           </label>
           <input
@@ -179,7 +179,7 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
       <button
         type="submit"
         disabled={isPending}
-        className="w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400 disabled:opacity-60"
+        className="ui-btn"
       >
         {employee ? "Lưu" : "Tạo nhân viên"}
       </button>

@@ -17,8 +17,8 @@ const LOCATION_OPTIONS: PositionOptions = { enableHighAccuracy: true, timeout: 1
 const LOCATION_GIVE_UP_MS = 20000;
 
 const focusClass = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
-const primaryButtonClass = `flex min-h-14 w-full items-center justify-center rounded-2xl bg-[var(--accent)] px-5 text-base font-bold text-[var(--foreground)] transition-transform active:scale-[.98] ${focusClass} disabled:opacity-50`;
-const secondaryButtonClass = `flex min-h-12 w-full items-center justify-center rounded-2xl border border-[color-mix(in_oklab,var(--surface)_35%,transparent)] px-4 text-sm font-semibold transition-colors ${focusClass}`;
+const primaryButtonClass = "ui-btn min-h-14 w-full text-base";
+const secondaryButtonClass = `flex min-h-12 w-full items-center justify-center rounded-full border border-[color-mix(in_oklab,var(--surface)_35%,transparent)] px-4 text-sm font-semibold transition-colors hover:bg-[color-mix(in_oklab,var(--surface)_10%,transparent)] ${focusClass}`;
 
 const todayFormatter = new Intl.DateTimeFormat("vi-VN", {
   timeZone: "Asia/Ho_Chi_Minh",
@@ -26,6 +26,20 @@ const todayFormatter = new Intl.DateTimeFormat("vi-VN", {
   day: "numeric",
   month: "long",
 });
+
+const hourFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Ho_Chi_Minh",
+  hour: "numeric",
+  hourCycle: "h23",
+});
+
+function greeting(now: Date) {
+  const hour = Number(hourFormatter.format(now));
+  if (hour < 11) return "Chào buổi sáng";
+  if (hour < 14) return "Chào buổi trưa";
+  if (hour < 18) return "Chào buổi chiều";
+  return "Chào buổi tối";
+}
 
 const clockFormatter = new Intl.DateTimeFormat("vi-VN", {
   timeZone: "Asia/Ho_Chi_Minh",
@@ -63,9 +77,12 @@ function requestLocation(): Promise<Location | null> {
 function resultMessage(mode: Mode, shift: Shift) {
   const action = mode === "check-out" ? "check out" : "check in";
   const done = `Đã ${action} lúc ${formatTime(shift.checkOutAt ?? shift.checkInAt)}`;
-  return shift.failReasons.length === 0
-    ? `${done}.`
-    : `${done}, chờ quản lý duyệt: ${formatFailReasons(shift.failReasons)}.`;
+  if (shift.failReasons.length > 0) {
+    return `${done}. Quản lý sẽ xem lại giúp bạn: ${formatFailReasons(shift.failReasons)}.`;
+  }
+  return mode === "check-out"
+    ? `${done}. Cảm ơn bạn, về nghỉ ngơi thật ấm nhé.`
+    : `${done}. Chúc bạn một ca thật êm.`;
 }
 
 function AttendanceIcon({ name }: { name: "arrow" | "pin" | "camera" | "check" }) {
@@ -113,27 +130,32 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
 
   if (openShift) {
     return (
-      <section className="overflow-hidden rounded-[2rem] bg-[var(--foreground)] p-5 text-[var(--surface)] sm:p-7">
-        <div className="mb-10 flex items-center justify-between gap-4">
-          <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_oklab,var(--success)_35%,transparent)] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em]">
-            <span className="size-2 rounded-full bg-[#71e5a4]" />
-            Đang trong ca
+      <section className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(160deg,#5f8466_0%,#3f5c47_100%)] p-5 text-[var(--surface)] shadow-[0_24px_48px_-32px_rgba(44,58,49,0.8)] sm:p-7">
+        <div aria-hidden="true" className="absolute -top-16 -right-10 size-48 rounded-full bg-[var(--bloom)] opacity-25 blur-2xl" />
+        <div className="relative mb-10 flex items-center justify-between gap-4">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_oklab,var(--surface)_16%,transparent)] px-3 py-1.5 text-xs font-semibold">
+            <span className="size-2 animate-pulse rounded-full bg-[var(--bloom)]" />
+            Bạn đang trong ca
           </span>
-          <span suppressHydrationWarning className="text-sm text-[color-mix(in_oklab,var(--surface)_65%,transparent)]">{todayLabel}</span>
+          <span suppressHydrationWarning className="text-sm capitalize text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">{todayLabel}</span>
         </div>
 
-        <p className="text-sm text-[color-mix(in_oklab,var(--surface)_65%,transparent)]">Bắt đầu lúc</p>
-        <p className="mt-1 text-[clamp(3.25rem,15vw,5.5rem)] leading-none font-extrabold tracking-[-0.07em]">
+        <p className="relative text-sm text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">Bạn ghé quán lúc</p>
+        <p className="relative mt-1 font-[family-name:var(--font-display)] text-[clamp(3.25rem,15vw,5.5rem)] leading-none font-medium tracking-[-0.03em]">
           {formatTime(openShift.checkInAt)}
         </p>
-        <div className="mt-7 flex items-center gap-2 border-t border-[color-mix(in_oklab,var(--surface)_18%,transparent)] pt-5 text-sm">
+        <div className="relative mt-7 flex items-center gap-2 border-t border-[color-mix(in_oklab,var(--surface)_18%,transparent)] pt-5 text-sm">
           <AttendanceIcon name="pin" />
           <span className="font-semibold">{openShift.branchName ?? "Chưa có tên chi nhánh"}</span>
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <button type="button" onClick={() => onStart("check-out")} className={primaryButtonClass}>
-            Kết thúc ca
+        <div className="relative mt-8 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => onStart("check-out")}
+            className="ui-btn min-h-14 w-full bg-[var(--surface)] text-base text-[var(--accent-strong)] hover:bg-[var(--accent-soft)]"
+          >
+            Xong ca rồi, check out
             <span className="ml-2"><AttendanceIcon name="arrow" /></span>
           </button>
           <button type="button" onClick={() => onStart("start-new")} className={secondaryButtonClass}>
@@ -145,21 +167,22 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
   }
 
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[var(--surface)] p-5 sm:p-7">
-      <div aria-hidden="true" className="absolute -top-14 -right-14 size-40 rounded-full bg-[var(--accent)] opacity-15" />
+    <section className="ui-card relative overflow-hidden rounded-[2rem]">
+      <div aria-hidden="true" className="absolute -top-16 -right-12 size-44 rounded-full bg-[var(--bloom)] opacity-20 blur-2xl" />
+      <div aria-hidden="true" className="absolute -bottom-20 -left-10 size-44 rounded-full bg-[var(--accent)] opacity-10 blur-2xl" />
       <div className="relative">
         <p suppressHydrationWarning className="text-sm font-medium capitalize text-[var(--muted)]">{todayLabel}</p>
-        <p suppressHydrationWarning className="mt-3 text-[clamp(3.75rem,18vw,6rem)] leading-none font-extrabold tracking-[-0.08em]">
+        <p suppressHydrationWarning className="mt-3 font-[family-name:var(--font-display)] text-[clamp(3.75rem,18vw,6rem)] leading-none font-medium tracking-[-0.03em]">
           {timeLabel}
         </p>
         <div className="mt-8 mb-7">
-          <h2 className="text-2xl font-bold tracking-[-0.04em]">Sẵn sàng vào ca?</h2>
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-            Bật vị trí và chuẩn bị chụp một ảnh xác nhận.
+          <h2 className="ui-heading text-2xl">Hôm nay mình bắt đầu nhé?</h2>
+          <p className="ui-lead mt-1">
+            Bật vị trí, rồi cười một chút cho tấm ảnh vào ca.
           </p>
         </div>
         <button type="button" onClick={() => onStart("check-in")} className={primaryButtonClass}>
-          Bắt đầu check in
+          Vào ca thôi
           <span className="ml-2"><AttendanceIcon name="arrow" /></span>
         </button>
       </div>
@@ -172,7 +195,7 @@ function AttendanceProgress({ step }: { step: Step }) {
   const stages = [
     { label: "Vị trí", icon: "pin" as const },
     { label: "Ảnh", icon: "camera" as const },
-    { label: "Xong", icon: "check" as const },
+    { label: "Xong rồi", icon: "check" as const },
   ];
 
   return (
@@ -181,9 +204,9 @@ function AttendanceProgress({ step }: { step: Step }) {
         <li
           key={stage.label}
           aria-current={index === activeIndex ? "step" : undefined}
-          className={`flex min-h-11 items-center justify-center gap-1.5 rounded-xl text-xs font-bold ${
+          className={`flex min-h-11 items-center justify-center gap-1.5 rounded-full text-xs font-semibold transition-colors ${
             index <= activeIndex
-              ? "bg-[var(--foreground)] text-[var(--surface)]"
+              ? "bg-[var(--accent)] text-[var(--surface)]"
               : "bg-[var(--surface-strong)] text-[var(--muted)]"
           }`}
         >
@@ -257,33 +280,33 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
     onDone({ isSuccess: true, message: resultMessage(mode, shift) });
   }
 
-  const title = mode === "check-out" ? "Xác nhận kết thúc ca" : "Xác nhận vào ca";
+  const title = mode === "check-out" ? "Tạm biệt ca hôm nay" : "Ghé quán hôm nay";
 
   return (
-    <section className="rounded-[2rem] border border-[var(--line)] bg-[var(--surface)] p-5 sm:p-7">
+    <section className="ui-card rounded-[2rem]">
       <div className="mb-6">
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-strong)]">Chấm công</p>
-        <h2 className="text-2xl font-bold tracking-[-0.04em]">{title}</h2>
+        <p className="ui-eyebrow mb-2">Một chút nữa thôi</p>
+        <h2 className="ui-heading text-2xl">{title}</h2>
       </div>
       <AttendanceProgress step={step} />
 
       {step === "locating" && (
         <div className="flex min-h-64 flex-col items-center justify-center text-center">
-          <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--surface-strong)]">
+          <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
             <AttendanceIcon name="pin" />
           </span>
-          <p className="font-bold">Đang xác định vị trí</p>
-          <p className="mt-1 max-w-xs text-sm leading-6 text-[var(--muted)]">Giữ trang này mở trong giây lát.</p>
+          <p className="font-semibold">Đang tìm xem bạn ở đâu</p>
+          <p className="ui-lead mt-1 max-w-xs text-sm">Chờ mình vài giây nhé.</p>
         </div>
       )}
 
       {step === "submitting" && (
         <div className="flex min-h-64 flex-col items-center justify-center text-center">
-          <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent)]">
+          <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent)] text-[var(--surface)]">
             <AttendanceIcon name="check" />
           </span>
-          <p className="font-bold">Đang ghi nhận ca</p>
-          <p className="mt-1 text-sm text-[var(--muted)]">Ảnh và vị trí đang được gửi an toàn.</p>
+          <p className="font-semibold">Đang ghi lại ca của bạn</p>
+          <p className="ui-lead mt-1 text-sm">Ảnh và vị trí đang được gửi đi an toàn.</p>
         </div>
       )}
 
@@ -291,16 +314,16 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
         <div className="mt-6 flex flex-col gap-5">
           <div
             className={`flex items-start gap-3 rounded-2xl p-4 text-sm ${
-              location ? "bg-[#e0f1e7] text-[#174d32]" : "bg-[#fff0d5] text-[#744619]"
+              location ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--warning-soft)] text-[var(--warning)]"
             }`}
           >
             <span className="mt-0.5"><AttendanceIcon name="pin" /></span>
             <div>
-              <p className="font-bold">{location ? "Đã lấy được vị trí" : "Không lấy được vị trí"}</p>
+              <p className="font-semibold">{location ? "Đã thấy bạn rồi" : "Chưa tìm được vị trí"}</p>
               <p className="mt-0.5 leading-5">
                 {location
                   ? `Độ chính xác khoảng ${Math.round(location.accuracyM)} m.`
-                  : "Bạn vẫn có thể tiếp tục, ca này sẽ chờ quản lý duyệt."}
+                  : "Không sao, bạn cứ tiếp tục — quản lý sẽ xem lại ca này."}
               </p>
             </div>
           </div>
@@ -309,9 +332,9 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
             (branches.error ? (
               <ErrorMessage message={branches.error} />
             ) : branches.data === null ? (
-              <Loading label="Đang tìm chi nhánh gần bạn..." />
+              <Loading label="Đang tìm quán gần bạn..." />
             ) : branches.data.length === 0 ? (
-              <ErrorMessage message="Chưa có chi nhánh nào. Bạn báo quản lý." />
+              <ErrorMessage message="Chưa có chi nhánh nào. Bạn nhắn quản lý giúp nhé." />
             ) : (
               <BranchPicker branches={branches.data} value={branchId} onChange={setChosenBranchId} />
             ))}
@@ -332,9 +355,9 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
             <button
               type="button"
               onClick={onCancel}
-              className={`flex min-h-12 w-full items-center justify-center rounded-2xl px-4 text-sm font-semibold text-[var(--muted)] ${focusClass}`}
+              className={`flex min-h-12 w-full items-center justify-center rounded-full px-4 text-sm font-semibold text-[var(--muted)] hover:bg-[var(--surface-strong)] ${focusClass}`}
             >
-              Huỷ
+              Để sau
             </button>
           </div>
         </div>
@@ -386,22 +409,23 @@ export function CheckInPanel() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <header>
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--accent-strong)]">Hôm nay</p>
+        <p className="ui-eyebrow mb-2">Cỏ Ngọt · hôm nay</p>
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className={`w-fit rounded text-[clamp(1.9rem,8vw,3.25rem)] leading-tight font-extrabold tracking-[-0.055em] ${focusClass}`}
+          suppressHydrationWarning
+          className={`ui-title w-fit rounded ${focusClass}`}
         >
-          Chấm công
+          {greeting(now)}
         </h1>
-        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Một ảnh, một vị trí — xong trong vài giây.</p>
+        <p className="ui-lead mt-2">Một tấm ảnh, một chút vị trí — vậy là quán biết bạn đã tới.</p>
       </header>
 
       {outcome && (
         <div
           role={outcome.isSuccess ? "status" : undefined}
           className={`flex items-start gap-3 rounded-2xl p-4 text-sm leading-6 ${
-            outcome.isSuccess ? "bg-[#e0f1e7] text-[#174d32]" : "bg-[#f9dddd] text-[#7d2020]"
+            outcome.isSuccess ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--danger-soft)] text-[var(--danger)]"
           }`}
         >
           <span className="mt-0.5"><AttendanceIcon name={outcome.isSuccess ? "check" : "pin"} /></span>
@@ -412,8 +436,8 @@ export function CheckInPanel() {
       {error ? (
         <ErrorMessage message={error} />
       ) : !data ? (
-        <div className="rounded-[2rem] border border-[var(--line)] bg-[var(--surface)] p-8">
-          <Loading label="Đang kiểm tra ca hiện tại..." />
+        <div className="ui-card rounded-[2rem]">
+          <Loading label="Đang xem ca của bạn..." />
         </div>
       ) : activeMode ? (
         <AttendanceFlow key={flowKey} mode={activeMode} onCancel={handleCancel} onDone={handleDone} />
@@ -423,7 +447,7 @@ export function CheckInPanel() {
 
       {!activeMode && data && (
         <p className="text-center text-xs leading-5 text-[var(--muted)]">
-          Thời gian được ghi nhận theo múi giờ Việt Nam.
+          Giờ được ghi theo giờ Việt Nam.
         </p>
       )}
     </div>

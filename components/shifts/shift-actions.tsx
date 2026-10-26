@@ -5,8 +5,6 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { useMutation } from "@/hooks/use-mutation";
 import type { Shift } from "@/types/shift";
 
-const focusClass =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
 
 type ShiftActionsProps = {
   shift: Shift;
@@ -31,8 +29,8 @@ export function ShiftActions({ shift, onStart, onDone }: ShiftActionsProps) {
   if (shift.status === "rejected") return null;
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-4">
-      <h2 id={headingId} className="text-xl font-semibold">
+    <section aria-labelledby={headingId} className="ui-card flex max-w-2xl flex-col gap-4">
+      <h2 id={headingId} className="ui-heading">
         Duyệt ca
       </h2>
       <div className="flex flex-wrap gap-2">
@@ -41,7 +39,7 @@ export function ShiftActions({ shift, onStart, onDone }: ShiftActionsProps) {
             type="button"
             disabled={isPending}
             onClick={() => review("approve")}
-            className={`w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white ${focusClass} disabled:opacity-60`}
+            className={"ui-btn"}
           >
             Duyệt
           </button>
@@ -50,7 +48,7 @@ export function ShiftActions({ shift, onStart, onDone }: ShiftActionsProps) {
           type="button"
           disabled={isPending}
           onClick={() => review("reject")}
-          className={`w-fit rounded border border-red-700 px-4 py-2 font-medium text-red-700 dark:border-red-400 dark:text-red-400 ${focusClass} disabled:opacity-60`}
+          className={"ui-btn-danger"}
         >
           Từ chối
         </button>

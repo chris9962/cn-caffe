@@ -29,7 +29,7 @@ export function EmployeeDetail({ params }: { params: Promise<{ id: string }> }) 
 
   return (
     <div className="flex flex-col gap-8">
-            <div role="status">{saved ? "Đã lưu." : null}</div>
+            <div role="status" className="ui-saved">{saved ? "Đã lưu." : null}</div>
       {error ? (
         <ErrorMessage message={error} />
       ) : data === null && isLoading ? (
@@ -38,7 +38,7 @@ export function EmployeeDetail({ params }: { params: Promise<{ id: string }> }) 
         <ErrorMessage message="Không tìm thấy nhân viên." />
       ) : (
         <>
-          <h1 className="text-2xl font-semibold">{employee.fullName}</h1>
+          <h1 className="ui-title">{employee.fullName}</h1>
           <EmployeeForm key={employee.id} employee={employee} onStart={clearSaved} onSaved={handleSaved} />
           <EmployeeLockControl
             key={`${employee.id}-${employee.isActive}`}

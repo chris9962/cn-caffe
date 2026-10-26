@@ -6,7 +6,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { useMutation } from "@/hooks/use-mutation";
 
 const inputClass =
-  "min-h-14 w-full rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-base font-semibold outline-none transition-colors placeholder:font-normal placeholder:text-[color-mix(in_oklab,var(--muted)_65%,transparent)] focus:border-[var(--foreground)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
+  "ui-field min-h-14 bg-[var(--surface)] font-medium placeholder:font-normal placeholder:text-[color-mix(in_oklab,var(--muted)_65%,transparent)]";
 
 function PasswordVisibilityIcon({ visible }: { visible: boolean }) {
   return (
@@ -58,7 +58,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <label htmlFor="phone" className="text-sm font-bold">
+        <label htmlFor="phone" className="ui-label">
           Số điện thoại
         </label>
         <input
@@ -74,7 +74,7 @@ export function LoginForm() {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="password" className="text-sm font-bold">
+        <label htmlFor="password" className="ui-label">
           Mật khẩu
         </label>
         <div className="relative">
@@ -100,16 +100,16 @@ export function LoginForm() {
         </div>
       </div>
       {error && (
-        <div className="rounded-2xl bg-[#f9dddd] px-4 py-3">
+        <div className="rounded-2xl bg-[var(--danger-soft)] px-4 py-3">
           <ErrorMessage message={error} />
         </div>
       )}
       <button
         type="submit"
         disabled={isPending}
-        className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-[var(--accent)] px-5 text-base font-bold text-[var(--foreground)] transition-transform active:scale-[.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--foreground)] disabled:opacity-50"
+        className="ui-btn min-h-14 w-full text-base"
       >
-        {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
+        {isPending ? "Đang mở cửa..." : "Vào quán"}
       </button>
     </form>
   );

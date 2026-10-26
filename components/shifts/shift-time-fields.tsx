@@ -4,7 +4,7 @@ import { useId } from "react";
 import { toVietnamLocalInput } from "@/lib/date";
 
 const inputClass =
-  "w-fit rounded border border-zinc-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
+  "ui-field w-fit";
 
 export const MISSING_TIMES_MESSAGE = "Bạn nhập đủ giờ vào và giờ ra.";
 
@@ -20,8 +20,8 @@ export function ShiftTimeFields({ value, onChange }: ShiftTimeFieldsProps) {
   const max = toVietnamLocalInput(new Date().toISOString());
   return (
     <div className="flex flex-wrap gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor={`${id}-check-in`} className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${id}-check-in`} className="ui-label">
           Giờ vào
         </label>
         <input
@@ -33,8 +33,8 @@ export function ShiftTimeFields({ value, onChange }: ShiftTimeFieldsProps) {
           className={inputClass}
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor={`${id}-check-out`} className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${id}-check-out`} className="ui-label">
           Giờ ra
         </label>
         <input

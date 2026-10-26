@@ -14,7 +14,7 @@ import type { CurrentUser } from "@/types/employee";
 import type { AuditLog, Shift } from "@/types/shift";
 
 const focusClass =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
 
 type ShiftDetailData = { shift: Shift; auditLogs: AuditLog[] };
 
@@ -40,8 +40,8 @@ function CheckPointSection({ point }: { point: CheckPoint }) {
   const distance = distanceText(point);
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-2">
-      <h2 id={headingId} className="text-xl font-semibold">
+    <section aria-labelledby={headingId} className="ui-card flex max-w-2xl flex-col gap-4">
+      <h2 id={headingId} className="ui-heading">
         {point.title}
       </h2>
       {point.time === null ? (
@@ -51,7 +51,7 @@ function CheckPointSection({ point }: { point: CheckPoint }) {
           <p>Lúc {formatDateTime(point.time)}</p>
           {point.photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- the signed URL changes on every load, so next/image could never reuse its optimised copy.
-            <img src={point.photoUrl} alt={`Ảnh ${name}`} className="w-full max-w-sm rounded" />
+            <img src={point.photoUrl} alt={`Ảnh ${name}`} className="w-full max-w-sm rounded-[1.25rem] border border-[var(--line)]" />
           ) : (
             <p>Không có ảnh</p>
           )}
@@ -64,7 +64,7 @@ function CheckPointSection({ point }: { point: CheckPoint }) {
                 href={`https://www.google.com/maps?q=${point.latitude},${point.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`w-fit rounded underline ${focusClass}`}
+                className={"ui-link w-fit"}
               >
                 Mở vị trí trên Google Maps
                 <span className="sr-only"> lúc {name} (mở tab mới)</span>
@@ -80,29 +80,29 @@ function CheckPointSection({ point }: { point: CheckPoint }) {
 function AuditLogSection({ auditLogs }: { auditLogs: AuditLog[] }) {
   const headingId = useId();
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-2">
-      <h2 id={headingId} className="text-xl font-semibold">
+    <section aria-labelledby={headingId} className="ui-card flex max-w-2xl flex-col gap-4">
+      <h2 id={headingId} className="ui-heading">
         Nhật ký thay đổi
       </h2>
       {auditLogs.length === 0 ? (
         <p>Chưa có thay đổi nào.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        <div className="ui-table-wrap">
+          <table className="ui-table">
             <caption className="sr-only">Nhật ký thay đổi của ca</caption>
             <thead>
-              <tr className="border-b border-zinc-300">
-                <th scope="col" className="p-2">Thao tác</th>
-                <th scope="col" className="p-2">Người thực hiện</th>
-                <th scope="col" className="p-2">Thời gian</th>
+              <tr>
+                <th scope="col">Thao tác</th>
+                <th scope="col">Người thực hiện</th>
+                <th scope="col">Thời gian</th>
               </tr>
             </thead>
             <tbody>
               {auditLogs.map((log) => (
-                <tr key={log.id} className="border-b border-zinc-200">
-                  <td className="p-2">{auditActionLabel(log.action)}</td>
-                  <td className="p-2">{log.actorName ?? "—"}</td>
-                  <td className="p-2">{formatDateTime(log.createdAt)}</td>
+                <tr key={log.id}>
+                  <td>{auditActionLabel(log.action)}</td>
+                  <td>{log.actorName ?? "—"}</td>
+                  <td>{formatDateTime(log.createdAt)}</td>
                 </tr>
               ))}
             </tbody>
@@ -129,21 +129,21 @@ function ShiftView({ user, shift, auditLogs, headingRef, onStart, onDone }: Shif
   return (
     <>
       <div className="flex flex-col gap-4">
-        <h1 ref={headingRef} tabIndex={-1} className={`text-2xl font-semibold ${focusClass}`}>
+        <h1 ref={headingRef} tabIndex={-1} className={`ui-title rounded ${focusClass}`}>
           Ca ngày {formatDate(shift.workDate)} của {shift.employeeName}
         </h1>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-          <dt className="font-medium">Nhân viên</dt>
+        <dl className="ui-card grid max-w-2xl grid-cols-[auto_1fr] items-center gap-x-6 gap-y-3">
+          <dt className="ui-hint">Nhân viên</dt>
           <dd>{shift.employeeName}</dd>
-          <dt className="font-medium">Chi nhánh</dt>
+          <dt className="ui-hint">Chi nhánh</dt>
           <dd>{shift.branchName}</dd>
-          <dt className="font-medium">Trạng thái</dt>
+          <dt className="ui-hint">Trạng thái</dt>
           <dd>
             <StatusBadge status={shift.status} />
           </dd>
-          <dt className="font-medium">Lý do</dt>
+          <dt className="ui-hint">Lý do</dt>
           <dd>{shift.failReasons.length > 0 ? formatFailReasons(shift.failReasons) : "—"}</dd>
-          <dt className="font-medium">Nguồn</dt>
+          <dt className="ui-hint">Nguồn</dt>
           <dd>{shift.source === "manual" ? "Nhập tay" : "Check in"}</dd>
         </dl>
       </div>
@@ -207,7 +207,7 @@ export function ShiftDetail({ shiftId }: { shiftId: string }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div role="status">{saved ? "Đã lưu." : null}</div>
+      <div role="status" className="ui-saved">{saved ? "Đã lưu." : null}</div>
       {loadError ? (
         <ErrorMessage message={loadError} />
       ) : me.data && detail.data ? (

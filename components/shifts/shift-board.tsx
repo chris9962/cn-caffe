@@ -14,8 +14,6 @@ import type { Branch } from "@/types/branch";
 import type { CurrentUser } from "@/types/employee";
 import type { ShiftList } from "@/types/shift";
 
-const focusClass =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
 
 // A cleared month input gives "", which the API would reject as an invalid month.
 function shiftsUrl({ month, date, branchId, status }: ShiftFilterValues) {
@@ -47,7 +45,7 @@ export function ShiftBoard() {
       {hasShiftPermission(me.data, "shifts.edit") && (
         <Link
           href="/manage/shifts/new"
-          className={`w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white ${focusClass}`}
+          className={"ui-btn"}
         >
           Thêm ca bằng tay
         </Link>
@@ -67,25 +65,25 @@ export function ShiftBoard() {
         <p>Không có ca nào phù hợp.</p>
       ) : (
         shifts.data && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
+          <div className="ui-table-wrap">
+            <table className="ui-table">
               <caption className="sr-only">Danh sách ca tại chi nhánh</caption>
               <thead>
-                <tr className="border-b border-zinc-300">
-                  <th scope="col" className="p-2">Ảnh check in</th>
-                  <th scope="col" className="p-2">Nhân viên</th>
-                  <th scope="col" className="p-2">Chi nhánh</th>
-                  <th scope="col" className="p-2">Ngày</th>
-                  <th scope="col" className="p-2">Giờ vào</th>
-                  <th scope="col" className="p-2">Giờ ra</th>
-                  <th scope="col" className="p-2">Trạng thái</th>
-                  <th scope="col" className="p-2">Lý do</th>
+                <tr>
+                  <th scope="col">Ảnh check in</th>
+                  <th scope="col">Nhân viên</th>
+                  <th scope="col">Chi nhánh</th>
+                  <th scope="col">Ngày</th>
+                  <th scope="col">Giờ vào</th>
+                  <th scope="col">Giờ ra</th>
+                  <th scope="col">Trạng thái</th>
+                  <th scope="col">Lý do</th>
                 </tr>
               </thead>
               <tbody>
                 {shifts.data.shifts.map((shift) => (
-                  <tr key={shift.id} className="border-b border-zinc-200">
-                    <td className="p-2">
+                  <tr key={shift.id}>
+                    <td>
                       {shift.source === "manual" ? (
                         "Nhập tay"
                       ) : shift.checkInPhotoUrl ? (
@@ -101,22 +99,22 @@ export function ShiftBoard() {
                         "Không có ảnh"
                       )}
                     </td>
-                    <td className="p-2">
-                      <Link href={`/manage/shifts/${shift.id}`} className={`rounded underline ${focusClass}`}>
+                    <td>
+                      <Link href={`/manage/shifts/${shift.id}`} className={"ui-link"}>
                         {shift.employeeName}
                         <span className="sr-only">
                           , ca ngày {formatDate(shift.workDate)} lúc {formatTime(shift.checkInAt)}
                         </span>
                       </Link>
                     </td>
-                    <td className="p-2">{shift.branchName}</td>
-                    <td className="p-2">{formatDate(shift.workDate)}</td>
-                    <td className="p-2">{formatTime(shift.checkInAt)}</td>
-                    <td className="p-2">{formatCheckOut(shift)}</td>
-                    <td className="p-2">
+                    <td>{shift.branchName}</td>
+                    <td>{formatDate(shift.workDate)}</td>
+                    <td>{formatTime(shift.checkInAt)}</td>
+                    <td>{formatCheckOut(shift)}</td>
+                    <td>
                       <StatusBadge status={shift.status} />
                     </td>
-                    <td className="p-2">{shift.failReasons.length > 0 ? formatFailReasons(shift.failReasons) : "—"}</td>
+                    <td>{shift.failReasons.length > 0 ? formatFailReasons(shift.failReasons) : "—"}</td>
                   </tr>
                 ))}
               </tbody>

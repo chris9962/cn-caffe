@@ -126,14 +126,14 @@ export function AppNav({ user }: { user: CurrentUser }) {
         <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0 text-right">
             <p className="truncate text-sm font-semibold">{user.fullName}</p>
-            <p className="text-xs text-[var(--muted)]">Đang làm việc</p>
+            <p className="text-xs text-[var(--muted)]">Chúc bạn một ngày êm</p>
           </div>
           <button
             type="button"
             onClick={handleLogout}
             disabled={isPending}
             aria-label="Đăng xuất"
-            className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--surface-strong)] text-xs font-bold ${focusClass} disabled:opacity-50`}
+            className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-strong)] ${focusClass} disabled:opacity-50`}
           >
             {initials}
           </button>
@@ -143,7 +143,10 @@ export function AppNav({ user }: { user: CurrentUser }) {
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-[var(--line)] bg-[var(--surface)] p-5 md:flex">
         <Link href={homeHref} className={`mb-10 flex w-fit items-center gap-3 rounded-2xl ${focusClass}`}>
           <AppMark />
-          <span className="text-xl font-extrabold tracking-[-0.04em]">Chấm công</span>
+          <span>
+            <span className="block font-[family-name:var(--font-display)] text-xl font-medium">Cỏ Ngọt</span>
+            <span className="block text-xs text-[var(--muted)]">sổ ca của quán</span>
+          </span>
         </Link>
 
         <nav aria-label="Điều hướng chính" className="flex-1">
@@ -153,7 +156,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
                 <Link
                   href={item.href}
                   aria-current={isActive(item.href) ? "page" : undefined}
-                  className={`flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-sm font-semibold transition-colors aria-[current=page]:bg-[var(--foreground)] aria-[current=page]:text-[var(--surface)] ${focusClass}`}
+                  className={`flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-sm font-semibold transition-colors text-[var(--muted)] hover:bg-[var(--background)] hover:text-[var(--foreground)] aria-[current=page]:bg-[var(--accent-soft)] aria-[current=page]:text-[var(--accent-strong)] ${focusClass}`}
                 >
                   <AppNavIcon name={item.icon} />
                   {item.label}
@@ -165,7 +168,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
 
         <div className="border-t border-[var(--line)] pt-5">
           <div className="mb-4 flex items-center gap-3">
-            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--surface-strong)] text-xs font-bold">
+            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-strong)]">
               {initials}
             </span>
             <div className="min-w-0">
@@ -177,9 +180,9 @@ export function AppNav({ user }: { user: CurrentUser }) {
             type="button"
             onClick={handleLogout}
             disabled={isPending}
-            className={`min-h-11 w-full rounded-xl border border-[var(--line)] px-4 text-sm font-semibold transition-colors hover:bg-[var(--surface-strong)] ${focusClass} disabled:opacity-50`}
+            className="ui-btn-quiet w-full"
           >
-            {isPending ? "Đang đăng xuất..." : "Đăng xuất"}
+            {isPending ? "Đang khép cửa..." : "Đăng xuất"}
           </button>
         </div>
       </aside>
@@ -194,9 +197,9 @@ export function AppNav({ user }: { user: CurrentUser }) {
               <Link
                 href={item.href}
                 aria-current={isActive(item.href) ? "page" : undefined}
-                className={`group relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[10px] font-semibold text-[var(--muted)] transition-colors aria-[current=page]:text-[var(--foreground)] ${focusClass}`}
+                className={`group relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-[10px] font-semibold text-[var(--muted)] transition-colors aria-[current=page]:text-[var(--accent-strong)] ${focusClass}`}
               >
-                <span className="absolute top-0 h-0.5 w-6 scale-x-0 rounded-full bg-[var(--accent)] transition-transform group-aria-[current=page]:scale-x-100" />
+                <span className="absolute top-0 h-0.5 w-6 scale-x-0 rounded-full bg-[var(--bloom)] transition-transform group-aria-[current=page]:scale-x-100" />
                 <AppNavIcon name={item.icon} />
                 <span className="w-full truncate text-center">{item.shortLabel}</span>
               </Link>

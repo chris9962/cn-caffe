@@ -6,9 +6,9 @@ import { useMutation } from "@/hooks/use-mutation";
 import type { Branch } from "@/types/branch";
 
 const focusClass =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400";
-const inputClass = `w-full rounded border border-zinc-500 px-3 py-2 ${focusClass}`;
-const buttonClass = `w-fit rounded bg-blue-700 px-4 py-2 font-medium text-white ${focusClass} disabled:opacity-60`;
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
+const inputClass = "ui-field";
+const buttonClass = "ui-btn";
 
 type Coordinates = { latitude: number; longitude: number };
 type ResolvedLink = Coordinates & { resolvedUrl: string };
@@ -101,9 +101,9 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="branch-name" className="font-medium">
+    <form onSubmit={handleSubmit} className="ui-card flex max-w-2xl flex-col gap-5">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="branch-name" className="ui-label">
           Tên
         </label>
         <input
@@ -116,8 +116,8 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
           className={inputClass}
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="branch-address" className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="branch-address" className="ui-label">
           Địa chỉ
         </label>
         <input
@@ -130,7 +130,7 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="branch-maps-url" className="font-medium">
+        <label htmlFor="branch-maps-url" className="ui-label">
           Link Google Maps
         </label>
         <input
@@ -142,7 +142,7 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
           aria-describedby="branch-maps-hint"
           className={inputClass}
         />
-        <p id="branch-maps-hint" className="text-sm text-zinc-700 dark:text-zinc-300">
+        <p id="branch-maps-hint" className="ui-hint">
           Mở Google Maps, chọn đúng quán, bấm &quot;Chia sẻ&quot; rồi copy link dán vào đây.
         </p>
         <button
@@ -167,14 +167,14 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
             type="checkbox"
             checked={isManual}
             onChange={(event) => setIsManual(event.target.checked)}
-            className={`size-4 ${focusClass}`}
+            className={`size-4 accent-[var(--accent)] ${focusClass}`}
           />
           Nhập toạ độ bằng tay
         </label>
         {isManual && (
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1">
-              <label htmlFor="branch-latitude" className="font-medium">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="branch-latitude" className="ui-label">
                 Vĩ độ
               </label>
               <input
@@ -188,8 +188,8 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
                 className={inputClass}
               />
             </div>
-            <div className="flex flex-col gap-1">
-              <label htmlFor="branch-longitude" className="font-medium">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="branch-longitude" className="ui-label">
                 Kinh độ
               </label>
               <input
@@ -206,8 +206,8 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="branch-radius" className="font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="branch-radius" className="ui-label">
           Bán kính (m)
         </label>
         <input
@@ -228,7 +228,7 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
             type="checkbox"
             checked={isActive}
             onChange={(event) => setIsActive(event.target.checked)}
-            className={`size-4 ${focusClass}`}
+            className={`size-4 accent-[var(--accent)] ${focusClass}`}
           />
           Đang hoạt động
         </label>
