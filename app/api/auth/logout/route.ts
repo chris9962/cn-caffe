@@ -1,0 +1,10 @@
+import { dbErrorResponse } from "@/app/api/_lib/errors";
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST() {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut();
+  if (error) return dbErrorResponse(error);
+
+  return Response.json({ ok: true });
+}

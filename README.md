@@ -1,5 +1,84 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+Nguyên tắc code của project nằm trong [AGENTS.md](AGENTS.md). Bạn phải đọc file này trước khi viết code.
+
+## Chạy local với Supabase
+
+Project chạy Supabase local trong Docker qua Supabase CLI. Supabase CLI nằm trong `devDependencies`, bạn không phải cài riêng.
+
+Bạn phải bật Docker Desktop trước khi chạy các lệnh dưới đây. Lần chạy đầu tiên tải khoảng 5 GB image, nên ổ đĩa phải còn ít nhất 10 GB trống.
+
+### Thiết lập lần đầu
+
+> ⚠️ Supabase CLI 2.120.0–2.122.0 không chạy migration và seed ở lần `db:start` đầu tiên khi dùng Docker 28.5. Bạn phải chạy `npm run db:reset` ngay sau `db:start` đầu tiên. Chi tiết ở mục [Lỗi đã biết](#lỗi-đã-biết).
+
+```bash
+npm install
+cp .env.example .env.local
+npm run db:start
+npm run db:reset
+npm run dev
+```
+
+Sau `npm run dev`, bạn làm tiếp mục [Chấm công](#chấm-công) để tạo tài khoản admin và đăng nhập vào ứng dụng.
+
+## Chấm công
+
+> ⚠️ `npm run db:reset` xoá cả tài khoản đăng nhập. Sau mỗi lần reset, bạn chạy lại bước 2.
+
+> ⚠️ Cổng 3000 có thể đã bị chiếm, ví dụ bởi Docker Desktop. Khi đó bạn chạy `npx next dev -p 3002` và dùng cổng 3002 ở bước 3.
+
+1. Bạn lấy `SECRET_KEY` từ `npm run db:status`. Bạn điền giá trị này vào `SUPABASE_SECRET_KEY` trong `.env.local` (file copy từ `.env.example`). Các route admin và `npm test` cần key này.
+2. Bạn tạo admin đầu tiên: `npm run admin:create -- <phone> <password> "<name>"`.
+3. Bạn mở `http://localhost:3000/login`. Bạn đăng nhập bằng số điện thoại và mật khẩu của bước 2.
+
+Test gồm hai lệnh:
+
+- `npm test` chạy test của route handler trên Supabase local.
+- `npm run test:db` chạy test pgTAP cho schema và RLS.
+
+> ⚠️ Camera chỉ chạy trên HTTPS hoặc `localhost`. Trên điện thoại mở qua `http://` trong mạng LAN, trình duyệt chặn camera và ứng dụng hiện "Không mở được camera".
+
+Khi triển khai production:
+
+1. Bạn tắt đăng ký công khai trong project Supabase: Authentication settings, tắt "Allow new users to sign up".
+2. Bạn phục vụ ứng dụng qua HTTPS.
+
+### Lệnh hằng ngày
+
+> ⚠️ `npm run db:reset` xoá toàn bộ dữ liệu trong database local.
+
+| Lệnh | Tác dụng |
+|---|---|
+| `npm run db:start` | Khởi động Supabase local. Dữ liệu từ lần chạy trước giữ nguyên. |
+| `npm run db:stop` | Dừng container. Dữ liệu giữ nguyên. |
+| `npm run db:status` | In URL và key của Supabase local. |
+| `npm run db:reset` | Tạo lại database local, chạy migration trong `supabase/migrations/`, rồi chạy `supabase/seed.sql`. |
+
+### Địa chỉ local
+
+| Service | Địa chỉ |
+|---|---|
+| Next.js | http://localhost:3000 |
+| Supabase API | http://127.0.0.1:54321 |
+| Supabase Studio | http://127.0.0.1:54323 |
+| Mailpit, hộp thư nhận email do Auth gửi | http://127.0.0.1:54324 |
+| Postgres | `postgresql://postgres:postgres@127.0.0.1:54322/postgres` |
+
+### Thay đổi schema
+
+1. Bạn chạy `npx supabase migration new <tên>` để tạo file migration.
+2. Bạn viết SQL vào file mới trong `supabase/migrations/`.
+3. Bạn chạy `npm run db:reset` để áp dụng migration.
+
+Bảng mới trong schema `public` không tự mở qua Data API. Migration phải có lệnh `grant` cho role `anon` hoặc `authenticated`. Migration cũng phải bật RLS và tạo policy. Xem ví dụ trong `supabase/migrations/`.
+
+### Lỗi đã biết
+
+Supabase CLI 2.120.0–2.122.0 kiểm tra volume database bằng chuỗi lỗi `no such volume`. Docker 28.5 trả về chuỗi khác: `volume <tên> not found`. CLI hiểu sai rằng database đã tồn tại. CLI in `Starting database from backup...` rồi bỏ qua khởi tạo schema, migration và seed.
+
+Lỗi này chỉ xảy ra khi volume database chưa tồn tại: lần `db:start` đầu tiên, hoặc sau `npx supabase stop --no-backup`. Khi Supabase sửa lỗi này trong CLI, project không cần bước `db:reset` ở lần thiết lập đầu.
+
 ## Getting Started
 
 First, run the development server:
