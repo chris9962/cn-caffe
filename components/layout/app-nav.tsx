@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppMark } from "@/components/ui/app-mark";
+import { homePath } from "@/lib/employees/home";
 import { ROLE_LABELS } from "@/lib/employees/labels";
 import { useMutation } from "@/hooks/use-mutation";
 import type { CurrentUser } from "@/types/employee";
@@ -13,17 +14,19 @@ type NavItem = { href: string; label: string; shortLabel: string; icon: NavIcon 
 
 function getNavItems(user: CurrentUser): NavItem[] {
   const isAdminOrDirector = user.role === "admin" || user.role === "director";
+  const canManageShifts = isAdminOrDirector || user.permissions.includes("shifts.view");
   const items: NavItem[] = [];
+  // Same order as homePath: shift management first, then the user's own attendance.
+  if (canManageShifts) {
+    items.push({ href: "/manage/shifts", label: "Quản lý ca", shortLabel: "Quản lý", icon: "review" });
+  }
   if (user.requiresAttendance) {
     items.push(
       { href: "/check-in", label: "Chấm công", shortLabel: "Chấm công", icon: "clock" },
       { href: "/my-shifts", label: "Ca của tôi", shortLabel: "Ca của tôi", icon: "calendar" },
     );
-  } else if (!isAdminOrDirector && !user.permissions.includes("shifts.view")) {
+  } else if (!canManageShifts) {
     items.push({ href: "/overview", label: "Tổng quan", shortLabel: "Tổng quan", icon: "home" });
-  }
-  if (isAdminOrDirector || user.permissions.includes("shifts.view")) {
-    items.push({ href: "/manage/shifts", label: "Quản lý ca", shortLabel: "Quản lý", icon: "review" });
   }
   if (isAdminOrDirector) {
     items.push(
@@ -118,7 +121,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
   const router = useRouter();
   const { mutate, isPending } = useMutation();
   const items = getNavItems(user);
-  const homeHref = items[0]?.href ?? "/overview";
+  const homeHref = homePath(user);
   const initials = user.fullName
     .split(/\s+/)
     .slice(-2)

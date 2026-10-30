@@ -37,22 +37,23 @@ function PasswordVisibilityIcon({ visible }: { visible: boolean }) {
 
 export function LoginForm() {
   const router = useRouter();
-  const { mutate, isPending, error } = useMutation();
+  const { mutate, isPending, error } = useMutation<{ home: string }>();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    let home: string;
     try {
-      await mutate("/api/auth/login", {
+      ({ home } = await mutate("/api/auth/login", {
         method: "POST",
         body: { phone, password },
-      });
+      }));
     } catch {
       return;
     }
-    router.replace("/");
+    router.replace(home);
   }
 
   return (

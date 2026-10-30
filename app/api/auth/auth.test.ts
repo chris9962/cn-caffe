@@ -30,8 +30,20 @@ describe("POST /api/auth/login", () => {
       json: { phone: local.replace(/(\d{4})(\d{3})/, "$1 $2 "), password: "Init1234" },
     });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true });
+    expect(await res.json()).toEqual({ home: "/check-in" });
     expect(hasSessionCookie()).toBe(true);
+  });
+
+  it("sends a manager who can view shifts to shift management", async () => {
+    const manager = await createTestEmployee({ role: "manager", password: "Init1234" });
+    const branch = await createTestBranch();
+    await grantManagerAccess(manager.id, [branch.id], ["shifts.view"]);
+    const res = await callRoute(loginPOST, {
+      method: "POST",
+      json: { phone: manager.phone, password: "Init1234" },
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ home: "/manage/shifts" });
   });
 
   it("rejects a wrong password with 401", async () => {
