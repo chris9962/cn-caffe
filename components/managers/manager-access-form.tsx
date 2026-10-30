@@ -5,6 +5,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
+import { useToast } from "@/hooks/use-toast";
 import { PERMISSION_LABELS } from "@/lib/employees/permission-labels";
 import type { Branch } from "@/types/branch";
 import type { ManagerPermission } from "@/types/employee";
@@ -32,11 +33,10 @@ function ManagerAccessFields({
   const { mutate, isPending, error } = useMutation();
   const [branchIds, setBranchIds] = useState(initial.branchIds);
   const [permissions, setPermissions] = useState(initial.permissions);
-  const [saved, setSaved] = useState(false);
+  const showToast = useToast();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSaved(false);
     try {
       await mutate(`/api/admin/managers/${managerId}/access`, {
         method: "PUT",
@@ -45,7 +45,7 @@ function ManagerAccessFields({
     } catch {
       return;
     }
-    setSaved(true);
+    showToast("Đã lưu phân quyền.");
   }
 
   return (
@@ -79,7 +79,6 @@ function ManagerAccessFields({
         ))}
       </fieldset>
       {error && <ErrorMessage message={error} />}
-      <div role="status" className="ui-saved">{saved ? "Đã lưu." : null}</div>
       <button
         type="submit"
         disabled={isPending}

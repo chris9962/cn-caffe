@@ -38,7 +38,7 @@ export function PayrollBoard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <h1 className="ui-title">Bảng lương</h1>
           {payroll?.status === "closed" && (
@@ -47,8 +47,8 @@ export function PayrollBoard() {
             </span>
           )}
         </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <MonthPicker value={month} onChange={setMonth} />
+        <div className="flex flex-wrap items-center gap-3">
+          <MonthPicker value={month} onChange={setMonth} hideLabel />
           {payroll && hasVersionChoice(payroll) && (
             <PayrollVersionSelect
               payroll={payroll}

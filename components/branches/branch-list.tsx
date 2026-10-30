@@ -19,28 +19,36 @@ export function BranchList() {
         <caption className="sr-only">Danh sách chi nhánh</caption>
         <thead>
           <tr>
-            <th scope="col">Tên</th>
-            <th scope="col">Địa chỉ</th>
-            <th scope="col">Bán kính</th>
-            <th scope="col">Trạng thái</th>
-            <th scope="col">Bản đồ</th>
+            {/* The address sits under the name, so the name column stops wrapping word by word on phones. */}
+            <th scope="col">Chi nhánh</th>
+            <th scope="col" className="w-px">
+              Bán kính
+            </th>
+            <th scope="col" className="w-px">
+              Trạng thái
+            </th>
+            <th scope="col" className="w-px">
+              Bản đồ
+            </th>
           </tr>
         </thead>
         <tbody>
           {data?.map((branch) => (
             <tr key={branch.id}>
-              <td>
+              <td className="min-w-40">
                 <Link
                   href={`/admin/branches/${branch.id}`}
                   className={"ui-link"}
                 >
                   {branch.name}
                 </Link>
+                {branch.address && (
+                  <span className="mt-0.5 block text-sm text-[var(--muted)]">{branch.address}</span>
+                )}
               </td>
-              <td>{branch.address}</td>
-              <td>{branch.radiusM} m</td>
-              <td>{branch.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}</td>
-              <td>
+              <td className="whitespace-nowrap">{branch.radiusM} m</td>
+              <td className="whitespace-nowrap">{branch.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}</td>
+              <td className="whitespace-nowrap">
                 {/* Built from coordinates, never the stored link: an admin could have saved any string there. */}
                 <a
                   href={`https://www.google.com/maps?q=${branch.latitude},${branch.longitude}`}

@@ -49,7 +49,7 @@ export function PayAdjustmentEditor({ payslip, onChanged }: PayAdjustmentEditorP
       </h3>
 
       {payslip.adjustments.length > 0 && (
-        <ul className="flex flex-col divide-y divide-[var(--line)] rounded-2xl border border-[var(--line)]">
+        <ul className="flex flex-col divide-y divide-[var(--line)] rounded-lg border border-[var(--line)]">
           {payslip.adjustments.map((item) => (
             <li key={item.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
               <div className="min-w-0 text-sm">
@@ -78,7 +78,7 @@ export function PayAdjustmentEditor({ payslip, onChanged }: PayAdjustmentEditorP
           {(["add", "deduct"] as const).map((value) => (
             <label
               key={value}
-              className="flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-[var(--line)] bg-[var(--background)] px-3 text-sm font-semibold has-[:checked]:border-[var(--accent)] has-[:checked]:bg-[var(--accent-soft)] has-[:checked]:text-[var(--accent-strong)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[var(--accent)]"
+              className="flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--background)] px-3 text-sm font-semibold has-[:checked]:border-[var(--accent)] has-[:checked]:bg-[var(--accent-soft)] has-[:checked]:text-[var(--accent-strong)] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[var(--accent)]"
             >
               <input
                 type="radio"

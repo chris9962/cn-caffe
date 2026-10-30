@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, type MouseEvent, type ReactNode } from "react";
+import { useId, type MouseEvent, type ReactNode } from "react";
+import { useModalDialog } from "@/hooks/use-modal-dialog";
 
 type SideDrawerProps = {
   open: boolean;
@@ -11,18 +12,8 @@ type SideDrawerProps = {
 
 // A panel that slides in from the right. The native <dialog> gives focus trapping, Esc and the backdrop.
 export function SideDrawer({ open, title, onClose, children }: SideDrawerProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const dialogRef = useModalDialog(open);
   const titleId = useId();
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
-    return () => {
-      if (dialog.open) dialog.close();
-    };
-  }, [open]);
 
   function handleClick(event: MouseEvent<HTMLDialogElement>) {
     // A click on the dialog element itself, not its content, is a click on the backdrop.

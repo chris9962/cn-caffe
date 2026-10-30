@@ -34,7 +34,7 @@ function HillsMotif() {
 export function LoginScreen() {
   return (
     <main className="min-h-dvh lg:grid lg:grid-cols-[minmax(25rem,1fr)_minmax(30rem,1fr)]">
-      <section className="relative min-h-[24rem] overflow-hidden bg-[linear-gradient(170deg,#6f8f74_0%,#4d6d54_45%,#33493a_100%)] px-5 pt-6 pb-24 text-[var(--surface)] sm:px-8 lg:flex lg:min-h-dvh lg:flex-col lg:p-10 xl:p-14">
+      <section className="relative overflow-hidden bg-[linear-gradient(170deg,#6f8f74_0%,#4d6d54_45%,#33493a_100%)] px-5 pt-6 pb-20 text-[var(--surface)] sm:px-8 lg:flex lg:min-h-dvh lg:flex-col lg:p-10 xl:p-14">
         <div aria-hidden="true" className="absolute -top-24 -right-16 size-72 rounded-full bg-[var(--bloom)] opacity-20 blur-3xl" />
         <div aria-hidden="true" className="absolute top-1/3 -left-24 size-64 rounded-full bg-white opacity-10 blur-3xl" />
         <HillsMotif />
@@ -47,19 +47,20 @@ export function LoginScreen() {
           </div>
         </div>
 
-        <div className="relative z-10 mt-12 max-w-xl lg:my-auto">
-          <h1 className="font-[family-name:var(--font-display)] text-[clamp(2.3rem,8vw,4.2rem)] leading-[1.08] font-medium tracking-[-0.02em]">
+        <div className="relative z-10 max-w-xl lg:my-auto">
+          {/* Hidden on phones to keep the form above the fold; screen readers still get the page heading. */}
+          <h1 className="sr-only lg:not-sr-only font-[family-name:var(--font-display)] text-[clamp(2.3rem,8vw,4.2rem)] leading-[1.08] font-medium tracking-[-0.02em]">
             Chấm công và xem lương
             <br />
             <em className="font-normal">ngay trên điện thoại.</em>
           </h1>
-          <p className="mt-5 max-w-md text-sm leading-7 text-[color-mix(in_oklab,var(--surface)_78%,transparent)] sm:text-base">
+          <p className="mt-5 hidden max-w-md text-sm lg:block leading-7 text-[color-mix(in_oklab,var(--surface)_78%,transparent)] sm:text-base">
             Vào ca bằng một ảnh và vị trí. Xem lại ca đã làm và lương từng tháng.
           </p>
         </div>
       </section>
 
-      <section className="relative -mt-10 min-h-[calc(100dvh-21rem)] rounded-t-[2.25rem] bg-[var(--background)] px-5 pt-10 pb-10 sm:px-8 lg:mt-0 lg:flex lg:min-h-dvh lg:items-center lg:rounded-none lg:px-[clamp(3rem,8vw,8rem)]">
+      <section className="relative -mt-10 min-h-[calc(100dvh-7.5rem)] rounded-t-[2.25rem] bg-[var(--background)] px-5 pt-8 pb-10 sm:px-8 lg:mt-0 lg:flex lg:min-h-dvh lg:items-center lg:rounded-none lg:px-[clamp(3rem,8vw,8rem)]">
         <div className="mx-auto w-full max-w-md lg:mx-0">
           <div className="mb-8">
             <h2 className="font-[family-name:var(--font-display)] text-3xl font-medium tracking-[-0.02em] sm:text-4xl">
@@ -68,7 +69,7 @@ export function LoginScreen() {
             <p className="ui-lead mt-3">Dùng số điện thoại và mật khẩu quản lý cung cấp.</p>
           </div>
           <LoginForm />
-          <p className="mt-8 text-center text-xs leading-5 text-[var(--muted)] lg:text-left">
+          <p className="mt-6 text-center text-xs leading-5 text-[var(--muted)] lg:text-left">
             Quên mật khẩu? Liên hệ quản lý để đặt lại.
           </p>
         </div>

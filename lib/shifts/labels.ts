@@ -1,4 +1,4 @@
-import { formatDateTime, formatTime, toVietnamLocalInput } from "@/lib/date";
+import { formatDateTime, formatDuration, formatTime, toVietnamLocalInput } from "@/lib/date";
 import type { FailReason, Shift, ShiftStatus } from "@/types/shift";
 
 export const STATUS_LABELS: Record<ShiftStatus, string> = {
@@ -30,6 +30,11 @@ export function formatFailReasons(reasons: FailReason[]) {
 
 export function auditActionLabel(action: string) {
   return AUDIT_ACTION_LABELS.get(action) ?? action;
+}
+
+export function formatShiftDuration(shift: Pick<Shift, "checkInAt" | "checkOutAt">) {
+  if (!shift.checkOutAt) return "—";
+  return formatDuration((Date.parse(shift.checkOutAt) - Date.parse(shift.checkInAt)) / 60000);
 }
 
 export function formatCheckOut(shift: Pick<Shift, "workDate" | "checkOutAt">) {

@@ -99,7 +99,7 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
       )}
 
       {unpaidShifts > 0 && (
-        <p className="rounded-2xl bg-[var(--warning-soft)] px-4 py-3 text-sm text-[var(--warning)]">
+        <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-[var(--warning)]">
           {unpaidShifts} ca chưa có mức lương áp dụng nên chưa được tính tiền.
         </p>
       )}
@@ -123,7 +123,7 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
             <span className="group-open/shifts:hidden">Xem {payslip.shifts.length} ca được tính</span>
             <span className="hidden group-open/shifts:inline">Ẩn danh sách ca</span>
           </summary>
-          <ul aria-label="Các ca được tính lương" className="mt-3 flex flex-col divide-y divide-[var(--line)] rounded-2xl border border-[var(--line)]">
+          <ul aria-label="Các ca được tính lương" className="mt-3 flex flex-col divide-y divide-[var(--line)] rounded-lg border border-[var(--line)]">
             {payslip.shifts.map((shift) => (
               <li key={shift.shiftId} className="flex items-start justify-between gap-4 px-4 py-3 text-sm">
                 <div className="min-w-0">

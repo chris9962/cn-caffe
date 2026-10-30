@@ -20,30 +20,40 @@ export function EmployeeList() {
         <caption className="sr-only">Danh sách nhân viên</caption>
         <thead>
           <tr>
-            <th scope="col">Họ tên</th>
-            <th scope="col">Số điện thoại</th>
-            <th scope="col">Vai trò</th>
-            <th scope="col">Hình thức</th>
-            <th scope="col">Chấm công</th>
-            <th scope="col">Trạng thái</th>
+            {/* Paired facts share a cell as two lines, so names stop wrapping word by word on phones. */}
+            <th scope="col">Nhân viên</th>
+            <th scope="col" className="w-px">
+              Vai trò
+            </th>
+            <th scope="col" className="w-px">
+              Trạng thái
+            </th>
           </tr>
         </thead>
         <tbody>
           {data?.map((employee) => (
             <tr key={employee.id}>
-              <td>
+              <td className="min-w-40">
                 <Link
                   href={`/admin/employees/${employee.id}`}
                   className={"ui-link"}
                 >
                   {employee.fullName}
                 </Link>
+                <span className="mt-0.5 block text-sm text-[var(--muted)]">{formatPhone(employee.phone)}</span>
               </td>
-              <td>{formatPhone(employee.phone)}</td>
-              <td>{ROLE_LABELS[employee.role]}</td>
-              <td>{EMPLOYMENT_TYPE_LABELS[employee.employmentType]}</td>
-              <td>{employee.requiresAttendance ? "Có" : "Không"}</td>
-              <td>{employee.isActive ? "Đang làm" : "Đã khoá"}</td>
+              <td className="whitespace-nowrap">
+                {ROLE_LABELS[employee.role]}
+                <span className="mt-0.5 block text-sm text-[var(--muted)]">
+                  {EMPLOYMENT_TYPE_LABELS[employee.employmentType]}
+                </span>
+              </td>
+              <td className="whitespace-nowrap">
+                {employee.isActive ? "Đang làm" : "Đã khoá"}
+                {!employee.requiresAttendance && (
+                  <span className="mt-0.5 block text-sm text-[var(--muted)]">Không chấm công</span>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

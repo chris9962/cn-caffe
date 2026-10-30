@@ -6,14 +6,9 @@ import { Loading } from "@/components/ui/loading";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useFetch } from "@/hooks/use-fetch";
-import { currentMonth, formatDate, formatDuration, formatTime } from "@/lib/date";
-import { formatCheckOut, formatFailReasons } from "@/lib/shifts/labels";
+import { currentMonth, formatDate, formatTime } from "@/lib/date";
+import { formatCheckOut, formatFailReasons, formatShiftDuration } from "@/lib/shifts/labels";
 import type { Shift } from "@/types/shift";
-
-function formatShiftDuration(shift: Shift) {
-  if (!shift.checkOutAt) return "—";
-  return formatDuration((Date.parse(shift.checkOutAt) - Date.parse(shift.checkInAt)) / 60000);
-}
 
 export function MyShiftList() {
   const [month, setMonth] = useState(() => currentMonth());
@@ -35,7 +30,7 @@ export function MyShiftList() {
         data && (
           <ul aria-label="Danh sách ca của tôi" className="flex flex-col gap-3">
             {data.map((shift) => (
-              <li key={shift.id} className="ui-card flex flex-col gap-3 rounded-[1.5rem] sm:p-5">
+              <li key={shift.id} className="ui-card flex flex-col gap-3 rounded-lg sm:p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-[family-name:var(--font-display)] text-lg font-medium">{formatDate(shift.workDate)}</p>
@@ -43,7 +38,7 @@ export function MyShiftList() {
                   </div>
                   <StatusBadge status={shift.status} />
                 </div>
-                <dl className="grid grid-cols-3 gap-2 rounded-2xl bg-[var(--background)] p-3 text-sm">
+                <dl className="grid grid-cols-3 gap-2 rounded-lg bg-[var(--background)] p-3 text-sm">
                   <div>
                     <dt className="ui-hint text-xs">Giờ vào</dt>
                     <dd className="font-semibold">{formatTime(shift.checkInAt)}</dd>

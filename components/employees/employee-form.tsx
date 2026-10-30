@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { Switch } from "@/components/ui/switch";
 import { useMutation } from "@/hooks/use-mutation";
 import {
   EMPLOYMENT_TYPE_LABELS,
@@ -15,11 +16,10 @@ const inputClass =
 
 type EmployeeFormProps = {
   employee?: Employee;
-  onStart?: () => void;
   onSaved: (employee: Employee) => void;
 };
 
-export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) {
+export function EmployeeForm({ employee, onSaved }: EmployeeFormProps) {
   const { mutate, isPending, error } = useMutation<Employee>();
   const [fullName, setFullName] = useState(employee?.fullName ?? "");
   const [phone, setPhone] = useState(employee ? formatPhone(employee.phone) : "");
@@ -35,7 +35,6 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onStart?.();
     let result: Employee;
     try {
       result = employee
@@ -140,24 +139,16 @@ export function EmployeeForm({ employee, onStart, onSaved }: EmployeeFormProps) 
           Dùng làm loại mặc định khi thêm mức lương. Cách tính lương theo từng mức lương, không quyết định việc chấm công.
         </p>
       </div>
-      <div className="rounded-2xl border border-[var(--line)] bg-[var(--background)] p-4">
-        <label className="flex cursor-pointer items-start gap-3">
-          <input
-            type="checkbox"
-            checked={!attendanceLocked && requiresAttendance}
-            disabled={attendanceLocked}
-            onChange={(event) => setRequiresAttendance(event.target.checked)}
-            className="mt-1 size-4 accent-[var(--accent)]"
-          />
-          <span>
-            <span className="block font-semibold">Cần chấm công</span>
-            <span className="block ui-hint">
-              {attendanceLocked
-                ? "Admin và giám đốc không chấm công."
-                : "Bật để nhân viên dùng Chấm công và Ca của tôi."}
-            </span>
-          </span>
-        </label>
+      <div className="rounded-lg border border-[var(--line)] bg-[var(--background)] p-4">
+        <Switch
+          checked={!attendanceLocked && requiresAttendance}
+          disabled={attendanceLocked}
+          onChange={setRequiresAttendance}
+          label="Cần chấm công"
+          description={
+            attendanceLocked ? "Admin và giám đốc không chấm công." : "Bật để nhân viên dùng Chấm công và Ca của tôi."
+          }
+        />
       </div>
       {!employee && (
         <div className="flex flex-col gap-1.5">

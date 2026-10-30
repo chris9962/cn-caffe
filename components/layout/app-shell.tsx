@@ -7,7 +7,9 @@ import { ChangePasswordForm } from "@/components/auth/change-password-form";
 import { AppNav } from "@/components/layout/app-nav";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
+import { ToastProvider } from "@/components/ui/toast";
 import { useFetch } from "@/hooks/use-fetch";
+import { homePath } from "@/lib/employees/home";
 import type { CurrentUser } from "@/types/employee";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -22,12 +24,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     if (user && needsAttendanceRedirect) {
-      const canManageShifts =
-        user.role === "admin" ||
-        user.role === "director" ||
-        user.permissions.includes("shifts.view");
       queueMicrotask(() => {
-        if (active) router.replace(canManageShifts ? "/manage/shifts" : "/overview");
+        if (active) router.replace(homePath(user));
       });
     }
     return () => {
@@ -74,11 +72,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-dvh md:grid md:grid-cols-[17rem_minmax(0,1fr)]">
-      <AppNav user={user} />
-      <main className="mx-auto w-full max-w-5xl px-4 pt-5 pb-[calc(6.75rem+env(safe-area-inset-bottom))] sm:px-6 md:px-8 md:py-8 lg:px-10">
-        {children}
-      </main>
-    </div>
+    <ToastProvider>
+      <div className="min-h-dvh md:grid md:grid-cols-[17rem_minmax(0,1fr)]">
+        <AppNav user={user} />
+        <main className="w-full min-w-0 px-4 pt-5 pb-[calc(6.75rem+env(safe-area-inset-bottom))] sm:px-6 md:px-8 md:py-8 lg:px-10">
+          {children}
+        </main>
+      </div>
+    </ToastProvider>
   );
 }

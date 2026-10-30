@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
+import { Modal } from "@/components/ui/modal";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
+import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/date";
 import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employees/labels";
 import { formatMoney } from "@/lib/payroll/format";
@@ -25,6 +27,8 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
   const [employmentType, setEmploymentType] = useState<EmploymentType>(employee.employmentType);
   const [amount, setAmount] = useState("");
   const [effectiveFrom, setEffectiveFrom] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const showToast = useToast();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,6 +42,8 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
     }
     setAmount("");
     setEffectiveFrom("");
+    setIsAdding(false);
+    showToast("Đã thêm mức lương.");
     rates.reload();
   }
 
@@ -55,9 +61,14 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
   return (
     <section aria-labelledby="pay-rate-heading" className="ui-card flex max-w-2xl flex-col gap-5">
       <div>
-        <h2 id="pay-rate-heading" className="ui-heading">
-          Mức lương
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="pay-rate-heading" className="ui-heading">
+            Mức lương
+          </h2>
+          <button type="button" onClick={() => setIsAdding(true)} className="ui-btn min-h-10 px-4 text-sm">
+            Thêm mức lương
+          </button>
+        </div>
         <p className="ui-hint mt-1">
           Mỗi ca dùng mức lương có hiệu lực vào ngày của ca. Thêm mức mới khi tăng lương hoặc đổi loại nhân viên.{" "}
           <Link href={`/admin/payroll/employees/${employee.id}`} className="ui-link">
@@ -71,11 +82,11 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
       ) : !rates.data ? (
         <Loading label="Đang tải mức lương..." />
       ) : rates.data.length === 0 ? (
-        <p className="rounded-2xl bg-[var(--warning-soft)] px-4 py-3 text-sm text-[var(--warning)]">
+        <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-[var(--warning)]">
           Chưa có mức lương. Ca của nhân viên này sẽ chưa được tính tiền.
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-[var(--line)] rounded-2xl border border-[var(--line)]">
+        <ul className="flex flex-col divide-y divide-[var(--line)] rounded-lg border border-[var(--line)]">
           {rates.data.map((rate) => (
             <li key={rate.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
               <div>
@@ -102,9 +113,9 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
       )}
       {remove.error && <ErrorMessage message={remove.error} />}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 border-t border-[var(--line)] pt-5">
-        <h3 className="ui-label">Thêm mức lương</h3>
-        <div className="grid gap-4 sm:grid-cols-3">
+      <Modal open={isAdding} title="Thêm mức lương" onClose={() => setIsAdding(false)}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="rate-type" className="ui-label">
               Loại
@@ -150,10 +161,11 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
           </div>
         </div>
         {save.error && <ErrorMessage message={save.error} />}
-        <button type="submit" disabled={save.isPending} className="ui-btn">
+        <button type="submit" disabled={save.isPending} className="ui-btn w-full">
           {save.isPending ? "Đang thêm..." : "Thêm mức lương"}
         </button>
       </form>
+      </Modal>
     </section>
   );
 }

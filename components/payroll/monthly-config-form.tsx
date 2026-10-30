@@ -6,6 +6,7 @@ import { Loading } from "@/components/ui/loading";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
+import { useToast } from "@/hooks/use-toast";
 import { currentMonth } from "@/lib/date";
 import { formatMonthLabel } from "@/lib/payroll/format";
 import type { MonthlyConfig } from "@/types/payroll";
@@ -16,11 +17,10 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
   const [overtimeEnd, setOvertimeEnd] = useState(config.overtimeEnd);
   const [overtimeHourlyRate, setOvertimeHourlyRate] = useState(String(config.overtimeHourlyRate));
   const [maxShiftHours, setMaxShiftHours] = useState(String(config.maxShiftMinutes / 60));
-  const [saved, setSaved] = useState(false);
+  const showToast = useToast();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSaved(false);
     try {
       await mutate("/api/admin/monthly-config", {
         method: "PUT",
@@ -35,7 +35,7 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
     } catch {
       return;
     }
-    setSaved(true);
+    showToast("Đã lưu cấu hình.");
     onSaved();
   }
 
@@ -43,7 +43,7 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
     <form onSubmit={handleSubmit} className="ui-card flex max-w-2xl flex-col gap-5">
       <h2 className="ui-heading">{formatMonthLabel(config.month)}</h2>
       {config.isLocked && (
-        <p className="rounded-2xl bg-[var(--bloom-soft)] px-4 py-3 text-sm text-[var(--warning)]">
+        <p className="rounded-lg bg-[var(--bloom-soft)] px-4 py-3 text-sm text-[var(--warning)]">
           Tháng này đã chốt lương nên không sửa được. Mở lại tháng ở Bảng lương nếu cần sửa.
         </p>
       )}
@@ -122,14 +122,9 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
           <p id="max-shift-hint" className="ui-hint">Ca dài hơn mức này sẽ chờ quản lý duyệt.</p>
         </div>
         {error && <ErrorMessage message={error} />}
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={isPending} className="ui-btn">
-            {isPending ? "Đang lưu..." : "Lưu cấu hình"}
-          </button>
-          <p role="status" className="ui-saved">
-            {saved ? "Đã lưu." : null}
-          </p>
-        </div>
+        <button type="submit" disabled={isPending} className="ui-btn">
+          {isPending ? "Đang lưu..." : "Lưu cấu hình"}
+        </button>
       </fieldset>
     </form>
   );

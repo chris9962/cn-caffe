@@ -2,59 +2,50 @@
 
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { Switch } from "@/components/ui/switch";
 import { useMutation } from "@/hooks/use-mutation";
 import type { Branch } from "@/types/branch";
 
-const focusClass =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
 const inputClass = "ui-field";
 const buttonClass = "ui-btn";
 
+const LOCATION_OPTIONS: PositionOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
+// Above this the fix usually comes from Wi-Fi or cell towers, too rough for a check-in radius of about 20 m.
+const ROUGH_ACCURACY_M = 50;
+
 type Coordinates = { latitude: number; longitude: number };
 type ResolvedLink = Coordinates & { resolvedUrl: string };
+type LocationNote = { kind: "success" | "warning" | "error"; text: string };
 
 type BranchFormProps = {
   branch?: Branch;
-  onStart?: () => void;
   onSaved: (branch: Branch) => void;
 };
 
-function parseCoordinates(latitude: string, longitude: string): Coordinates | null {
-  if (latitude.trim() === "" || longitude.trim() === "") return null;
-  const lat = Number(latitude);
-  const lng = Number(longitude);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
-  return { latitude: lat, longitude: lng };
-}
-
-export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
+export function BranchForm({ branch, onSaved }: BranchFormProps) {
   const save = useMutation<Branch>();
   const resolve = useMutation<ResolvedLink>();
   const [name, setName] = useState(branch?.name ?? "");
   const [address, setAddress] = useState(branch?.address ?? "");
   const [googleMapsUrl, setGoogleMapsUrl] = useState(branch?.googleMapsUrl ?? "");
-  const [isManual, setIsManual] = useState(false);
-  const [latitudeText, setLatitudeText] = useState(branch ? String(branch.latitude) : "");
-  const [longitudeText, setLongitudeText] = useState(branch ? String(branch.longitude) : "");
-  const [radiusM, setRadiusM] = useState(String(branch?.radiusM ?? 100));
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(
+    branch ? { latitude: branch.latitude, longitude: branch.longitude } : null,
+  );
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationNote, setLocationNote] = useState<LocationNote | null>(null);
+  const [radiusM, setRadiusM] = useState(String(branch?.radiusM ?? 20));
   const [isActive, setIsActive] = useState(branch?.isActive ?? true);
 
   const [radiusError, setRadiusError] = useState<string | null>(null);
 
-  const coordinates = parseCoordinates(latitudeText, longitudeText);
-
   function handleLinkChange(value: string) {
     setGoogleMapsUrl(value);
     // The old coordinates belong to the old link; keeping them would let a new link be saved with a stale place.
-    if (!isManual) {
-      setLatitudeText("");
-      setLongitudeText("");
-    }
+    setCoordinates(null);
+    setLocationNote(null);
   }
 
   async function handleResolve() {
-    onStart?.();
     let result: ResolvedLink;
     try {
       result = await resolve.mutate("/api/admin/branches/resolve-map-link", {
@@ -64,14 +55,47 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
     } catch {
       return;
     }
-    setLatitudeText(String(result.latitude));
-    setLongitudeText(String(result.longitude));
+    setCoordinates({ latitude: result.latitude, longitude: result.longitude });
+    setLocationNote(null);
+  }
+
+  function handleUseCurrentLocation() {
+    if (!navigator.geolocation) {
+      setLocationNote({ kind: "error", text: "Trình duyệt này không lấy được vị trí." });
+      return;
+    }
+    setIsLocating(true);
+    setLocationNote(null);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setIsLocating(false);
+        setCoordinates({ latitude: coords.latitude, longitude: coords.longitude });
+        // A pasted link would describe a different place than the device position.
+        setGoogleMapsUrl("");
+        const accuracy = Math.round(coords.accuracy);
+        setLocationNote(
+          accuracy > ROUGH_ACCURACY_M
+            ? { kind: "warning", text: `Độ chính xác khoảng ${accuracy} m. Bạn nên đứng tại quán, bật GPS rồi thử lại.` }
+            : { kind: "success", text: `Đã lấy vị trí hiện tại, độ chính xác khoảng ${accuracy} m.` },
+        );
+      },
+      (error) => {
+        setIsLocating(false);
+        setLocationNote({
+          kind: "error",
+          text:
+            error.code === error.PERMISSION_DENIED
+              ? "Bạn cần cho phép trình duyệt dùng vị trí."
+              : "Không lấy được vị trí. Bạn thử lại hoặc dán link Google Maps.",
+        });
+      },
+      LOCATION_OPTIONS,
+    );
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!coordinates) return;
-    onStart?.();
     const radius = Number(radiusM);
     if (radiusM.trim() === "" || !Number.isInteger(radius) || radius < 1) {
       setRadiusError("Bán kính phải là số nguyên dương.");
@@ -129,83 +153,73 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
           className={inputClass}
         />
       </div>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="branch-maps-url" className="ui-label">
-          Link Google Maps
-        </label>
-        <input
-          id="branch-maps-url"
-          type="url"
-          autoComplete="off"
-          value={googleMapsUrl}
-          onChange={(event) => handleLinkChange(event.target.value)}
-          aria-describedby="branch-maps-hint"
-          className={inputClass}
-        />
-        <p id="branch-maps-hint" className="ui-hint">
-          Mở Google Maps, chọn đúng quán, bấm &quot;Chia sẻ&quot; rồi copy link dán vào đây.
+
+      <fieldset className="flex flex-col gap-4 rounded-lg border border-[var(--line)] p-4">
+        <legend className="ui-label px-1">Vị trí quán</legend>
+        <p role="status" className="text-sm">
+          {coordinates ? (
+            <>
+              <span className="font-semibold">
+                {coordinates.latitude.toFixed(5)}, {coordinates.longitude.toFixed(5)}
+              </span>{" "}
+              {/* Built from coordinates, never the stored link: an admin could have saved any string there. */}
+              <a
+                href={`https://www.google.com/maps?q=${coordinates.latitude},${coordinates.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ui-link"
+              >
+                Xem trên bản đồ<span className="sr-only"> (mở tab mới)</span>
+              </a>
+            </>
+          ) : (
+            "Chưa có toạ độ. Bạn dùng vị trí hiện tại hoặc dán link Google Maps."
+          )}
         </p>
-        <button
-          type="button"
-          onClick={handleResolve}
-          disabled={resolve.isPending || googleMapsUrl.trim() === ""}
-          className={buttonClass}
-        >
-          Lấy toạ độ từ link
+
+        <button type="button" onClick={handleUseCurrentLocation} disabled={isLocating} className="ui-btn-quiet">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+            <path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
+          {isLocating ? "Đang lấy vị trí..." : "Dùng vị trí hiện tại"}
         </button>
-        {resolve.error && <ErrorMessage message={resolve.error} />}
-      </div>
-      <div className="flex flex-col gap-2">
-        <p role="status">
-          <span className="font-medium">Toạ độ: </span>
-          {coordinates
-            ? `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`
-            : "Chưa có toạ độ"}
-        </p>
-        <label className="flex w-fit items-center gap-2">
-          <input
-            type="checkbox"
-            checked={isManual}
-            onChange={(event) => setIsManual(event.target.checked)}
-            className={`size-4 accent-[var(--accent)] ${focusClass}`}
-          />
-          Nhập toạ độ bằng tay
-        </label>
-        {isManual && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="branch-latitude" className="ui-label">
-                Vĩ độ
-              </label>
-              <input
-                id="branch-latitude"
-                type="number"
-                step="any"
-                min={-90}
-                max={90}
-                value={latitudeText}
-                onChange={(event) => setLatitudeText(event.target.value)}
-                className={inputClass}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="branch-longitude" className="ui-label">
-                Kinh độ
-              </label>
-              <input
-                id="branch-longitude"
-                type="number"
-                step="any"
-                min={-180}
-                max={180}
-                value={longitudeText}
-                onChange={(event) => setLongitudeText(event.target.value)}
-                className={inputClass}
-              />
-            </div>
-          </div>
+        {locationNote?.kind === "error" && <ErrorMessage message={locationNote.text} />}
+        {locationNote?.kind === "warning" && (
+          <p className="rounded-lg bg-[var(--warning-soft)] px-3 py-2 text-sm text-[var(--warning)]">{locationNote.text}</p>
         )}
-      </div>
+        {locationNote?.kind === "success" && <p className="ui-hint">{locationNote.text}</p>}
+
+        <div className="flex flex-col gap-2 border-t border-[var(--line)] pt-4">
+          <label htmlFor="branch-maps-url" className="ui-label">
+            Hoặc dán link Google Maps
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="branch-maps-url"
+              type="url"
+              autoComplete="off"
+              value={googleMapsUrl}
+              onChange={(event) => handleLinkChange(event.target.value)}
+              aria-describedby="branch-maps-hint"
+              className={`${inputClass} min-w-0 flex-1`}
+            />
+            <button
+              type="button"
+              onClick={handleResolve}
+              disabled={resolve.isPending || googleMapsUrl.trim() === ""}
+              className={`${buttonClass} shrink-0`}
+            >
+              Lấy toạ độ
+            </button>
+          </div>
+          <p id="branch-maps-hint" className="ui-hint">
+            Mở Google Maps, chọn đúng quán, bấm &quot;Chia sẻ&quot; rồi copy link dán vào đây.
+          </p>
+          {resolve.error && <ErrorMessage message={resolve.error} />}
+        </div>
+      </fieldset>
+
       <div className="flex flex-col gap-1.5">
         <label htmlFor="branch-radius" className="ui-label">
           Bán kính (m)
@@ -223,15 +237,12 @@ export function BranchForm({ branch, onStart, onSaved }: BranchFormProps) {
         {radiusError && <ErrorMessage message={radiusError} />}
       </div>
       {branch && (
-        <label className="flex w-fit items-center gap-2">
-          <input
-            type="checkbox"
-            checked={isActive}
-            onChange={(event) => setIsActive(event.target.checked)}
-            className={`size-4 accent-[var(--accent)] ${focusClass}`}
-          />
-          Đang hoạt động
-        </label>
+        <Switch
+          checked={isActive}
+          onChange={setIsActive}
+          label="Đang hoạt động"
+          description="Tắt để ẩn chi nhánh khỏi danh sách chấm công."
+        />
       )}
       {save.error && <ErrorMessage message={save.error} />}
       <button type="submit" disabled={save.isPending || !coordinates} className={buttonClass}>

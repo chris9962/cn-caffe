@@ -1,19 +1,20 @@
 "use client";
 
-import { use, useState } from "react";
+import { use } from "react";
 import { BranchForm } from "@/components/branches/branch-form";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
 import { useFetch } from "@/hooks/use-fetch";
+import { useToast } from "@/hooks/use-toast";
 import type { Branch } from "@/types/branch";
 
 export function BranchDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { data, error, isLoading, reload } = useFetch<Branch[]>("/api/admin/branches");
-  const [saved, setSaved] = useState(false);
+  const showToast = useToast();
 
   function handleSaved() {
-    setSaved(true);
+    showToast("Đã lưu chi nhánh.");
     reload();
   }
 
@@ -22,7 +23,6 @@ export function BranchDetail({ params }: { params: Promise<{ id: string }> }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div role="status" className="ui-saved">{saved ? "Đã lưu." : null}</div>
       {error ? (
         <ErrorMessage message={error} />
       ) : data === null && isLoading ? (
@@ -32,12 +32,7 @@ export function BranchDetail({ params }: { params: Promise<{ id: string }> }) {
       ) : (
         <>
           <h1 className="ui-title">{branch.name}</h1>
-          <BranchForm
-            key={branch.id}
-            branch={branch}
-            onStart={() => setSaved(false)}
-            onSaved={handleSaved}
-          />
+          <BranchForm key={branch.id} branch={branch} onSaved={handleSaved} />
         </>
       )}
     </div>

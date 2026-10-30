@@ -26,20 +26,6 @@ const todayFormatter = new Intl.DateTimeFormat("vi-VN", {
   month: "long",
 });
 
-const hourFormatter = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "Asia/Ho_Chi_Minh",
-  hour: "numeric",
-  hourCycle: "h23",
-});
-
-function greeting(now: Date) {
-  const hour = Number(hourFormatter.format(now));
-  if (hour < 11) return "Chào buổi sáng";
-  if (hour < 14) return "Chào buổi trưa";
-  if (hour < 18) return "Chào buổi chiều";
-  return "Chào buổi tối";
-}
-
 const clockFormatter = new Intl.DateTimeFormat("vi-VN", {
   timeZone: "Asia/Ho_Chi_Minh",
   hour: "2-digit",
@@ -48,7 +34,6 @@ const clockFormatter = new Intl.DateTimeFormat("vi-VN", {
 });
 
 type Mode = "check-in" | "check-out" | "start-new";
-type Step = "idle" | "locating" | "ready" | "submitting";
 type Location = { latitude: number; longitude: number; accuracyM: number };
 type Outcome = { isSuccess: boolean; message: string };
 
@@ -84,19 +69,13 @@ function resultMessage(mode: Mode, shift: Shift, unfinishedDate: string | null) 
   return `${done}${review}.${unfinished}`;
 }
 
-function AttendanceIcon({ name }: { name: "arrow" | "pin" | "camera" | "check" }) {
+function AttendanceIcon({ name }: { name: "arrow" | "pin" | "check" }) {
   const paths = {
     arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
     pin: (
       <>
         <path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" />
         <circle cx="12" cy="9" r="2.5" />
-      </>
-    ),
-    camera: (
-      <>
-        <path d="M4 7.5h3l1.5-2h7l1.5 2h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z" />
-        <circle cx="12" cy="13" r="3.5" />
       </>
     ),
     check: <path d="m5 12 4 4L19 6" />,
@@ -132,7 +111,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
   if (openShift && today !== null && openShift.workDate < today) {
     const day = shortDate(openShift.workDate);
     return (
-      <section className="ui-card flex flex-col gap-5 rounded-[2rem] border-[var(--bloom)] bg-[var(--bloom-soft)]">
+      <section className="ui-card flex flex-col gap-5 rounded-lg border-[var(--bloom)] bg-[var(--bloom-soft)]">
         <div className="flex flex-col gap-1">
           <p className="ui-eyebrow text-[var(--warning)]">Chưa kết thúc ca</p>
           <h2 className="ui-heading text-2xl">Ca ngày {day} chưa kết thúc</h2>
@@ -160,7 +139,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
 
   if (openShift) {
     return (
-      <section className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(160deg,#5f8466_0%,#3f5c47_100%)] p-5 text-[var(--surface)] shadow-[0_24px_48px_-32px_rgba(44,58,49,0.8)] sm:p-7">
+      <section className="relative overflow-hidden rounded-lg bg-[linear-gradient(160deg,#5f8466_0%,#3f5c47_100%)] p-5 text-[var(--surface)] shadow-[0_24px_48px_-32px_rgba(44,58,49,0.8)] sm:p-7">
         <div aria-hidden="true" className="absolute -top-16 -right-10 size-48 rounded-full bg-[var(--bloom)] opacity-25 blur-2xl" />
         <div className="relative mb-10 flex items-center justify-between gap-4">
           <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_oklab,var(--surface)_16%,transparent)] px-3 py-1.5 text-xs font-semibold">
@@ -194,7 +173,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
   }
 
   return (
-    <section className="ui-card relative overflow-hidden rounded-[2rem]">
+    <section className="ui-card relative overflow-hidden rounded-lg">
       <div aria-hidden="true" className="absolute -top-16 -right-12 size-44 rounded-full bg-[var(--bloom)] opacity-20 blur-2xl" />
       <div aria-hidden="true" className="absolute -bottom-20 -left-10 size-44 rounded-full bg-[var(--accent)] opacity-10 blur-2xl" />
       <div className="relative">
@@ -202,13 +181,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
         <p suppressHydrationWarning className="mt-3 font-[family-name:var(--font-display)] text-[clamp(3.75rem,18vw,6rem)] leading-none font-medium tracking-[-0.03em]">
           {timeLabel}
         </p>
-        <div className="mt-8 mb-7">
-          <h2 className="ui-heading text-2xl">Sẵn sàng vào ca?</h2>
-          <p className="ui-lead mt-1">
-            Bật vị trí và chuẩn bị chụp một ảnh xác nhận.
-          </p>
-        </div>
-        <button type="button" onClick={() => onStart("check-in")} className={primaryButtonClass}>
+        <button type="button" onClick={() => onStart("check-in")} className={`${primaryButtonClass} mt-6`}>
           Vào ca
           <span className="ml-2"><AttendanceIcon name="arrow" /></span>
         </button>
@@ -217,66 +190,55 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
   );
 }
 
-function AttendanceProgress({ step }: { step: Step }) {
-  const activeIndex = step === "locating" ? 0 : step === "ready" ? 1 : 2;
-  const stages = [
-    { label: "Vị trí", icon: "pin" as const },
-    { label: "Ảnh", icon: "camera" as const },
-    { label: "Xong rồi", icon: "check" as const },
-  ];
-
-  return (
-    <ol aria-label="Tiến trình chấm công" className="grid grid-cols-3 gap-2">
-      {stages.map((stage, index) => (
-        <li
-          key={stage.label}
-          aria-current={index === activeIndex ? "step" : undefined}
-          className={`flex min-h-11 items-center justify-center gap-1.5 rounded-full text-xs font-semibold transition-colors ${
-            index <= activeIndex
-              ? "bg-[var(--accent)] text-[var(--surface)]"
-              : "bg-[var(--surface-strong)] text-[var(--muted)]"
-          }`}
-        >
-          <AttendanceIcon name={stage.icon} />
-          {stage.label}
-        </li>
-      ))}
-    </ol>
-  );
-}
-
 type AttendanceFlowProps = {
   mode: Mode;
   // The work date of the shift left open, named in the message after starting a new shift.
   unfinishedDate: string | null;
+  // Check out happens at the open shift's branch, so its name labels the photo.
+  openShiftBranchName: string | null;
   onCancel: () => void;
   onDone: (outcome: Outcome) => void;
 };
 
-function AttendanceFlow({ mode, unfinishedDate, onCancel, onDone }: AttendanceFlowProps) {
-  const { mutate } = useMutation<Shift>();
-  const [step, setStep] = useState<Step>("locating");
-  const [location, setLocation] = useState<Location | null>(null);
+function AttendanceFlow({ mode, unfinishedDate, openShiftBranchName, onCancel, onDone }: AttendanceFlowProps) {
+  const { mutate, isPending } = useMutation<Shift>();
+  // undefined while the browser is still answering, null when it cannot give a position.
+  const [location, setLocation] = useState<Location | null | undefined>(undefined);
   const [chosenBranchId, setChosenBranchId] = useState<string | null>(null);
   const [photo, setPhoto] = useState<Blob | null>(null);
 
   const needsBranch = mode !== "check-out";
+  const isLocating = location === undefined;
   const branchesUrl =
-    step === "ready" && needsBranch
+    needsBranch && !isLocating
       ? location
         ? `/api/branches?lat=${location.latitude}&lng=${location.longitude}`
         : "/api/branches"
       : null;
   const branches = useFetch<Array<Branch | BranchWithDistance>>(branchesUrl);
-  const branchId = chosenBranchId ?? (location ? (branches.data?.[0]?.id ?? "") : "");
-  const canCapture = !needsBranch || (branches.data !== null && branches.data.length > 0);
+  const branchList = branches.data ?? [];
+  const inRadius = branchList.filter((branch) => "distanceM" in branch && branch.distanceM <= branch.radiusM);
+  // The employee chooses only when two branches overlap or none is in range; one match is taken as is.
+  const pickerBranches = inRadius.length === 1 ? [] : inRadius.length > 1 ? inRadius : branchList;
+  const branchId = chosenBranchId ?? inRadius[0]?.id ?? (location ? (branchList[0]?.id ?? "") : "");
+  const isResolvingBranch = needsBranch && (isLocating || (branches.data === null && !branches.error));
+  const branchLabel = needsBranch
+    ? isResolvingBranch
+      ? "Đang xác định chi nhánh..."
+      : (branchList.find((branch) => branch.id === branchId)?.name ?? "Chưa chọn chi nhánh")
+    : (openShiftBranchName ?? "Chi nhánh của ca đang mở");
+  const reviewNote =
+    location === null
+      ? "Không lấy được vị trí. Ca này sẽ chờ quản lý duyệt."
+      : needsBranch && branches.data !== null && branches.data.length > 0 && inRadius.length === 0
+        ? "Bạn đang ở ngoài bán kính chi nhánh. Ca này sẽ chờ quản lý duyệt."
+        : null;
+  const canConfirm = photo !== null && !isLocating && !isPending && (!needsBranch || branchId !== "");
 
   useEffect(() => {
     let isCancelled = false;
     requestLocation().then((nextLocation) => {
-      if (isCancelled) return;
-      setLocation(nextLocation);
-      setStep("ready");
+      if (!isCancelled) setLocation(nextLocation);
     });
     return () => {
       isCancelled = true;
@@ -295,7 +257,6 @@ function AttendanceFlow({ mode, unfinishedDate, onCancel, onDone }: AttendanceFl
     if (needsBranch) body.append("branchId", branchId);
     if (mode === "start-new") body.append("startNew", "true");
 
-    setStep("submitting");
     let shift: Shift;
     try {
       shift = await mutate(mode === "check-out" ? "/api/attendance/check-out" : "/api/attendance/check-in", {
@@ -309,89 +270,36 @@ function AttendanceFlow({ mode, unfinishedDate, onCancel, onDone }: AttendanceFl
     onDone({ isSuccess: true, message: resultMessage(mode, shift, unfinishedDate) });
   }
 
-  const title = mode === "check-out" ? "Xác nhận kết thúc ca" : mode === "start-new" ? "Vào ca mới" : "Xác nhận vào ca";
-
   return (
-    <section className="ui-card rounded-[2rem]">
-      <div className="mb-6">
-        <p className="ui-eyebrow mb-2">Chấm công</p>
-        <h2 className="ui-heading text-2xl">{title}</h2>
-      </div>
-      <AttendanceProgress step={step} />
-
-      {step === "locating" && (
-        <div className="flex min-h-64 flex-col items-center justify-center text-center">
-          <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+    <CameraCapture
+      onCapture={setPhoto}
+      onCancel={onCancel}
+      overlay={
+        <>
+          <p className="flex items-center gap-2 text-sm font-semibold">
             <AttendanceIcon name="pin" />
-          </span>
-          <p className="font-semibold">Đang lấy vị trí</p>
-          <p className="ui-lead mt-1 max-w-xs text-sm">Giữ trang này mở trong vài giây.</p>
-        </div>
+            {branchLabel}
+          </p>
+          {reviewNote && <p className="mt-1 text-xs leading-5 text-[var(--bloom)]">{reviewNote}</p>}
+        </>
+      }
+      confirmAction={
+        <button
+          type="button"
+          onClick={handleConfirm}
+          disabled={!canConfirm}
+          className="min-h-11 whitespace-nowrap rounded-full bg-white px-5 text-base font-semibold text-black disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          {isPending ? "Đang gửi..." : "Xác nhận"}
+        </button>
+      }
+    >
+      {needsBranch && branches.error && <ErrorMessage message={branches.error} />}
+      {needsBranch && branches.data?.length === 0 && <ErrorMessage message="Chưa có chi nhánh nào. Bạn báo quản lý." />}
+      {photo && needsBranch && pickerBranches.length > 0 && (
+        <BranchPicker branches={pickerBranches} value={branchId} onChange={setChosenBranchId} />
       )}
-
-      {step === "submitting" && (
-        <div className="flex min-h-64 flex-col items-center justify-center text-center">
-          <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent)] text-[var(--surface)]">
-            <AttendanceIcon name="check" />
-          </span>
-          <p className="font-semibold">Đang ghi nhận ca</p>
-          <p className="ui-lead mt-1 text-sm">Ảnh và vị trí đang được gửi.</p>
-        </div>
-      )}
-
-      {step === "ready" && (
-        <div className="mt-6 flex flex-col gap-5">
-          <div
-            className={`flex items-start gap-3 rounded-2xl p-4 text-sm ${
-              location ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--warning-soft)] text-[var(--warning)]"
-            }`}
-          >
-            <span className="mt-0.5"><AttendanceIcon name="pin" /></span>
-            <div>
-              <p className="font-semibold">{location ? "Đã lấy được vị trí" : "Không lấy được vị trí"}</p>
-              <p className="mt-0.5 leading-5">
-                {location
-                  ? `Độ chính xác khoảng ${Math.round(location.accuracyM)} m.`
-                  : "Bạn vẫn tiếp tục được, ca này sẽ chờ quản lý duyệt."}
-              </p>
-            </div>
-          </div>
-
-          {needsBranch &&
-            (branches.error ? (
-              <ErrorMessage message={branches.error} />
-            ) : branches.data === null ? (
-              <Loading label="Đang tìm chi nhánh gần bạn..." />
-            ) : branches.data.length === 0 ? (
-              <ErrorMessage message="Chưa có chi nhánh nào. Bạn báo quản lý." />
-            ) : (
-              <BranchPicker branches={branches.data} value={branchId} onChange={setChosenBranchId} />
-            ))}
-
-          {canCapture && <CameraCapture onCapture={setPhoto} />}
-
-          <div className="flex flex-col gap-3 border-t border-[var(--line)] pt-5 sm:flex-row-reverse">
-            {canCapture && (
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={!photo || (needsBranch && branchId === "")}
-                className={primaryButtonClass}
-              >
-                {mode === "check-out" ? "Xác nhận check out" : "Xác nhận check in"}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={onCancel}
-              className={`flex min-h-12 w-full items-center justify-center rounded-full px-4 text-sm font-semibold text-[var(--muted)] hover:bg-[var(--surface-strong)] ${focusClass}`}
-            >
-              Huỷ
-            </button>
-          </div>
-        </div>
-      )}
-    </section>
+    </CameraCapture>
   );
 }
 
@@ -435,25 +343,30 @@ export function CheckInPanel() {
     reload();
   }
 
+  const title =
+    activeMode === "check-out"
+      ? "Kết thúc ca"
+      : activeMode === "start-new"
+        ? "Vào ca mới"
+        : activeMode
+          ? "Vào ca"
+          : "Chấm công";
+
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <header>
-        <p className="ui-eyebrow mb-2">Hôm nay</p>
-        <h1
-          ref={headingRef}
-          tabIndex={-1}
-          suppressHydrationWarning
-          className={`ui-title w-fit rounded ${focusClass}`}
-        >
-          {greeting(now)}
-        </h1>
-        <p className="ui-lead mt-2">Chụp một ảnh và bật vị trí để vào ca.</p>
-      </header>
+    // While checking in, the panel is exactly one phone screen tall: the shell's top bar and bottom nav take 12rem.
+    <div
+      className={`mx-auto flex w-full max-w-3xl flex-col ${
+        activeMode ? "h-[calc(100dvh-12rem-env(safe-area-inset-bottom))] gap-3 md:h-auto" : "gap-4"
+      }`}
+    >
+      <h1 ref={headingRef} tabIndex={-1} className={`ui-heading w-fit rounded text-2xl ${focusClass}`}>
+        {title}
+      </h1>
 
       {outcome && (
         <div
           role={outcome.isSuccess ? "status" : undefined}
-          className={`flex items-start gap-3 rounded-2xl p-4 text-sm leading-6 ${
+          className={`flex items-start gap-3 rounded-lg p-4 text-sm leading-6 ${
             outcome.isSuccess ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--danger-soft)] text-[var(--danger)]"
           }`}
         >
@@ -465,7 +378,7 @@ export function CheckInPanel() {
       {error ? (
         <ErrorMessage message={error} />
       ) : !data ? (
-        <div className="ui-card rounded-[2rem]">
+        <div className="ui-card rounded-lg">
           <Loading label="Đang kiểm tra ca hiện tại..." />
         </div>
       ) : activeMode ? (
@@ -473,17 +386,12 @@ export function CheckInPanel() {
           key={flowKey}
           mode={activeMode}
           unfinishedDate={data.shift?.workDate ?? null}
+          openShiftBranchName={data.shift?.branchName ?? null}
           onCancel={handleCancel}
           onDone={handleDone}
         />
       ) : (
         <AttendanceOverview now={now} openShift={data.shift} onStart={handleStart} />
-      )}
-
-      {!activeMode && data && (
-        <p className="text-center text-xs leading-5 text-[var(--muted)]">
-          Thời gian được ghi theo giờ Việt Nam.
-        </p>
       )}
     </div>
   );

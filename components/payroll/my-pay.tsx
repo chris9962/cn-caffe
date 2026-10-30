@@ -26,7 +26,7 @@ export function MyPay() {
         <ErrorMessage message={error} />
       ) : (
         data && (
-          <section aria-labelledby="my-pay-heading" className="ui-card flex flex-col gap-4 rounded-[2rem]">
+          <section aria-labelledby="my-pay-heading" className="ui-card flex flex-col gap-4 rounded-lg">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 id="my-pay-heading" className="ui-heading">
                 {formatMonthLabel(data.month)}

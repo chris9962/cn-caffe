@@ -15,7 +15,8 @@ export function PayrollVersionSelect({ payroll, onChange }: PayrollVersionSelect
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="ui-label">
+      {/* The options name the version, so the label only needs to reach screen readers. */}
+      <label htmlFor={id} className="sr-only">
         Phiên bản
       </label>
       <select

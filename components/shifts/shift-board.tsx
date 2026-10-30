@@ -86,20 +86,29 @@ export function ShiftBoard() {
                   <caption className="sr-only">Danh sách ca tại chi nhánh</caption>
                   <thead>
                     <tr>
-                      <th scope="col">Ảnh check in</th>
-                      <th scope="col">Nhân viên</th>
-                      <th scope="col">Chi nhánh</th>
-                      <th scope="col">Ngày</th>
-                      <th scope="col">Giờ vào</th>
-                      <th scope="col">Giờ ra</th>
-                      <th scope="col">Trạng thái</th>
-                      <th scope="col">Lý do</th>
+                      {/* w-px shrinks the column to the photo; the long header text used to set its width. */}
+                      <th scope="col" className="w-px">
+                        Ảnh<span className="sr-only"> check in</span>
+                      </th>
+                      {/* Short facts share a cell as two lines, so the reason column gets the remaining width. */}
+                      <th scope="col" className="w-px">
+                        Nhân viên
+                      </th>
+                      <th scope="col" className="w-px">
+                        Thời gian
+                      </th>
+                      <th scope="col" className="w-px">
+                        Trạng thái
+                      </th>
+                      <th scope="col" className="min-w-56">
+                        Lý do
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {shifts.data.shifts.map((shift) => (
                       <tr key={shift.id}>
-                        <td>
+                        <td className="whitespace-nowrap">
                           {shift.source === "manual" ? (
                             "Thủ công"
                           ) : shift.checkInPhotoUrl ? (
@@ -107,27 +116,32 @@ export function ShiftBoard() {
                             <img
                               src={shift.checkInPhotoUrl}
                               alt={`Ảnh check in của ${shift.employeeName}`}
-                              width={48}
-                              height={48}
-                              className="size-12 rounded object-cover"
+                              width={72}
+                              height={72}
+                              className="size-[4.5rem] rounded-xl object-cover"
                             />
                           ) : (
                             "Không có ảnh"
                           )}
                         </td>
-                        <td>
+                        <td className="min-w-48">
                           <Link href={`/manage/shifts/${shift.id}`} className={"ui-link"}>
                             {shift.employeeName}
                             <span className="sr-only">
                               , ca ngày {formatDate(shift.workDate)} lúc {formatTime(shift.checkInAt)}
                             </span>
                           </Link>
+                          <span className="mt-0.5 block text-sm text-[var(--muted)]">{shift.branchName}</span>
                         </td>
-                        <td>{shift.branchName}</td>
-                        <td>{formatDate(shift.workDate)}</td>
-                        <td>{formatTime(shift.checkInAt)}</td>
-                        <td>{formatCheckOut(shift)}</td>
-                        <td>
+                        <td className="whitespace-nowrap">
+                          <span className="block">{formatDate(shift.workDate)}</span>
+                          <span className="mt-0.5 block text-sm text-[var(--muted)]">
+                            {shift.checkOutAt
+                              ? `${formatTime(shift.checkInAt)} – ${formatCheckOut(shift)}`
+                              : `Vào ${formatTime(shift.checkInAt)}`}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap">
                           <StatusBadge status={shift.status} />
                         </td>
                         <td>{shift.failReasons.length > 0 ? formatFailReasons(shift.failReasons) : "—"}</td>
