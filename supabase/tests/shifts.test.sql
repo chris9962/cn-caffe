@@ -90,7 +90,14 @@ set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-000000000004', 'role', 'authenticated')::text, true);
 
 select is(
-  (select jsonb_build_object('id', id, 'near', distance_m < 1) from public.branches_by_distance(10.7769, 106.7009) limit 1),
+  -- Ordinality keeps the function's own order, and the fixture filter ignores local branches placed at the same point.
+  (
+    select jsonb_build_object('id', listed.id, 'near', listed.distance_m < 1)
+    from public.branches_by_distance(10.7769, 106.7009) with ordinality as listed
+    where listed.id::text like '00000000-0000-0000-0000-%'
+    order by listed.ordinality
+    limit 1
+  ),
   jsonb_build_object('id', '00000000-0000-0000-0000-0000000000b1', 'near', true),
   'branches_by_distance lists the nearest branch first'
 );
