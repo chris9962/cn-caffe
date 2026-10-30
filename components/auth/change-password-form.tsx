@@ -34,9 +34,9 @@ export function ChangePasswordForm({ onChanged }: { onChanged: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="ui-card flex max-w-2xl flex-col gap-5">
       <div>
-        <p className="ui-eyebrow mb-2">Lần đầu ghé quán</p>
-        <h1 className="ui-title">Đặt mật khẩu của riêng bạn</h1>
-        <p className="ui-lead mt-2">Chọn một mật khẩu chỉ mình bạn biết, rồi mình vào quán nhé.</p>
+        <p className="ui-eyebrow mb-2">Lần đầu đăng nhập</p>
+        <h1 className="ui-title">Đổi mật khẩu</h1>
+        <p className="ui-lead mt-2">Bạn cần đặt mật khẩu mới trước khi tiếp tục.</p>
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="new-password" className="ui-label">
@@ -73,7 +73,7 @@ export function ChangePasswordForm({ onChanged }: { onChanged: () => void }) {
         disabled={isPending}
         className="ui-btn"
       >
-        Lưu và vào quán
+        Lưu mật khẩu
       </button>
     </form>
   );

@@ -7,7 +7,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 import { Loading } from "@/components/ui/loading";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
-import { formatTime } from "@/lib/date";
+import { formatDate, formatTime, toVietnamLocalInput } from "@/lib/date";
 import { formatFailReasons } from "@/lib/shifts/labels";
 import type { Branch, BranchWithDistance } from "@/types/branch";
 import type { Shift } from "@/types/shift";
@@ -18,7 +18,6 @@ const LOCATION_GIVE_UP_MS = 20000;
 
 const focusClass = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]";
 const primaryButtonClass = "ui-btn min-h-14 w-full text-base";
-const secondaryButtonClass = `flex min-h-12 w-full items-center justify-center rounded-full border border-[color-mix(in_oklab,var(--surface)_35%,transparent)] px-4 text-sm font-semibold transition-colors hover:bg-[color-mix(in_oklab,var(--surface)_10%,transparent)] ${focusClass}`;
 
 const todayFormatter = new Intl.DateTimeFormat("vi-VN", {
   timeZone: "Asia/Ho_Chi_Minh",
@@ -74,15 +73,15 @@ function requestLocation(): Promise<Location | null> {
   });
 }
 
-function resultMessage(mode: Mode, shift: Shift) {
-  const action = mode === "check-out" ? "check out" : "check in";
-  const done = `Đã ${action} lúc ${formatTime(shift.checkOutAt ?? shift.checkInAt)}`;
-  if (shift.failReasons.length > 0) {
-    return `${done}. Quản lý sẽ xem lại giúp bạn: ${formatFailReasons(shift.failReasons)}.`;
-  }
-  return mode === "check-out"
-    ? `${done}. Cảm ơn bạn, về nghỉ ngơi thật ấm nhé.`
-    : `${done}. Chúc bạn một ca thật êm.`;
+const shortDate = (date: string) => formatDate(date).slice(0, 5);
+
+function resultMessage(mode: Mode, shift: Shift, unfinishedDate: string | null) {
+  const action = mode === "check-out" ? "Đã check out" : mode === "start-new" ? "Đã vào ca mới" : "Đã check in";
+  const done = `${action} lúc ${formatTime(shift.checkOutAt ?? shift.checkInAt)}`;
+  const review = shift.failReasons.length > 0 ? `, chờ quản lý duyệt: ${formatFailReasons(shift.failReasons)}` : "";
+  const unfinished =
+    mode === "start-new" && unfinishedDate ? ` Ca ngày ${shortDate(unfinishedDate)} chờ quản lý nhập giờ ra.` : "";
+  return `${done}${review}.${unfinished}`;
 }
 
 function AttendanceIcon({ name }: { name: "arrow" | "pin" | "camera" | "check" }) {
@@ -127,6 +126,37 @@ type AttendanceOverviewProps = {
 function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps) {
   const timeLabel = now ? clockFormatter.format(now) : "--:--";
   const todayLabel = now ? todayFormatter.format(now) : "Hôm nay";
+  const today = now ? toVietnamLocalInput(now.toISOString()).slice(0, 10) : null;
+
+  // A shift still open from an earlier day almost always means the employee forgot to check out.
+  if (openShift && today !== null && openShift.workDate < today) {
+    const day = shortDate(openShift.workDate);
+    return (
+      <section className="ui-card flex flex-col gap-5 rounded-[2rem] border-[var(--bloom)] bg-[var(--bloom-soft)]">
+        <div className="flex flex-col gap-1">
+          <p className="ui-eyebrow text-[var(--warning)]">Chưa kết thúc ca</p>
+          <h2 className="ui-heading text-2xl">Ca ngày {day} chưa kết thúc</h2>
+          <p className="text-sm text-[var(--muted)]">
+            Bắt đầu lúc {formatTime(openShift.checkInAt)}, {day}
+            {openShift.branchName ? ` · ${openShift.branchName}` : ""}
+          </p>
+        </div>
+        <p className="text-sm leading-6">
+          Nếu ca đó đã xong, bấm <strong>Vào ca mới</strong>. Quản lý sẽ nhập giờ ra cho ca {day}; ca đó chưa được tính lương
+          cho tới khi có giờ ra.
+        </p>
+        <div className="flex flex-col gap-3">
+          <button type="button" onClick={() => onStart("start-new")} className={primaryButtonClass}>
+            Vào ca mới
+            <span className="ml-2"><AttendanceIcon name="arrow" /></span>
+          </button>
+          <button type="button" onClick={() => onStart("check-out")} className="ui-btn-quiet min-h-12 w-full">
+            Kết thúc ca {day} bây giờ
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   if (openShift) {
     return (
@@ -140,7 +170,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
           <span suppressHydrationWarning className="text-sm capitalize text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">{todayLabel}</span>
         </div>
 
-        <p className="relative text-sm text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">Bạn ghé quán lúc</p>
+        <p className="relative text-sm text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">Bắt đầu lúc</p>
         <p className="relative mt-1 font-[family-name:var(--font-display)] text-[clamp(3.25rem,15vw,5.5rem)] leading-none font-medium tracking-[-0.03em]">
           {formatTime(openShift.checkInAt)}
         </p>
@@ -149,17 +179,14 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
           <span className="font-semibold">{openShift.branchName ?? "Chưa có tên chi nhánh"}</span>
         </div>
 
-        <div className="relative mt-8 flex flex-col gap-3 sm:flex-row">
+        <div className="relative mt-8">
           <button
             type="button"
             onClick={() => onStart("check-out")}
             className="ui-btn min-h-14 w-full bg-[var(--surface)] text-base text-[var(--accent-strong)] hover:bg-[var(--accent-soft)]"
           >
-            Xong ca rồi, check out
+            Kết thúc ca
             <span className="ml-2"><AttendanceIcon name="arrow" /></span>
-          </button>
-          <button type="button" onClick={() => onStart("start-new")} className={secondaryButtonClass}>
-            Quên check out ca trước
           </button>
         </div>
       </section>
@@ -176,13 +203,13 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
           {timeLabel}
         </p>
         <div className="mt-8 mb-7">
-          <h2 className="ui-heading text-2xl">Hôm nay mình bắt đầu nhé?</h2>
+          <h2 className="ui-heading text-2xl">Sẵn sàng vào ca?</h2>
           <p className="ui-lead mt-1">
-            Bật vị trí, rồi cười một chút cho tấm ảnh vào ca.
+            Bật vị trí và chuẩn bị chụp một ảnh xác nhận.
           </p>
         </div>
         <button type="button" onClick={() => onStart("check-in")} className={primaryButtonClass}>
-          Vào ca thôi
+          Vào ca
           <span className="ml-2"><AttendanceIcon name="arrow" /></span>
         </button>
       </div>
@@ -220,11 +247,13 @@ function AttendanceProgress({ step }: { step: Step }) {
 
 type AttendanceFlowProps = {
   mode: Mode;
+  // The work date of the shift left open, named in the message after starting a new shift.
+  unfinishedDate: string | null;
   onCancel: () => void;
   onDone: (outcome: Outcome) => void;
 };
 
-function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
+function AttendanceFlow({ mode, unfinishedDate, onCancel, onDone }: AttendanceFlowProps) {
   const { mutate } = useMutation<Shift>();
   const [step, setStep] = useState<Step>("locating");
   const [location, setLocation] = useState<Location | null>(null);
@@ -277,15 +306,15 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
       onDone({ isSuccess: false, message: (error as Error).message });
       return;
     }
-    onDone({ isSuccess: true, message: resultMessage(mode, shift) });
+    onDone({ isSuccess: true, message: resultMessage(mode, shift, unfinishedDate) });
   }
 
-  const title = mode === "check-out" ? "Tạm biệt ca hôm nay" : "Ghé quán hôm nay";
+  const title = mode === "check-out" ? "Xác nhận kết thúc ca" : mode === "start-new" ? "Vào ca mới" : "Xác nhận vào ca";
 
   return (
     <section className="ui-card rounded-[2rem]">
       <div className="mb-6">
-        <p className="ui-eyebrow mb-2">Một chút nữa thôi</p>
+        <p className="ui-eyebrow mb-2">Chấm công</p>
         <h2 className="ui-heading text-2xl">{title}</h2>
       </div>
       <AttendanceProgress step={step} />
@@ -295,8 +324,8 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
           <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent-strong)]">
             <AttendanceIcon name="pin" />
           </span>
-          <p className="font-semibold">Đang tìm xem bạn ở đâu</p>
-          <p className="ui-lead mt-1 max-w-xs text-sm">Chờ mình vài giây nhé.</p>
+          <p className="font-semibold">Đang lấy vị trí</p>
+          <p className="ui-lead mt-1 max-w-xs text-sm">Giữ trang này mở trong vài giây.</p>
         </div>
       )}
 
@@ -305,8 +334,8 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
           <span className="mb-5 inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--accent)] text-[var(--surface)]">
             <AttendanceIcon name="check" />
           </span>
-          <p className="font-semibold">Đang ghi lại ca của bạn</p>
-          <p className="ui-lead mt-1 text-sm">Ảnh và vị trí đang được gửi đi an toàn.</p>
+          <p className="font-semibold">Đang ghi nhận ca</p>
+          <p className="ui-lead mt-1 text-sm">Ảnh và vị trí đang được gửi.</p>
         </div>
       )}
 
@@ -319,11 +348,11 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
           >
             <span className="mt-0.5"><AttendanceIcon name="pin" /></span>
             <div>
-              <p className="font-semibold">{location ? "Đã thấy bạn rồi" : "Chưa tìm được vị trí"}</p>
+              <p className="font-semibold">{location ? "Đã lấy được vị trí" : "Không lấy được vị trí"}</p>
               <p className="mt-0.5 leading-5">
                 {location
                   ? `Độ chính xác khoảng ${Math.round(location.accuracyM)} m.`
-                  : "Không sao, bạn cứ tiếp tục — quản lý sẽ xem lại ca này."}
+                  : "Bạn vẫn tiếp tục được, ca này sẽ chờ quản lý duyệt."}
               </p>
             </div>
           </div>
@@ -332,9 +361,9 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
             (branches.error ? (
               <ErrorMessage message={branches.error} />
             ) : branches.data === null ? (
-              <Loading label="Đang tìm quán gần bạn..." />
+              <Loading label="Đang tìm chi nhánh gần bạn..." />
             ) : branches.data.length === 0 ? (
-              <ErrorMessage message="Chưa có chi nhánh nào. Bạn nhắn quản lý giúp nhé." />
+              <ErrorMessage message="Chưa có chi nhánh nào. Bạn báo quản lý." />
             ) : (
               <BranchPicker branches={branches.data} value={branchId} onChange={setChosenBranchId} />
             ))}
@@ -357,7 +386,7 @@ function AttendanceFlow({ mode, onCancel, onDone }: AttendanceFlowProps) {
               onClick={onCancel}
               className={`flex min-h-12 w-full items-center justify-center rounded-full px-4 text-sm font-semibold text-[var(--muted)] hover:bg-[var(--surface-strong)] ${focusClass}`}
             >
-              Để sau
+              Huỷ
             </button>
           </div>
         </div>
@@ -409,7 +438,7 @@ export function CheckInPanel() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <header>
-        <p className="ui-eyebrow mb-2">Cỏ Ngọt · hôm nay</p>
+        <p className="ui-eyebrow mb-2">Hôm nay</p>
         <h1
           ref={headingRef}
           tabIndex={-1}
@@ -418,7 +447,7 @@ export function CheckInPanel() {
         >
           {greeting(now)}
         </h1>
-        <p className="ui-lead mt-2">Một tấm ảnh, một chút vị trí — vậy là quán biết bạn đã tới.</p>
+        <p className="ui-lead mt-2">Chụp một ảnh và bật vị trí để vào ca.</p>
       </header>
 
       {outcome && (
@@ -437,17 +466,23 @@ export function CheckInPanel() {
         <ErrorMessage message={error} />
       ) : !data ? (
         <div className="ui-card rounded-[2rem]">
-          <Loading label="Đang xem ca của bạn..." />
+          <Loading label="Đang kiểm tra ca hiện tại..." />
         </div>
       ) : activeMode ? (
-        <AttendanceFlow key={flowKey} mode={activeMode} onCancel={handleCancel} onDone={handleDone} />
+        <AttendanceFlow
+          key={flowKey}
+          mode={activeMode}
+          unfinishedDate={data.shift?.workDate ?? null}
+          onCancel={handleCancel}
+          onDone={handleDone}
+        />
       ) : (
         <AttendanceOverview now={now} openShift={data.shift} onStart={handleStart} />
       )}
 
       {!activeMode && data && (
         <p className="text-center text-xs leading-5 text-[var(--muted)]">
-          Giờ được ghi theo giờ Việt Nam.
+          Thời gian được ghi theo giờ Việt Nam.
         </p>
       )}
     </div>

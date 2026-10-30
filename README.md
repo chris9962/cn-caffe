@@ -52,7 +52,7 @@ Khi triển khai production:
 4. Khi tháng đã kết thúc và không còn ca đang làm, thiếu check out hoặc chờ duyệt, bạn bấm **Chốt lương tháng**. Sau khi chốt, ca, cấu hình và khoản cộng trừ của tháng đó bị khoá.
 5. Bạn tải file Excel của tháng đã chốt. Khi cần sửa, bạn mở lại tháng kèm lý do rồi chốt lại; phiên bản cũ vẫn xem được.
 
-Nhân viên xem lương ở **Lương của tôi**: tạm tính khi tháng còn mở, phiếu lương khi tháng đã chốt. Quản lý chi nhánh không xem được lương người khác.
+Nhân viên xem lương ở **Lương của tôi**: tạm tính khi tháng còn mở, phiếu lương khi tháng đã chốt. Quản lý chỉ xem được bảng lương khi admin bật quyền "Xem bảng lương" cho họ, và chỉ xem: không chốt, mở lại hay sửa khoản nào.
 
 ### Lệnh hằng ngày
 

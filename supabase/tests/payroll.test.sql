@@ -1,18 +1,23 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(19);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000a1', 'pa@test.local'),
   ('00000000-0000-0000-0000-0000000000a2', 'pm@test.local'),
   ('00000000-0000-0000-0000-0000000000a3', 'ps@test.local'),
-  ('00000000-0000-0000-0000-0000000000a4', 'pt@test.local');
+  ('00000000-0000-0000-0000-0000000000a4', 'pt@test.local'),
+  ('00000000-0000-0000-0000-0000000000a5', 'pv@test.local');
 
 insert into public.employees (id, full_name, phone, role, requires_attendance) values
   ('00000000-0000-0000-0000-0000000000a1', 'Admin', '84100000001', 'admin', false),
   ('00000000-0000-0000-0000-0000000000a2', 'Manager', '84100000002', 'manager', true),
   ('00000000-0000-0000-0000-0000000000a3', 'Staff S', '84100000003', 'staff', true),
-  ('00000000-0000-0000-0000-0000000000a4', 'Staff T', '84100000004', 'staff', true);
+  ('00000000-0000-0000-0000-0000000000a4', 'Staff T', '84100000004', 'staff', true),
+  ('00000000-0000-0000-0000-0000000000a5', 'Payroll Viewer', '84100000005', 'manager', true);
+
+insert into public.manager_permissions (manager_id, permission) values
+  ('00000000-0000-0000-0000-0000000000a5', 'payroll.view');
 
 insert into public.pay_rates (employee_id, employment_type, amount, effective_from) values
   ('00000000-0000-0000-0000-0000000000a3', 'part_time', 25000, '2024-01-01'),
@@ -56,6 +61,27 @@ select is_empty('select 1 from public.pay_rates', 'managers cannot read other pe
 select is_empty('select 1 from public.payslips', 'managers cannot read other people''s payslips');
 reset role;
 
+-- Manager with payroll.view: reads pay, cannot write it.
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-0000000000a5', 'role', 'authenticated')::text, true);
+
+select results_eq(
+  $$select count(*)::int from public.pay_rates where employee_id in ('00000000-0000-0000-0000-0000000000a3', '00000000-0000-0000-0000-0000000000a4')$$,
+  array[2],
+  'a payroll viewer reads everyone''s pay rates'
+);
+select results_eq(
+  $$select count(*)::int from public.payslips where version_id = '00000000-0000-0000-0000-0000000000f2'$$,
+  array[2],
+  'a payroll viewer reads every payslip'
+);
+select throws_ok(
+  $$insert into public.pay_adjustments (employee_id, month, amount, note)
+    values ('00000000-0000-0000-0000-0000000000a3', '2024-06-01', 5, 'Thử')$$,
+  '42501', null, 'a payroll viewer cannot add adjustments'
+);
+reset role;
+
 -- Admin
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-0000000000a1', 'role', 'authenticated')::text, true);
@@ -78,7 +104,7 @@ select throws_ok(
 select throws_ok($$select public.reopen_payroll_month('2024-05-01', '  ')$$, 'P0001', 'reason_required', 'reopening needs a reason');
 select lives_ok($$select public.reopen_payroll_month('2024-05-01', 'Sửa thưởng')$$, 'an admin reopens a closed month');
 select results_eq(
-  $$select reopen_reason from public.payroll_versions where version = 2$$,
+  $$select reopen_reason from public.payroll_versions where month = '2024-05-01' and version = 2$$,
   array['Sửa thưởng'],
   'the reopened version keeps the reason'
 );

@@ -98,7 +98,8 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
             className="ui-field"
           />
           <p id="overtime-rate-hint" className="ui-hint">
-            Một mức chung cho mọi nhân viên bán thời gian. Giờ tăng ca nhận mức này thay cho lương giờ thường.
+            Một mức chung cho mọi nhân viên bán thời gian. Giờ làm trong khung tăng ca chỉ tính theo mức này,
+            không tính thêm lương giờ thường.
           </p>
         </div>
         <div className="flex flex-col gap-1.5">

@@ -70,7 +70,7 @@ export function PayrollBoard() {
             month={payroll.month}
             payslips={payroll.payslips}
             isEstimate={payroll.shownVersion === null}
-            onAdjustmentsChanged={payroll.status === "open" && payroll.shownVersion === null ? reload : null}
+            onAdjustmentsChanged={payroll.canManage && payroll.status === "open" && payroll.shownVersion === null ? reload : null}
           />
         </>
       )}
