@@ -131,7 +131,7 @@ Mỗi chi nhánh có:
 - Tên và địa chỉ.
 - Link Google Maps của quán. **[Chủ dự án]**
 - Toạ độ (vĩ độ, kinh độ) lấy từ link Google Maps. **[Chủ dự án]**
-- Bán kính cho phép. Bán kính mặc định là 100 m. **[Claude]**
+- Bán kính cho phép. Bán kính mặc định là 20 m. **[Chủ dự án]**
 
 ### 6.1 Lấy toạ độ từ link Google Maps
 
