@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { BranchCreate } from "@/components/branches/branch-create";
 
+// AppShell resolves the session client-side, so this segment never renders on the server shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Thêm chi nhánh" };
 
 export default function NewBranchPage() {

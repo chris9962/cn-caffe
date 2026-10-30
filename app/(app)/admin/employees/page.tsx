@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmployeeList } from "@/components/employees/employee-list";
 
+// AppShell resolves the session client-side, so this segment never renders on the server shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Nhân viên" };
 
 export default function EmployeesPage() {

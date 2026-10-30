@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BranchList } from "@/components/branches/branch-list";
 
+// AppShell resolves the session client-side, so this segment never renders on the server shell.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Chi nhánh" };
 
 export default function BranchesPage() {
