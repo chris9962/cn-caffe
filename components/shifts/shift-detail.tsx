@@ -24,6 +24,7 @@ type CheckPoint = {
   title: "Check in" | "Check out";
   time: string | null;
   photoUrl: string | null;
+  photosDeleted: boolean;
   latitude: number | null;
   longitude: number | null;
   distanceM: number | null;
@@ -55,7 +56,7 @@ function CheckPointSection({ point }: { point: CheckPoint }) {
             // eslint-disable-next-line @next/next/no-img-element -- the signed URL changes on every load, so next/image could never reuse its optimised copy.
             <img src={point.photoUrl} alt={`Ảnh ${name}`} className="w-full max-w-sm rounded-lg border border-[var(--line)]" />
           ) : (
-            <p>Không có ảnh</p>
+            <p>{point.photosDeleted ? "Ảnh đã xoá khi chốt lương" : "Không có ảnh"}</p>
           )}
           {point.latitude === null || point.longitude === null ? (
             <p>Không có vị trí</p>
@@ -189,6 +190,7 @@ function ShiftView({ user, shift, auditLogs, headingRef, onDone }: ShiftViewProp
           title: "Check in",
           time: shift.checkInAt,
           photoUrl: shift.checkInPhotoUrl,
+          photosDeleted: shift.photosDeleted,
           latitude: shift.checkInLatitude,
           longitude: shift.checkInLongitude,
           distanceM: shift.checkInDistanceM,
@@ -200,6 +202,7 @@ function ShiftView({ user, shift, auditLogs, headingRef, onDone }: ShiftViewProp
           title: "Check out",
           time: shift.checkOutAt,
           photoUrl: shift.checkOutPhotoUrl,
+          photosDeleted: shift.photosDeleted,
           latitude: shift.checkOutLatitude,
           longitude: shift.checkOutLongitude,
           distanceM: shift.checkOutDistanceM,

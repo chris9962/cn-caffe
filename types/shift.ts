@@ -24,6 +24,8 @@ export type Shift = {
   failReasons: FailReason[];
   checkInPhotoUrl: string | null;
   checkOutPhotoUrl: string | null;
+  // True once closing the month's payroll deleted the shift's photos.
+  photosDeleted: boolean;
 };
 
 export type ShiftList = { shifts: Shift[]; total: number };

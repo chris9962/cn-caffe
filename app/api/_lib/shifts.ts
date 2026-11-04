@@ -19,10 +19,22 @@ export async function uploadShiftPhoto(supabase: ServerClient, employeeId: strin
   return path;
 }
 
+// Storage removes at most 1000 objects per request.
+const REMOVE_BATCH_SIZE = 1000;
+
+export async function removeShiftPhotos(supabase: ServerClient, paths: string[]): Promise<void> {
+  for (let start = 0; start < paths.length; start += REMOVE_BATCH_SIZE) {
+    const batch = paths.slice(start, start + REMOVE_BATCH_SIZE);
+    const { data, error } = await supabase.storage.from(PHOTO_BUCKET).remove(batch);
+    // Storage reports an object that RLS kept as an empty result, not as an error.
+    if (error || data.length < batch.length) {
+      console.error(error ?? `Removed ${data.length} of ${batch.length} shift photos: ${batch.join(", ")}`);
+    }
+  }
+}
+
 export async function removeShiftPhoto(supabase: ServerClient, path: string): Promise<void> {
-  const { data, error } = await supabase.storage.from(PHOTO_BUCKET).remove([path]);
-  // Storage reports an object that RLS kept as an empty result, not as an error.
-  if (error || data.length === 0) console.error(error ?? `Shift photo was not removed: ${path}`);
+  await removeShiftPhotos(supabase, [path]);
 }
 
 export async function withPhotoUrls(supabase: ServerClient, rows: ShiftRow[]): Promise<Shift[]> {

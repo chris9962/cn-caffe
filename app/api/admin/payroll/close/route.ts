@@ -3,6 +3,7 @@ import { readJsonObject } from "@/app/api/_lib/employee-input";
 import { dbErrorResponse, errorResponse } from "@/app/api/_lib/errors";
 import { computePayslips } from "@/app/api/_lib/payroll";
 import { parseMonth } from "@/app/api/_lib/payroll-input";
+import { removeShiftPhotos } from "@/app/api/_lib/shifts";
 
 // Closing runs in two database steps around the calculation: start locks the month, finish stores the payslips.
 export async function POST(request: Request) {
@@ -35,5 +36,11 @@ export async function POST(request: Request) {
   });
   if (finishError) return cancel(dbErrorResponse(finishError));
 
-  return Response.json({ month, version });
+  // The month is already closed here, so a failed photo cleanup is only logged and never undoes the close.
+  const { data: photoPaths, error: photosError } = await supabase.rpc("clear_month_shift_photos", { p_month: monthDate });
+  if (photosError) console.error(photosError);
+  const deletedPhotos: string[] = photoPaths ?? [];
+  await removeShiftPhotos(supabase, deletedPhotos);
+
+  return Response.json({ month, version, deletedPhotos: deletedPhotos.length });
 }

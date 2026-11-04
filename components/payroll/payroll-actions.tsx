@@ -4,13 +4,15 @@ import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { SideDrawer } from "@/components/ui/side-drawer";
 import { useMutation } from "@/hooks/use-mutation";
+import { useToast } from "@/hooks/use-toast";
 import { formatMonthLabel } from "@/lib/payroll/format";
 import type { PayrollMonth } from "@/types/payroll";
 
 type PayrollActionsProps = { payroll: PayrollMonth; onChanged: () => void };
 
 function CloseButton({ payroll, onChanged }: PayrollActionsProps) {
-  const { mutate, isPending, error } = useMutation<{ version: number }>();
+  const { mutate, isPending, error } = useMutation<{ version: number; deletedPhotos: number }>();
+  const showToast = useToast();
   const hint = !payroll.hasEnded
     ? "Chốt được khi hết tháng"
     : payroll.blockingShifts.length > 0
@@ -18,14 +20,18 @@ function CloseButton({ payroll, onChanged }: PayrollActionsProps) {
       : null;
 
   async function handleClose() {
-    if (!window.confirm(`Chốt lương ${formatMonthLabel(payroll.month).toLowerCase()}? Ca và khoản cộng trừ của tháng sẽ bị khoá.`)) {
-      return;
-    }
+    const monthLabel = formatMonthLabel(payroll.month).toLowerCase();
+    const message =
+      `Chốt lương ${monthLabel}? Ca và khoản cộng trừ của tháng sẽ bị khoá.\n\n` +
+      `Toàn bộ ảnh check in và check out của ${monthLabel} sẽ bị xoá vĩnh viễn và không khôi phục được, kể cả khi mở lại tháng.`;
+    if (!window.confirm(message)) return;
+    let result: { deletedPhotos: number };
     try {
-      await mutate("/api/admin/payroll/close", { method: "POST", body: { month: payroll.month } });
+      result = await mutate("/api/admin/payroll/close", { method: "POST", body: { month: payroll.month } });
     } catch {
       return;
     }
+    showToast(`Đã chốt lương, đã xoá ${result.deletedPhotos} ảnh`);
     onChanged();
   }
 
@@ -95,7 +101,10 @@ function ReopenButton({ payroll, onChanged }: PayrollActionsProps) {
               onChange={(event) => setReason(event.target.value)}
               className="ui-field min-h-24 py-3"
             />
-            <p className="ui-hint">Phiếu lương hiện tại được giữ lại thành phiên bản cũ.</p>
+            <p className="ui-hint">
+              Phiếu lương hiện tại được giữ lại thành phiên bản cũ. Ảnh chấm công của tháng đã bị xoá khi chốt và không
+              khôi phục được.
+            </p>
           </div>
           {error && <ErrorMessage message={error} />}
           <button type="submit" disabled={isPending} className="ui-btn-danger">

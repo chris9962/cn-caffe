@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(19);
+select plan(25);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000a1', 'pa@test.local'),
@@ -27,6 +27,19 @@ insert into public.pay_adjustments (employee_id, month, amount, note) values
   ('00000000-0000-0000-0000-0000000000a3', '2024-05-01', 1000, 'Thưởng'),
   ('00000000-0000-0000-0000-0000000000a4', '2024-05-01', 2000, 'Thưởng');
 
+-- A May shift with both photos, inserted while the month is still open.
+insert into public.branches (id, name, latitude, longitude, radius_m, is_active) values
+  ('00000000-0000-0000-0000-0000000000b1', 'B1', 10.7769, 106.7009, 100, true);
+insert into public.shifts (
+  id, employee_id, branch_id, work_date, status, source, check_in_at, check_out_at,
+  check_in_photo_path, check_out_photo_path, created_by
+) values (
+  '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000a3', '00000000-0000-0000-0000-0000000000b1',
+  '2024-05-10', 'valid', 'check_in', '2024-05-10 08:00+07', '2024-05-10 12:00+07',
+  '00000000-0000-0000-0000-0000000000a3/in.jpg', '00000000-0000-0000-0000-0000000000a3/out.jpg',
+  '00000000-0000-0000-0000-0000000000a3'
+);
+
 -- Two closed versions of May 2024: staff may see only their own row of the current one.
 insert into public.payroll_periods (month, status, current_version) values ('2024-05-01', 'closed', 2);
 insert into public.payroll_versions (id, month, version) values
@@ -36,6 +49,17 @@ insert into public.payslips (version_id, employee_id, total, data) values
   ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000a3', 1, '{}'),
   ('00000000-0000-0000-0000-0000000000f2', '00000000-0000-0000-0000-0000000000a3', 2, '{}'),
   ('00000000-0000-0000-0000-0000000000f2', '00000000-0000-0000-0000-0000000000a4', 3, '{}');
+
+-- Clearing photos is the only change a closed month's shift accepts.
+select throws_ok(
+  $$update public.shifts set status = 'rejected' where id = '00000000-0000-0000-0000-0000000000c1'$$,
+  'P0001', 'month_closed', 'a closed month refuses shift changes'
+);
+select throws_ok(
+  $$update public.shifts set check_in_photo_path = null, status = 'rejected', photos_deleted_at = now()
+    where id = '00000000-0000-0000-0000-0000000000c1'$$,
+  'P0001', 'month_closed', 'clearing photos cannot carry other shift changes'
+);
 
 -- Staff S
 set local role authenticated;
@@ -51,6 +75,7 @@ select throws_ok(
   '42501', null, 'staff cannot add pay rates'
 );
 select throws_ok($$select public.start_payroll_close('2024-04-01')$$, '42501', 'forbidden', 'staff cannot close a month');
+select throws_ok($$select public.clear_month_shift_photos('2024-05-01')$$, '42501', 'forbidden', 'staff cannot delete a month''s photos');
 reset role;
 
 -- Manager: shift permissions never include pay.
@@ -101,6 +126,21 @@ select throws_ok(
   $$delete from public.pay_adjustments where month = '2024-05-01'$$,
   'P0001', 'month_closed', 'a closed month refuses deleting adjustments'
 );
+select throws_ok(
+  $$select public.clear_month_shift_photos('2024-06-01')$$,
+  'P0001', 'month_not_closed', 'only a closed month''s photos can be deleted'
+);
+select results_eq(
+  $$select public.clear_month_shift_photos('2024-05-01')$$,
+  $$values (array['00000000-0000-0000-0000-0000000000a3/in.jpg', '00000000-0000-0000-0000-0000000000a3/out.jpg'])$$,
+  'clearing a closed month returns the paths of its photos'
+);
+select results_eq(
+  $$select check_in_photo_path is null and check_out_photo_path is null and photos_deleted_at is not null
+    from public.shifts where id = '00000000-0000-0000-0000-0000000000c1'$$,
+  array[true],
+  'the shift loses its photo paths and records when they were deleted'
+);
 select throws_ok($$select public.reopen_payroll_month('2024-05-01', '  ')$$, 'P0001', 'reason_required', 'reopening needs a reason');
 select lives_ok($$select public.reopen_payroll_month('2024-05-01', 'Sửa thưởng')$$, 'an admin reopens a closed month');
 select results_eq(
@@ -118,8 +158,8 @@ reset role;
 
 select results_eq(
   $$select action from public.audit_logs where row_id = '2024-05-01' order by id$$,
-  array['payroll.reopened'],
-  'reopening is written to the audit log'
+  array['shift_photos.deleted', 'payroll.reopened'],
+  'deleting photos and reopening are written to the audit log'
 );
 
 select * from finish();

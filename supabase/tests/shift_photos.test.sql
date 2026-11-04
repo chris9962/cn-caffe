@@ -1,16 +1,19 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(18);
+select plan(21);
 
 -- storage.protect_delete blocks raw deletes unless this flag is set; the Storage API sets it itself.
 set local storage.allow_delete_query = 'true';
 
 insert into auth.users (id, email) values
+  ('00000000-0000-0000-0000-000000000001', 'a@test.local'),
   ('00000000-0000-0000-0000-000000000003', 'n@test.local'),
   ('00000000-0000-0000-0000-000000000004', 's@test.local'),
   ('00000000-0000-0000-0000-000000000005', 't@test.local'),
   ('00000000-0000-0000-0000-000000000007', 'x@test.local');
 
+insert into public.employees (id, full_name, phone, role, requires_attendance) values
+  ('00000000-0000-0000-0000-000000000001', 'Admin A', '84000000001', 'admin', false);
 insert into public.employees (id, full_name, phone, role) values
   ('00000000-0000-0000-0000-000000000003', 'Manager N', '84000000003', 'manager'),
   ('00000000-0000-0000-0000-000000000004', 'Staff S', '84000000004', 'staff'),
@@ -122,6 +125,38 @@ select is(
   (select count(*) from storage.objects where name = '00000000-0000-0000-0000-000000000004/y.jpg'),
   0::bigint,
   'the unreferenced object is gone'
+);
+
+-- Admin A: closing payroll removes photos that no shift references any more.
+insert into storage.objects (bucket_id, name) values ('shift-photos', '00000000-0000-0000-0000-000000000004/z.jpg');
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-000000000001', 'role', 'authenticated')::text, true);
+
+delete from storage.objects where name = '00000000-0000-0000-0000-000000000004/x.jpg';
+delete from storage.objects where name = '00000000-0000-0000-0000-000000000004/z.jpg';
+reset role;
+
+select is(
+  (select count(*) from storage.objects where name = '00000000-0000-0000-0000-000000000004/x.jpg'),
+  1::bigint,
+  'admin delete of a referenced object removes nothing'
+);
+select is(
+  (select count(*) from storage.objects where name = '00000000-0000-0000-0000-000000000004/z.jpg'),
+  0::bigint,
+  'admin deletes an unreferenced object in another employee folder'
+);
+
+-- Staff T cannot delete Staff S's unreferenced upload.
+insert into storage.objects (bucket_id, name) values ('shift-photos', '00000000-0000-0000-0000-000000000004/w.jpg');
+set local role authenticated;
+select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-000000000005', 'role', 'authenticated')::text, true);
+delete from storage.objects where name = '00000000-0000-0000-0000-000000000004/w.jpg';
+reset role;
+select is(
+  (select count(*) from storage.objects where name = '00000000-0000-0000-0000-000000000004/w.jpg'),
+  1::bigint,
+  'another staff cannot delete an unreferenced object'
 );
 
 -- Photo path constraint

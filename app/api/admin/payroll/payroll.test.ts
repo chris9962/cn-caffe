@@ -180,11 +180,29 @@ describe("estimate, close and reopen", () => {
   });
 
   it("closes the month, locks it and shows the stored payslip to the employee", async () => {
-    await db.from("shifts").update({ status: "valid" }).eq("id", pendingShiftId).throwOnError();
+    const photoPath = `${fullTimer.id}/close-test.jpg`;
+    await db.storage.from("shift-photos").upload(photoPath, new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: "image/jpeg" }));
+    await db
+      .from("shifts")
+      .update({ status: "valid", check_in_photo_path: photoPath })
+      .eq("id", pendingShiftId)
+      .throwOnError();
 
     const res = await close();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ month, version: 1 });
+    expect(await res.json()).toEqual({ month, version: 1, deletedPhotos: 1 });
+
+    // Closing deletes the month's photos and marks the shift, while the rest of the shift stays locked.
+    const { data: files } = await db.storage.from("shift-photos").list(fullTimer.id);
+    expect(files).toEqual([]);
+    const { data: shift } = await db
+      .from("shifts")
+      .select("check_in_photo_path, photos_deleted_at")
+      .eq("id", pendingShiftId)
+      .single()
+      .throwOnError();
+    expect(shift.check_in_photo_path).toBeNull();
+    expect(shift.photos_deleted_at).not.toBeNull();
 
     const data = (await (await payroll()).json()) as PayrollMonth;
     expect(data).toMatchObject({ status: "closed", shownVersion: 1 });
@@ -234,7 +252,7 @@ describe("estimate, close and reopen", () => {
     expect(estimate.payslip?.totals.total).toBe(500_000);
 
     await signInAs(admin);
-    expect(await (await close()).json()).toEqual({ month, version: 2 });
+    expect(await (await close()).json()).toEqual({ month, version: 2, deletedPhotos: 0 });
 
     const latest = (await (await payroll()).json()) as PayrollMonth;
     expect(latest.versions.map((item) => item.version)).toEqual([2, 1]);

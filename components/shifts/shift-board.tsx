@@ -120,6 +120,8 @@ export function ShiftBoard() {
                               height={72}
                               className="size-[4.5rem] rounded-xl object-cover"
                             />
+                          ) : shift.photosDeleted ? (
+                            "Ảnh đã xoá"
                           ) : (
                             "Không có ảnh"
                           )}

@@ -62,7 +62,7 @@ export function toBranch(row: BranchRow): Branch {
 export const SHIFT_COLUMNS = `id, employee_id, branch_id, work_date, status, source, check_in_at, check_out_at,
   check_in_latitude, check_in_longitude, check_in_accuracy_m, check_in_distance_m, check_in_photo_path,
   check_out_latitude, check_out_longitude, check_out_accuracy_m, check_out_distance_m, check_out_photo_path,
-  fail_reasons, branches(name), employees(full_name)`;
+  photos_deleted_at, fail_reasons, branches(name), employees(full_name)`;
 
 export type ShiftRow = {
   id: string;
@@ -83,6 +83,7 @@ export type ShiftRow = {
   check_out_accuracy_m: number | null;
   check_out_distance_m: number | null;
   check_out_photo_path: string | null;
+  photos_deleted_at: string | null;
   fail_reasons: FailReason[];
   branches: { name: string } | null;
   employees: { full_name: string } | null;
@@ -115,6 +116,7 @@ export function toShift(
     failReasons: row.fail_reasons,
     checkInPhotoUrl: photoUrls.checkIn,
     checkOutPhotoUrl: photoUrls.checkOut,
+    photosDeleted: row.photos_deleted_at !== null,
   };
 }
 
