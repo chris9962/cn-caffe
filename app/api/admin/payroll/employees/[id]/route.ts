@@ -71,13 +71,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const failed = estimates.find((result) => result instanceof Response);
   if (failed) return failed;
 
-  // An open month where nothing happened (a part time rate but no shift) would only add a row of 0 đ.
+  // An open month where nothing happened (a rate but no shift) would only add a row of 0 đ.
   const estimateByMonth = new Map(
     openMonths.flatMap((month, index) => {
       const payslip = (estimates[index] as Payslip[])[0];
-      const isEmpty =
-        !payslip ||
-        (payslip.shifts.length === 0 && payslip.fixedSegments.length === 0 && payslip.adjustments.length === 0);
+      const isEmpty = !payslip || (payslip.shifts.length === 0 && payslip.adjustments.length === 0);
       return isEmpty ? [] : [[month, payslip] as const];
     }),
   );

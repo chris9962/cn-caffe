@@ -39,6 +39,14 @@ export async function PUT(request: Request) {
   const maxShiftMinutes = parsePositiveAmount(body.maxShiftMinutes, "Thời lượng tối đa của ca không hợp lệ.");
   if (maxShiftMinutes instanceof Response) return maxShiftMinutes;
   if (maxShiftMinutes > 48 * 60) return errorResponse(400, "Thời lượng tối đa của ca không được quá 48 giờ.");
+  const fullTimeDailyMinutes = parsePositiveAmount(body.fullTimeDailyMinutes, "Số giờ bắt buộc mỗi ngày không hợp lệ.");
+  if (fullTimeDailyMinutes instanceof Response) return fullTimeDailyMinutes;
+  if (fullTimeDailyMinutes > 24 * 60) return errorResponse(400, "Số giờ bắt buộc mỗi ngày không được quá 24 giờ.");
+  const fullTimeOvertimeHourlyRate = parseNonNegativeAmount(
+    body.fullTimeOvertimeHourlyRate,
+    "Lương tăng ca toàn thời gian phải là số nguyên không âm.",
+  );
+  if (fullTimeOvertimeHourlyRate instanceof Response) return fullTimeOvertimeHourlyRate;
 
   const { supabase, employee } = auth;
   // Makes sure the month's row exists, copied from the latest earlier month, before updating it.
@@ -52,11 +60,15 @@ export async function PUT(request: Request) {
       overtime_end: overtimeEnd,
       overtime_hourly_rate: overtimeHourlyRate,
       max_shift_minutes: maxShiftMinutes,
+      full_time_daily_minutes: fullTimeDailyMinutes,
+      full_time_overtime_hourly_rate: fullTimeOvertimeHourlyRate,
       updated_at: new Date().toISOString(),
       updated_by: employee.id,
     })
     .eq("month", monthDate)
-    .select("month, overtime_start, overtime_end, overtime_hourly_rate, max_shift_minutes")
+    .select(
+      "month, overtime_start, overtime_end, overtime_hourly_rate, max_shift_minutes, full_time_daily_minutes, full_time_overtime_hourly_rate",
+    )
     .single();
   if (error) return dbErrorResponse(error);
 

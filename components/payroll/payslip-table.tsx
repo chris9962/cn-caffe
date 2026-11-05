@@ -39,7 +39,6 @@ export function PayslipTable({ month, payslips, isEstimate, onAdjustmentsChanged
               <th scope="col">Loại</th>
               <th scope="col" className="text-right">Giờ làm</th>
               <th scope="col" className="text-right">Tiền theo giờ</th>
-              <th scope="col" className="text-right">Lương cố định</th>
               <th scope="col" className="text-right">Cộng / trừ</th>
               <th scope="col" className="text-right">Tổng lương</th>
               <th scope="col">
@@ -67,7 +66,6 @@ export function PayslipTable({ month, payslips, isEstimate, onAdjustmentsChanged
                   </td>
                   <td className="text-right whitespace-nowrap">{formatHours(totals.regularMinutes + totals.overtimeMinutes)}</td>
                   <td className="text-right whitespace-nowrap">{formatMoney(totals.regularPay + totals.overtimePay)}</td>
-                  <td className="text-right whitespace-nowrap">{formatMoney(totals.fixedPay)}</td>
                   <td className="text-right whitespace-nowrap">{adjustments === 0 ? "—" : formatSignedMoney(adjustments)}</td>
                   <td className="text-right font-semibold whitespace-nowrap">{formatMoney(totals.total)}</td>
                   <td className="w-12 text-right">
@@ -86,7 +84,6 @@ export function PayslipTable({ month, payslips, isEstimate, onAdjustmentsChanged
               <td className="text-right whitespace-nowrap">
                 {formatMoney(sum((payslip) => payslip.totals.regularPay + payslip.totals.overtimePay))}
               </td>
-              <td className="text-right whitespace-nowrap">{formatMoney(sum((payslip) => payslip.totals.fixedPay))}</td>
               <td className="text-right whitespace-nowrap">
                 {formatSignedMoney(sum((payslip) => payslip.totals.additions + payslip.totals.deductions))}
               </td>

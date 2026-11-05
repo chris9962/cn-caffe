@@ -16,12 +16,12 @@ function HillsMotif() {
         <path d="M410 104 l16 -46 l16 46 Z M436 108 l11 -32 l11 32 Z" />
         <path d="M520 98 l12 -34 l12 34 Z" />
       </g>
-      <path d="M0 200 C90 160 180 175 270 150 C360 125 450 165 600 140 V260 H0 Z" fill="#1d2a22" opacity="0.35" />
-      <g fill="#1d2a22" opacity="0.45">
+      <path d="M0 200 C90 160 180 175 270 150 C360 125 450 165 600 140 V260 H0 Z" fill="#2a130f" opacity="0.35" />
+      <g fill="#2a130f" opacity="0.45">
         <path d="M150 178 l18 -54 l18 54 Z M176 182 l12 -36 l12 36 Z" />
         <path d="M330 152 l15 -44 l15 44 Z" />
       </g>
-      <path d="M0 236 C120 214 240 226 360 210 C460 198 540 214 600 206 V260 H0 Z" fill="#1d2a22" opacity="0.55" />
+      <path d="M0 236 C120 214 240 226 360 210 C460 198 540 214 600 206 V260 H0 Z" fill="#2a130f" opacity="0.55" />
       <g fill="var(--bloom)">
         <circle cx="470" cy="214" r="6" />
         <circle cx="492" cy="222" r="4.5" />
@@ -34,15 +34,15 @@ function HillsMotif() {
 export function LoginScreen() {
   return (
     <main className="min-h-dvh lg:grid lg:grid-cols-[minmax(25rem,1fr)_minmax(30rem,1fr)]">
-      <section className="relative overflow-hidden bg-[linear-gradient(170deg,#6f8f74_0%,#4d6d54_45%,#33493a_100%)] px-5 pt-6 pb-20 text-[var(--surface)] sm:px-8 lg:flex lg:min-h-dvh lg:flex-col lg:p-10 xl:p-14">
+      <section className="relative overflow-hidden bg-[linear-gradient(170deg,#6b3a30_0%,#512822_45%,#3a1c17_100%)] px-5 pt-6 pb-20 text-[var(--surface)] sm:px-8 lg:flex lg:min-h-dvh lg:flex-col lg:p-10 xl:p-14">
         <div aria-hidden="true" className="absolute -top-24 -right-16 size-72 rounded-full bg-[var(--bloom)] opacity-20 blur-3xl" />
         <div aria-hidden="true" className="absolute top-1/3 -left-24 size-64 rounded-full bg-white opacity-10 blur-3xl" />
         <HillsMotif />
 
         <div className="relative z-10 flex items-center gap-3">
-          <AppMark size="large" inverse />
+          <AppMark size="large" />
           <div>
-            <p className="font-[family-name:var(--font-display)] text-xl font-medium">Cỏ Ngọt</p>
+            <p className="font-[family-name:var(--font-display)] text-xl font-medium">Ấm Manual Coffee</p>
             <p className="text-xs text-[color-mix(in_oklab,var(--surface)_70%,transparent)]">Chấm công · Tính lương</p>
           </div>
         </div>

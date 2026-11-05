@@ -1,5 +1,4 @@
 import { formatDate, formatTime } from "@/lib/date";
-import { EMPLOYMENT_TYPE_LABELS } from "@/lib/employees/labels";
 import { formatHours, formatMoney, formatSignedMoney } from "@/lib/payroll/format";
 import { formatCheckOut } from "@/lib/shifts/labels";
 import type { Payslip, PayslipShift } from "@/types/payroll";
@@ -29,6 +28,14 @@ function groupByHourlyRate(shifts: PayslipShift[]): RateGroup[] {
 
 const shortDate = (date: string) => formatDate(date).slice(0, 5);
 
+function overtimeOf(shifts: PayslipShift[], employmentType: "part_time" | "full_time") {
+  const matching = shifts.filter((shift) => shift.employmentType === employmentType);
+  return {
+    minutes: matching.reduce((total, shift) => total + shift.overtimeMinutes, 0),
+    pay: matching.reduce((total, shift) => total + shift.overtimePay, 0),
+  };
+}
+
 function SummaryRow({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-4 py-2.5">
@@ -43,44 +50,40 @@ function SummaryRow({ label, value, hint }: { label: string; value: string; hint
 
 export function PayslipView({ payslip }: { payslip: Payslip }) {
   const { totals, config } = payslip;
-  const hasPartTime = payslip.shifts.some((shift) => shift.employmentType === "part_time");
   const rateGroups = groupByHourlyRate(payslip.shifts);
+  const partTimeOvertime = overtimeOf(payslip.shifts, "part_time");
+  const fullTimeOvertime = overtimeOf(payslip.shifts, "full_time");
   const unpaidShifts = payslip.shifts.filter((shift) => shift.employmentType === null).length;
 
   return (
     <div className="flex flex-col gap-5">
       <dl className="divide-y divide-[var(--line)] text-sm">
-        {hasPartTime && (
-          <>
-            {rateGroups.map((group) => (
-              <SummaryRow
-                key={group.rate}
-                label={`Giờ thường · ${formatMoney(group.rate)}/giờ`}
-                hint={`${formatHours(group.minutes)} · ca ${
-                  group.firstDate === group.lastDate
-                    ? shortDate(group.firstDate)
-                    : `${shortDate(group.firstDate)} – ${shortDate(group.lastDate)}`
-                }`}
-                value={formatMoney(group.pay)}
-              />
-            ))}
-            {totals.overtimeMinutes > 0 && (
-              <SummaryRow
-                label={`Giờ tăng ca · ${formatMoney(config.overtimeHourlyRate)}/giờ`}
-                hint={`${formatHours(totals.overtimeMinutes)} · khung ${config.overtimeStart} – ${config.overtimeEnd}`}
-                value={formatMoney(totals.overtimePay)}
-              />
-            )}
-          </>
-        )}
-        {payslip.fixedSegments.map((segment) => (
+        {rateGroups.map((group) => (
           <SummaryRow
-            key={segment.from}
-            label="Lương cố định"
-            hint={`${formatDate(segment.from)} – ${formatDate(segment.to)}: ${segment.days} ngày × ${formatMoney(segment.monthlyAmount)}/tháng`}
-            value={formatMoney(segment.pay)}
+            key={group.rate}
+            label={`Giờ thường · ${formatMoney(group.rate)}/giờ`}
+            hint={`${formatHours(group.minutes)} · ca ${
+              group.firstDate === group.lastDate
+                ? shortDate(group.firstDate)
+                : `${shortDate(group.firstDate)} – ${shortDate(group.lastDate)}`
+            }`}
+            value={formatMoney(group.pay)}
           />
         ))}
+        {partTimeOvertime.minutes > 0 && (
+          <SummaryRow
+            label={`Giờ tăng ca · ${formatMoney(config.overtimeHourlyRate)}/giờ`}
+            hint={`${formatHours(partTimeOvertime.minutes)} · khung ${config.overtimeStart} – ${config.overtimeEnd}`}
+            value={formatMoney(partTimeOvertime.pay)}
+          />
+        )}
+        {fullTimeOvertime.minutes > 0 && (
+          <SummaryRow
+            label={`Giờ tăng ca · ${formatMoney(config.fullTimeOvertimeHourlyRate)}/giờ`}
+            hint={`${formatHours(fullTimeOvertime.minutes)} · vượt ${formatHours(config.fullTimeDailyMinutes)} mỗi ngày`}
+            value={formatMoney(fullTimeOvertime.pay)}
+          />
+        )}
         {payslip.adjustments.map((item) => (
           <SummaryRow key={item.id} label={item.amount > 0 ? "Cộng thêm" : "Trừ"} hint={item.note} value={formatSignedMoney(item.amount)} />
         ))}
@@ -92,7 +95,7 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
         </div>
       </dl>
 
-      {payslip.shifts.length === 0 && payslip.fixedSegments.length === 0 && payslip.adjustments.length === 0 && (
+      {payslip.shifts.length === 0 && payslip.adjustments.length === 0 && (
         <p className="ui-hint">
           Chưa có ca hợp lệ nào trong tháng. Ca đang làm hoặc chờ duyệt sẽ được tính khi đã hợp lệ.
         </p>
@@ -135,11 +138,7 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="font-semibold whitespace-nowrap">
-                    {shift.employmentType === "part_time"
-                      ? formatMoney(shift.regularPay + shift.overtimePay)
-                      : shift.employmentType === "full_time"
-                        ? EMPLOYMENT_TYPE_LABELS.full_time
-                        : "Chưa có mức lương"}
+                    {shift.employmentType === null ? "Chưa có mức lương" : formatMoney(shift.regularPay + shift.overtimePay)}
                   </p>
                   <p className="ui-hint whitespace-nowrap">
                     {formatHours(shift.regularMinutes)}

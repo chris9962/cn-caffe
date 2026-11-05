@@ -56,6 +56,15 @@ async function insertShift(employeeId: string, day: string, from: string, to: st
 }
 
 const json = (body: unknown) => ({ method: "POST", json: body });
+const configBody = {
+  month,
+  overtimeStart: "23:00",
+  overtimeEnd: "06:00",
+  overtimeHourlyRate: 1,
+  maxShiftMinutes: 960,
+  fullTimeDailyMinutes: 600,
+  fullTimeOvertimeHourlyRate: 20_000,
+};
 const payroll = (query = `?month=${month}`) => callRoute(payrollGET, { url: `http://localhost/api/admin/payroll${query}` });
 const close = (body: unknown = { month }) => callRoute(closePOST, json(body));
 const reopen = (body: unknown) => callRoute(reopenPOST, json(body));
@@ -111,7 +120,7 @@ describe("setup by an admin", () => {
     expect((await addRate(staff.id, { employmentType: "part_time", amount: 1, effectiveFrom: "2025-03-15" })).status).toBe(409);
     expect((await addRate(staff.id, { employmentType: "part_time", amount: 0, effectiveFrom: "2025-04-01" })).status).toBe(400);
     expect(
-      (await addRate(fullTimer.id, { employmentType: "full_time", amount: 3_100_000, effectiveFrom: "2025-01-01" })).status,
+      (await addRate(fullTimer.id, { employmentType: "full_time", amount: 30_000, effectiveFrom: "2025-01-01" })).status,
     ).toBe(201);
 
     const list = await callRoute(ratesGET, { params: { id: staff.id } });
@@ -130,16 +139,25 @@ describe("setup by an admin", () => {
   it("saves the month's overtime settings", async () => {
     const res = await callRoute(configPUT, {
       method: "PUT",
-      json: { month, overtimeStart: "23:00", overtimeEnd: "06:00", overtimeHourlyRate: 30_000, maxShiftMinutes: 960 },
+      json: { ...configBody, overtimeHourlyRate: 30_000, fullTimeDailyMinutes: 480 },
     });
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ month, overtimeHourlyRate: 30_000, isLocked: false });
-
-    const bad = await callRoute(configPUT, {
-      method: "PUT",
-      json: { month, overtimeStart: "25:00", overtimeEnd: "06:00", overtimeHourlyRate: 1, maxShiftMinutes: 960 },
+    expect(await res.json()).toMatchObject({
+      month,
+      overtimeHourlyRate: 30_000,
+      fullTimeDailyMinutes: 480,
+      fullTimeOvertimeHourlyRate: 20_000,
+      isLocked: false,
     });
-    expect(bad.status).toBe(400);
+
+    for (const bad of [
+      { ...configBody, overtimeStart: "25:00" },
+      { ...configBody, fullTimeDailyMinutes: 0 },
+      { ...configBody, fullTimeDailyMinutes: 25 * 60 },
+      { ...configBody, fullTimeOvertimeHourlyRate: -1 },
+    ]) {
+      expect((await callRoute(configPUT, { method: "PUT", json: bad })).status).toBe(400);
+    }
   });
 
   it("adds adjustments with a reason and deletes them", async () => {
@@ -169,7 +187,8 @@ describe("estimate, close and reopen", () => {
     // The rejected shift earns nothing; the rest matches spec 8.7.
     expect(partTime.totals).toMatchObject({ regularPay: 309_000, overtimePay: 75_000, total: 484_000 });
     const fullTime = data.payslips.find((payslip) => payslip.employeeId === fullTimer.id)!;
-    expect(fullTime.totals.fixedPay).toBe(3_100_000);
+    // Full time is paid by the hour, and its only shift is still waiting for review.
+    expect(fullTime.totals.total).toBe(0);
   });
 
   it("refuses to close the current month or a month with blocking shifts", async () => {
@@ -207,12 +226,15 @@ describe("estimate, close and reopen", () => {
     const data = (await (await payroll()).json()) as PayrollMonth;
     expect(data).toMatchObject({ status: "closed", shownVersion: 1 });
     expect(data.versions).toHaveLength(1);
+    // 08:00–17:00 with 8 required hours: 8 × 30.000 + 1 × 20.000.
+    const fullTime = data.payslips.find((payslip) => payslip.employeeId === fullTimer.id)!;
+    expect(fullTime.totals).toMatchObject({ regularPay: 240_000, overtimePay: 20_000, total: 260_000 });
 
     // Every change to the closed month is refused.
     expect((await addAdjustment({ employeeId: staff.id, month, amount: 1, note: "Muộn" })).status).toBe(409);
     const config = await callRoute(configPUT, {
       method: "PUT",
-      json: { month, overtimeStart: "22:00", overtimeEnd: "06:00", overtimeHourlyRate: 1, maxShiftMinutes: 960 },
+      json: { ...configBody, overtimeStart: "22:00" },
     });
     expect(config.status).toBe(409);
     // The trigger guards the table itself, so even the service role cannot change a closed month's shifts.
@@ -282,11 +304,11 @@ describe("pay history of one employee", () => {
     ]);
   });
 
-  it("shows a full time employee's fixed pay as an estimate in every open month", async () => {
+  it("skips a full time employee's open months without shifts, since full time is paid by the hour", async () => {
     const data = (await (await history(fullTimer.id)).json()) as EmployeePayHistory;
-    const open = data.months.filter((item) => item.version === null);
-    expect(open).toHaveLength(11);
-    expect(open.every((item) => item.payslip.totals.fixedPay > 0)).toBe(true);
+    expect(data.months.map((item) => [item.month, item.version, item.payslip.totals.total])).toEqual([
+      [month, 2, 260_000],
+    ]);
   });
 
   it("rejects a bad year and an unknown employee", async () => {

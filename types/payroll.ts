@@ -24,7 +24,18 @@ export type MonthlyConfig = {
   overtimeEnd: string;
   overtimeHourlyRate: number;
   maxShiftMinutes: number;
+  fullTimeDailyMinutes: number;
+  fullTimeOvertimeHourlyRate: number;
   isLocked: boolean;
+};
+
+export type PayslipConfig = {
+  overtimeStart: string;
+  overtimeEnd: string;
+  overtimeHourlyRate: number;
+  // Full time minutes per day paid at the employee's hourly rate; the rest earns fullTimeOvertimeHourlyRate.
+  fullTimeDailyMinutes: number;
+  fullTimeOvertimeHourlyRate: number;
 };
 
 export type PayslipShift = {
@@ -41,14 +52,6 @@ export type PayslipShift = {
   overtimePay: number;
 };
 
-export type PayslipFixedSegment = {
-  from: string;
-  to: string;
-  days: number;
-  monthlyAmount: number;
-  pay: number;
-};
-
 export type PayslipBranchHours = { branchId: string; branchName: string; minutes: number };
 
 export type PayslipTotals = {
@@ -56,7 +59,6 @@ export type PayslipTotals = {
   overtimeMinutes: number;
   regularPay: number;
   overtimePay: number;
-  fixedPay: number;
   additions: number;
   deductions: number;
   total: number;
@@ -68,9 +70,8 @@ export type Payslip = {
   employeeName: string;
   phone: string;
   employmentTypes: EmploymentType[];
-  config: { overtimeStart: string; overtimeEnd: string; overtimeHourlyRate: number };
+  config: PayslipConfig;
   shifts: PayslipShift[];
-  fixedSegments: PayslipFixedSegment[];
   branches: PayslipBranchHours[];
   adjustments: Array<{ id: string; amount: number; note: string }>;
   totals: PayslipTotals;

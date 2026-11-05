@@ -1,6 +1,6 @@
 import { monthRange, toVietnamLocalInput } from "@/lib/date";
 import type { EmploymentType } from "@/types/employee";
-import type { Payslip, PayslipBranchHours, PayslipFixedSegment, PayslipShift } from "@/types/payroll";
+import type { Payslip, PayslipBranchHours, PayslipConfig, PayslipShift } from "@/types/payroll";
 
 export type RateInput = { employmentType: EmploymentType; amount: number; effectiveFrom: string };
 
@@ -18,7 +18,7 @@ export type PayrollInput = {
   month: string;
   employee: { id: string; fullName: string; phone: string; endDate: string | null };
   rates: RateInput[];
-  config: { overtimeStart: string; overtimeEnd: string; overtimeHourlyRate: number };
+  config: PayslipConfig;
   shifts: ShiftInput[];
   adjustments: Array<{ id: string; amount: number; note: string }>;
 };
@@ -71,57 +71,51 @@ export function overtimeMinutes(checkInAt: string, checkOutAt: string, start: st
   return Math.floor(overlapMs / MINUTE_MS);
 }
 
-function payShift(shift: ShiftInput, input: PayrollInput): PayslipShift {
-  const rate = rateOn(input.rates, input.employee.endDate, shift.workDate);
-  const totalMinutes = Math.floor((Date.parse(shift.checkOutAt) - Date.parse(shift.checkInAt)) / MINUTE_MS);
-  const base = {
-    shiftId: shift.id,
-    workDate: shift.workDate,
-    branchName: shift.branchName,
-    checkInAt: shift.checkInAt,
-    checkOutAt: shift.checkOutAt,
-    employmentType: rate?.employmentType ?? null,
-  };
+// Walks the shifts in check in order, because a full time day fills its required hours with the earliest shifts first.
+function payShifts(shifts: ShiftInput[], input: PayrollInput): PayslipShift[] {
+  const { config } = input;
+  const fullTimeMinutesByDay = new Map<string, number>();
 
-  // Full time hours are only tracked; the fixed monthly amount pays for them.
-  if (rate?.employmentType !== "part_time") {
-    return { ...base, hourlyRate: null, regularMinutes: totalMinutes, overtimeMinutes: 0, regularPay: 0, overtimePay: 0 };
-  }
+  return shifts.map((shift) => {
+    const rate = rateOn(input.rates, input.employee.endDate, shift.workDate);
+    const totalMinutes = Math.floor((Date.parse(shift.checkOutAt) - Date.parse(shift.checkInAt)) / MINUTE_MS);
+    const base = {
+      shiftId: shift.id,
+      workDate: shift.workDate,
+      branchName: shift.branchName,
+      checkInAt: shift.checkInAt,
+      checkOutAt: shift.checkOutAt,
+      employmentType: rate?.employmentType ?? null,
+    };
 
-  const overtime = Math.min(
-    totalMinutes,
-    overtimeMinutes(shift.checkInAt, shift.checkOutAt, input.config.overtimeStart, input.config.overtimeEnd),
-  );
-  const regular = totalMinutes - overtime;
-  // Overtime minutes earn the overtime rate instead of, not on top of, the hourly rate.
-  return {
-    ...base,
-    hourlyRate: rate.amount,
-    regularMinutes: regular,
-    overtimeMinutes: overtime,
-    regularPay: Math.round((regular * rate.amount) / 60),
-    overtimePay: Math.round((overtime * input.config.overtimeHourlyRate) / 60),
-  };
-}
-
-// Splits the month into runs of days under the same full time rate, each paid by calendar days.
-function fixedSegments(input: PayrollInput, days: string[]): PayslipFixedSegment[] {
-  const segments: Array<PayslipFixedSegment & { rate: RateInput }> = [];
-  for (const day of days) {
-    const rate = rateOn(input.rates, input.employee.endDate, day);
-    if (rate?.employmentType !== "full_time") continue;
-    const last = segments.at(-1);
-    if (last && last.rate === rate && addDays(last.to, 1) === day) {
-      last.to = day;
-      last.days += 1;
-    } else {
-      segments.push({ rate, from: day, to: day, days: 1, monthlyAmount: rate.amount, pay: 0 });
+    if (rate === null) {
+      return { ...base, hourlyRate: null, regularMinutes: totalMinutes, overtimeMinutes: 0, regularPay: 0, overtimePay: 0 };
     }
-  }
-  return segments.map(({ rate, ...segment }) => ({
-    ...segment,
-    pay: Math.round((rate.amount * segment.days) / days.length),
-  }));
+
+    let overtime: number;
+    let overtimeRate: number;
+    if (rate.employmentType === "part_time") {
+      overtime = Math.min(totalMinutes, overtimeMinutes(shift.checkInAt, shift.checkOutAt, config.overtimeStart, config.overtimeEnd));
+      overtimeRate = config.overtimeHourlyRate;
+    } else {
+      // Full time overtime is whatever the day's shifts add up to beyond the required hours, at any time of day.
+      const workedBefore = fullTimeMinutesByDay.get(shift.workDate) ?? 0;
+      fullTimeMinutesByDay.set(shift.workDate, workedBefore + totalMinutes);
+      overtime = totalMinutes - Math.min(totalMinutes, Math.max(0, config.fullTimeDailyMinutes - workedBefore));
+      overtimeRate = config.fullTimeOvertimeHourlyRate;
+    }
+
+    const regular = totalMinutes - overtime;
+    // Overtime minutes earn the overtime rate instead of, not on top of, the hourly rate.
+    return {
+      ...base,
+      hourlyRate: rate.amount,
+      regularMinutes: regular,
+      overtimeMinutes: overtime,
+      regularPay: Math.round((regular * rate.amount) / 60),
+      overtimePay: Math.round((overtime * overtimeRate) / 60),
+    };
+  });
 }
 
 function branchHours(shifts: ShiftInput[]): PayslipBranchHours[] {
@@ -137,10 +131,10 @@ function branchHours(shifts: ShiftInput[]): PayslipBranchHours[] {
 
 export function calculatePayslip(input: PayrollInput): Payslip {
   const days = daysOfMonth(input.month);
-  const shifts = [...input.shifts]
-    .sort((a, b) => a.checkInAt.localeCompare(b.checkInAt))
-    .map((shift) => payShift(shift, input));
-  const segments = fixedSegments(input, days);
+  const shifts = payShifts(
+    [...input.shifts].sort((a, b) => a.checkInAt.localeCompare(b.checkInAt)),
+    input,
+  );
 
   const employmentTypes = new Set<EmploymentType>();
   for (const day of days) {
@@ -151,7 +145,6 @@ export function calculatePayslip(input: PayrollInput): Payslip {
   const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
   const regularPay = sum(shifts.map((shift) => shift.regularPay));
   const overtimePay = sum(shifts.map((shift) => shift.overtimePay));
-  const fixedPay = sum(segments.map((segment) => segment.pay));
   const additions = sum(input.adjustments.filter((item) => item.amount > 0).map((item) => item.amount));
   const deductions = sum(input.adjustments.filter((item) => item.amount < 0).map((item) => item.amount));
 
@@ -163,7 +156,6 @@ export function calculatePayslip(input: PayrollInput): Payslip {
     employmentTypes: [...employmentTypes],
     config: input.config,
     shifts,
-    fixedSegments: segments,
     branches: branchHours(input.shifts),
     adjustments: input.adjustments,
     totals: {
@@ -171,10 +163,9 @@ export function calculatePayslip(input: PayrollInput): Payslip {
       overtimeMinutes: sum(shifts.map((shift) => shift.overtimeMinutes)),
       regularPay,
       overtimePay,
-      fixedPay,
       additions,
       deductions,
-      total: regularPay + overtimePay + fixedPay + additions + deductions,
+      total: regularPay + overtimePay + additions + deductions,
     },
   };
 }

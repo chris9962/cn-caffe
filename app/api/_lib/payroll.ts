@@ -13,6 +13,8 @@ type ConfigRow = {
   overtime_end: string;
   overtime_hourly_rate: number;
   max_shift_minutes: number;
+  full_time_daily_minutes: number;
+  full_time_overtime_hourly_rate: number;
 };
 
 // Postgres prints a time as "23:00:00"; the app works in "HH:MM".
@@ -23,6 +25,8 @@ export function toMonthlyConfig(row: ConfigRow, isLocked: boolean): MonthlyConfi
     overtimeEnd: row.overtime_end.slice(0, 5),
     overtimeHourlyRate: row.overtime_hourly_rate,
     maxShiftMinutes: row.max_shift_minutes,
+    fullTimeDailyMinutes: row.full_time_daily_minutes,
+    fullTimeOvertimeHourlyRate: row.full_time_overtime_hourly_rate,
     isLocked,
   };
 }
@@ -144,6 +148,8 @@ export async function computePayslips(
         overtimeStart: config.overtime_start.slice(0, 5),
         overtimeEnd: config.overtime_end.slice(0, 5),
         overtimeHourlyRate: config.overtime_hourly_rate,
+        fullTimeDailyMinutes: config.full_time_daily_minutes,
+        fullTimeOvertimeHourlyRate: config.full_time_overtime_hourly_rate,
       },
       shifts: (shiftsByEmployee.get(employee.id) ?? []).map(
         (row): ShiftInput => ({

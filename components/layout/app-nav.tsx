@@ -169,7 +169,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
         <Link href={homeHref} className={`mb-10 flex w-fit items-center gap-3 rounded-2xl ${focusClass}`}>
           <AppMark />
           <span>
-            <span className="block font-[family-name:var(--font-display)] text-xl font-medium">Cỏ Ngọt</span>
+            <span className="block font-[family-name:var(--font-display)] text-xl font-medium">Ấm Manual Coffee</span>
             <span className="block text-xs text-[var(--muted)]">Chấm công · Tính lương</span>
           </span>
         </Link>

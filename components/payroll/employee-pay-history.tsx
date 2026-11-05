@@ -86,7 +86,6 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
                 <th scope="col">Trạng thái</th>
                 <th scope="col" className="text-right">Giờ làm</th>
                 <th scope="col" className="text-right">Tiền theo giờ</th>
-                <th scope="col" className="text-right">Lương cố định</th>
                 <th scope="col" className="text-right">Cộng / trừ</th>
                 <th scope="col" className="text-right">Tổng lương</th>
                 <th scope="col">
@@ -120,7 +119,6 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
                     </td>
                     <td className="text-right whitespace-nowrap">{formatHours(totals.regularMinutes + totals.overtimeMinutes)}</td>
                     <td className="text-right whitespace-nowrap">{formatMoney(totals.regularPay + totals.overtimePay)}</td>
-                    <td className="text-right whitespace-nowrap">{formatMoney(totals.fixedPay)}</td>
                     <td className="text-right whitespace-nowrap">{adjustments === 0 ? "—" : formatSignedMoney(adjustments)}</td>
                     <td className="text-right font-semibold whitespace-nowrap">{formatMoney(totals.total)}</td>
                     <td className="w-12 text-right">
@@ -135,7 +133,7 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
             </tbody>
             <tfoot>
               <tr className="[&>td]:border-t-2 [&>td]:border-[var(--line)] [&>td]:font-semibold">
-                <td colSpan={6}>Cả năm {year}</td>
+                <td colSpan={5}>Cả năm {year}</td>
                 <td className="text-right whitespace-nowrap text-[var(--accent-strong)]">{formatMoney(yearTotal)}</td>
                 <td />
               </tr>

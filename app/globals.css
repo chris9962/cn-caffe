@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
-/* Đà Lạt palette: pine green, morning mist, wild sunflower (dã quỳ), roasted coffee. */
+/* Ấm palette, taken from the logo: roasted brown on warm cream. */
 :root {
   color-scheme: light;
-  --background: #f4f0e6;
-  --surface: #fffdf8;
-  --surface-strong: #ebe5d8;
-  --foreground: #2c3a31;
-  --muted: #6f776d;
-  --line: #e2dccd;
-  --accent: #557a5c;
-  --accent-strong: #436649;
-  --accent-soft: #e2ebdc;
-  --bloom: #e5b046;
-  --bloom-soft: #f9ecca;
-  --coffee: #8a6a52;
+  --background: #fbf3df;
+  --surface: #fffaf0;
+  --surface-strong: #f1e4c6;
+  --foreground: #2e1915;
+  --muted: #7a625a;
+  --line: #ead9b8;
+  --accent: #512822;
+  --accent-strong: #3d1d18;
+  --accent-soft: #f2e0cc;
+  --bloom: #e2b04e;
+  --bloom-soft: #fff0c5;
+  --coffee: #8a5a44;
   --success: #3f6d4a;
   --success-soft: #e2ecdf;
   --danger: #a84b40;

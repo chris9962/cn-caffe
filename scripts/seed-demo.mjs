@@ -7,8 +7,8 @@ const SHIFT_DAYS = 5;
 
 const PEOPLE = [
   { phone: "0900000002", fullName: "Nhân viên bán thời gian", role: "staff", employmentType: "part_time", amount: 25_000 },
-  { phone: "0900000003", fullName: "Nhân viên toàn thời gian", role: "staff", employmentType: "full_time", amount: 8_000_000 },
-  { phone: "0900000004", fullName: "Quản lý thử", role: "manager", employmentType: "full_time", amount: 10_000_000 },
+  { phone: "0900000003", fullName: "Nhân viên toàn thời gian", role: "staff", employmentType: "full_time", amount: 28_000 },
+  { phone: "0900000004", fullName: "Quản lý thử", role: "manager", employmentType: "full_time", amount: 32_000 },
 ];
 
 const [latitudeInput, longitudeInput] = process.argv.slice(2);

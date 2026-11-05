@@ -34,7 +34,7 @@ export function ShiftActions({ shift, onDone }: ShiftActionsProps) {
       className={
         isWaiting
           ? // Stays in reach while the manager scrolls through the photos; 4.75rem clears the phone bottom nav.
-            "sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 flex max-w-2xl flex-col gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-3 shadow-[0_-12px_32px_-20px_rgba(44,58,49,0.45)] md:bottom-6"
+            "sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 flex max-w-2xl flex-col gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-3 shadow-[0_-12px_32px_-20px_rgba(81,40,34,0.45)] md:bottom-6"
           : "ui-card flex max-w-2xl flex-col gap-4"
       }
     >

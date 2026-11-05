@@ -17,6 +17,8 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
   const [overtimeEnd, setOvertimeEnd] = useState(config.overtimeEnd);
   const [overtimeHourlyRate, setOvertimeHourlyRate] = useState(String(config.overtimeHourlyRate));
   const [maxShiftHours, setMaxShiftHours] = useState(String(config.maxShiftMinutes / 60));
+  const [fullTimeDailyHours, setFullTimeDailyHours] = useState(String(config.fullTimeDailyMinutes / 60));
+  const [fullTimeOvertimeRate, setFullTimeOvertimeRate] = useState(String(config.fullTimeOvertimeHourlyRate));
   const showToast = useToast();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -30,6 +32,8 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
           overtimeEnd,
           overtimeHourlyRate: Number(overtimeHourlyRate),
           maxShiftMinutes: Math.round(Number(maxShiftHours) * 60),
+          fullTimeDailyMinutes: Math.round(Number(fullTimeDailyHours) * 60),
+          fullTimeOvertimeHourlyRate: Number(fullTimeOvertimeRate),
         },
       });
     } catch {
@@ -48,7 +52,8 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
         </p>
       )}
       <fieldset disabled={config.isLocked} className="flex flex-col gap-5 disabled:opacity-60">
-        <legend className="sr-only">Khung tăng ca</legend>
+        <legend className="sr-only">Cấu hình lương tháng</legend>
+        <h3 className="ui-label">Bán thời gian</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="overtime-start" className="ui-label">
@@ -83,7 +88,7 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="overtime-rate" className="ui-label">
-            Lương tăng ca (đồng/giờ)
+            Lương tăng ca bán thời gian (đồng/giờ)
           </label>
           <input
             id="overtime-rate"
@@ -102,7 +107,51 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
             không tính thêm lương giờ thường.
           </p>
         </div>
-        <div className="flex flex-col gap-1.5">
+        <h3 className="ui-label border-t border-[var(--line)] pt-5">Toàn thời gian</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="full-time-daily-hours" className="ui-label">
+              Số giờ bắt buộc mỗi ngày
+            </label>
+            <input
+              id="full-time-daily-hours"
+              type="number"
+              inputMode="decimal"
+              min={0.5}
+              max={24}
+              step={0.5}
+              required
+              value={fullTimeDailyHours}
+              onChange={(event) => setFullTimeDailyHours(event.target.value)}
+              aria-describedby="full-time-daily-hint"
+              className="ui-field"
+            />
+            <p id="full-time-daily-hint" className="ui-hint">
+              Giờ làm trong ngày đến mức này tính theo lương giờ của từng nhân viên.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="full-time-overtime-rate" className="ui-label">
+              Lương tăng ca toàn thời gian (đồng/giờ)
+            </label>
+            <input
+              id="full-time-overtime-rate"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={1}
+              required
+              value={fullTimeOvertimeRate}
+              onChange={(event) => setFullTimeOvertimeRate(event.target.value)}
+              aria-describedby="full-time-overtime-hint"
+              className="ui-field"
+            />
+            <p id="full-time-overtime-hint" className="ui-hint">
+              Một mức chung cho giờ vượt số giờ bắt buộc của ngày, không tính thêm lương giờ thường.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-1.5 border-t border-[var(--line)] pt-5">
           <label htmlFor="max-shift-hours" className="ui-label">
             Thời lượng tối đa của một ca (giờ)
           </label>

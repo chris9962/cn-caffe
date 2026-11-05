@@ -31,7 +31,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toast && (
           <p
             key={toast.id}
-            className="flex items-center gap-2 rounded-full bg-[var(--foreground)] px-4 py-2.5 text-sm font-semibold text-[var(--surface)] shadow-[0_12px_32px_-12px_rgba(44,58,49,0.6)] motion-safe:animate-[toast-in_180ms_ease-out]"
+            className="flex items-center gap-2 rounded-full bg-[var(--foreground)] px-4 py-2.5 text-sm font-semibold text-[var(--surface)] shadow-[0_12px_32px_-12px_rgba(81,40,34,0.6)] motion-safe:animate-[toast-in_180ms_ease-out]"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="size-4">
               <path d="m5 12 4 4L19 6" />

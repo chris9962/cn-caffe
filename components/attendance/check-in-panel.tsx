@@ -139,7 +139,7 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
 
   if (openShift) {
     return (
-      <section className="relative overflow-hidden rounded-lg bg-[linear-gradient(160deg,#5f8466_0%,#3f5c47_100%)] p-5 text-[var(--surface)] shadow-[0_24px_48px_-32px_rgba(44,58,49,0.8)] sm:p-7">
+      <section className="relative overflow-hidden rounded-lg bg-[linear-gradient(160deg,#6b3a30_0%,#512822_100%)] p-5 text-[var(--surface)] shadow-[0_24px_48px_-32px_rgba(81,40,34,0.8)] sm:p-7">
         <div aria-hidden="true" className="absolute -top-16 -right-10 size-48 rounded-full bg-[var(--bloom)] opacity-25 blur-2xl" />
         <div className="relative mb-10 flex items-center justify-between gap-4">
           <span className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_oklab,var(--surface)_16%,transparent)] px-3 py-1.5 text-xs font-semibold">

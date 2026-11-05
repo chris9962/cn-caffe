@@ -16,8 +16,8 @@ const serifFont = Lora({
 });
 
 export const metadata: Metadata = {
-  title: { template: "%s · Cỏ Ngọt", default: "Cỏ Ngọt" },
-  description: "Chấm công và tính lương cho quán cà phê Cỏ Ngọt",
+  title: { template: "%s · Ấm", default: "Ấm Manual Coffee" },
+  description: "Chấm công và tính lương cho Ấm Manual Coffee Roasters",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

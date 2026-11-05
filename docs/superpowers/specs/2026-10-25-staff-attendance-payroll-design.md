@@ -25,7 +25,7 @@ Check in và check out là chức năng cốt lõi. Tính lương dùng dữ li�
 - Nhân viên check in và check out bằng web trên điện thoại cá nhân, kèm vị trí và ảnh chụp trực tiếp. **[Chủ dự án]**
 - Một ngày có nhiều ca. Giờ làm của ca bằng giờ check out trừ giờ check in. **[Chủ dự án]**
 - Hệ thống tính lương part time theo giờ. Giờ làm trong khung tăng ca nhận lương tăng ca theo giờ. **[Chủ dự án]**
-- Hệ thống tính lương full time theo mức cố định hằng tháng. **[Chủ dự án]**
+- Hệ thống tính lương full time theo giờ. Giờ vượt số giờ bắt buộc mỗi ngày nhận lương tăng ca full time theo giờ. **[Chủ dự án]**
 - Admin và Giám đốc thêm dòng + hoặc − lương cho từng nhân viên trong từng tháng. **[Chủ dự án]**
 - Admin và Giám đốc chốt lương theo tháng, mở lại tháng đã chốt, và xuất bảng lương ra file Excel. **[Chủ dự án]**
 - Nhân viên xem ca của mình, lương tạm tính của tháng đang mở và phiếu lương các tháng đã chốt. **[Chủ dự án]**
@@ -38,7 +38,6 @@ Check in và check out là chức năng cốt lõi. Tính lương dùng dữ li�
 - Xếp lịch ca trước, đăng ký ca.
 - Ngày lễ, hệ số lương ngày lễ, nghỉ phép.
 - Thuế thu nhập cá nhân, bảo hiểm xã hội.
-- Tự tính tăng ca cho full time. **[Chủ dự án]**
 - Gửi SMS, push notification, email.
 - Check in khi không có mạng.
 - Nhiều công ty trên cùng một hệ thống.
@@ -229,7 +228,7 @@ Mỗi nhân viên có một danh sách mức lương. Mỗi mức lương có ng
 | Loại nhân viên | Mức lương |
 |---|---|
 | Part time | Lương theo giờ, ví dụ 25.000 đ/giờ. |
-| Full time | Lương tháng cố định, ví dụ 9.000.000 đ/tháng. |
+| Full time | Lương giờ, ví dụ 25.000 đ/giờ. |
 
 **[Claude]** Loại nhân viên nằm trong từng mức lương. Vì vậy, khi nhân viên chuyển từ part time sang full time giữa tháng, hệ thống tính mỗi đoạn theo đúng loại của đoạn đó.
 
@@ -243,7 +242,9 @@ Mỗi tháng có một bộ cấu hình riêng. **[Chủ dự án]**
 |---|---|
 | Giờ bắt đầu khung tăng ca | 23:00 **[Chủ dự án]** |
 | Giờ kết thúc khung tăng ca, thuộc ngày hôm sau | 06:00 **[Chủ dự án]** |
-| Lương tăng ca theo giờ, một mức chung cho mọi nhân viên | Ví dụ 30.000 đ/giờ. Admin nhập số thật. **[Chủ dự án]** |
+| Lương tăng ca part time theo giờ, một mức chung cho mọi nhân viên part time | Ví dụ 30.000 đ/giờ. Admin nhập số thật. **[Chủ dự án]** |
+| Số giờ bắt buộc mỗi ngày của full time | 10 giờ **[Chủ dự án]** |
+| Lương tăng ca full time theo giờ | 20.000 đ/giờ **[Chủ dự án]** |
 | Thời lượng tối đa của một ca | 16 giờ **[Claude]** |
 
 **[Claude]** Khi tháng mới chưa có cấu hình, hệ thống sao chép cấu hình của tháng gần nhất trước đó.
@@ -274,15 +275,16 @@ Ví dụ cách chia giờ, với khung 23:00–06:00:
 
 ### 8.4 Công thức cho full time
 
-Lương full time của tháng = lương tháng cố định + tổng các dòng + −. **[Chủ dự án]**
+Bản cho quán Ấm tính lương full time theo giờ, giống part time, với khác biệt duy nhất là cách xác định giờ tăng ca. **[Chủ dự án]**
 
-Full time vẫn check in và check out. Giờ làm của full time chỉ để theo dõi, không ảnh hưởng tới lương. **[Chủ dự án]**
+- Mỗi nhân viên full time có lương giờ riêng, nhập ở mức lương của nhân viên. **[Chủ dự án]**
+- Mỗi ngày có số giờ bắt buộc, mặc định 10 giờ. Giờ làm trong ngày đến mức này tính theo lương giờ của nhân viên. Ngày làm ít hơn thì nhận theo số giờ thực làm. **[Chủ dự án]**
+- Giờ vượt số giờ bắt buộc của ngày tính theo lương tăng ca full time, mặc định 20.000 đ/giờ. Giờ này thay cho, không cộng thêm vào, lương giờ thường. **[Chủ dự án]**
+- Số giờ bắt buộc và lương tăng ca full time nằm trong cấu hình tháng. **[Chủ dự án]**
+- Khung tăng ca của part time không áp dụng cho full time. **[Claude]**
+- Giờ làm của một ngày là tổng các ca có ngày làm việc đó, xem mục 7.5. Các ca sớm hơn trong ngày lấp số giờ bắt buộc trước. **[Claude]**
 
-**[Claude]** Lương cố định chia theo số ngày lịch của tháng trong 3 trường hợp:
-
-- Lương cố định đổi giữa tháng.
-- Nhân viên bắt đầu làm giữa tháng. Ngày bắt đầu là ngày hiệu lực của mức lương đầu tiên.
-- Nhân viên nghỉ việc giữa tháng. Ngày cuối là ngày nghỉ việc, xem mục 5.
+Lương full time của tháng = tổng tiền giờ thường + tổng tiền tăng ca + tổng các dòng + −.
 
 ### 8.5 Dòng + − lương
 
@@ -310,11 +312,10 @@ Nhân viên A, part time. Mức lương: 25.000 đ/giờ từ 2026-10-01, 28.000
 
 ### 8.8 Ví dụ full time
 
-Nhân viên B, full time. Mức lương: 9.000.000 đ/tháng từ 2026-09-01, 10.000.000 đ/tháng từ 2026-10-15. Tháng 2026-10 có 31 ngày.
+Nhân viên B, full time, lương giờ 25.000 đ. Cấu hình tháng: 10 giờ bắt buộc, lương tăng ca full time 20.000 đ/giờ.
 
-- 14 ngày đầu: 9.000.000 × 14 / 31 = 4.064.516 đ.
-- 17 ngày sau: 10.000.000 × 17 / 31 = 5.483.871 đ.
-- Lương cố định của tháng: 9.548.387 đ.
+- Ngày làm 12 giờ: 10 × 25.000 + 2 × 20.000 = 290.000 đ.
+- Ngày làm 8 giờ: 8 × 25.000 = 200.000 đ.
 
 ## 9. Chốt tháng, mở lại, phiên bản
 
@@ -349,7 +350,7 @@ Bản đầu chỉ hiện nhật ký trong chi tiết của ca và trong danh s�
 
 Admin hoặc Giám đốc tải bảng lương của một tháng đã chốt về file `.xlsx`. **[Chủ dự án]**
 
-Mỗi dòng là một nhân viên. Các cột gồm: họ tên, số điện thoại, loại nhân viên, giờ làm theo từng chi nhánh, giờ thường, giờ tăng ca, tiền giờ thường, tiền tăng ca, lương cố định, tổng dòng +, tổng dòng −, tổng lương. **[Claude]**
+Mỗi dòng là một nhân viên. Các cột gồm: họ tên, số điện thoại, loại nhân viên, giờ làm theo từng chi nhánh, giờ thường, giờ tăng ca, tiền giờ thường, tiền tăng ca, tổng dòng +, tổng dòng −, tổng lương. **[Claude]**
 
 ## 10. Màn hình
 
@@ -383,7 +384,7 @@ Quản lý có mọi màn hình của nhân viên, cộng thêm:
 | Chi nhánh | Tên, địa chỉ, link Google Maps, toạ độ lấy từ link, bán kính. Xem mục 6.1. |
 | Quản lý | Gán chi nhánh, bật tắt quyền. |
 | Ca | Giống màn hình của quản lý, áp dụng cho mọi chi nhánh. |
-| Cấu hình tháng | Khung tăng ca, lương tăng ca theo giờ, thời lượng tối đa của một ca. |
+| Cấu hình tháng | Khung tăng ca và lương tăng ca part time, số giờ bắt buộc mỗi ngày và lương tăng ca full time, thời lượng tối đa của một ca. |
 | Bảng lương tháng | Lương tạm tính của mọi nhân viên, dòng + −, danh sách ca chặn việc chốt, nút chốt, nút mở lại, danh sách phiên bản, nút xuất Excel. |
 
 ## 11. Kiến trúc kỹ thuật

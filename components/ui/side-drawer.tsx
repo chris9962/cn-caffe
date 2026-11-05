@@ -28,7 +28,7 @@ export function SideDrawer({ open, title, onClose, children }: SideDrawerProps) 
       onClick={handleClick}
       className="fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-[min(34rem,100vw)] max-w-none bg-transparent p-0 backdrop:bg-[color-mix(in_oklab,var(--foreground)_35%,transparent)] backdrop:backdrop-blur-[2px] open:animate-[drawer-in_220ms_ease-out]"
     >
-      <div className="flex h-full flex-col bg-[var(--surface)] shadow-[-24px_0_48px_-32px_rgba(44,58,49,0.6)]">
+      <div className="flex h-full flex-col bg-[var(--surface)] shadow-[-24px_0_48px_-32px_rgba(81,40,34,0.6)]">
         <div className="flex items-start justify-between gap-4 border-b border-[var(--line)] px-5 py-4 sm:px-7">
           <div id={titleId} className="min-w-0">
             {title}

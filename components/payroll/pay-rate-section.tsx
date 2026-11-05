@@ -14,7 +14,8 @@ import { formatMoney } from "@/lib/payroll/format";
 import type { Employee, EmploymentType } from "@/types/employee";
 import type { PayRate } from "@/types/payroll";
 
-const UNIT: Record<EmploymentType, string> = { part_time: "/giờ", full_time: "/tháng" };
+// Both employment types are paid by the hour at Ấm.
+const UNIT = "/giờ";
 
 type PayRateSectionProps = { employee: Employee };
 
@@ -48,7 +49,7 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
   }
 
   async function handleDelete(rate: PayRate) {
-    const label = `${formatMoney(rate.amount)}${UNIT[rate.employmentType]} từ ${formatDate(rate.effectiveFrom)}`;
+    const label = `${formatMoney(rate.amount)}${UNIT} từ ${formatDate(rate.effectiveFrom)}`;
     if (!window.confirm(`Xoá mức lương ${label}? Các tháng đã chốt không bị ảnh hưởng.`)) return;
     try {
       await remove.mutate(`${ratesUrl}/${rate.id}`, { method: "DELETE" });
@@ -92,7 +93,7 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
               <div>
                 <p className="font-semibold">
                   {formatMoney(rate.amount)}
-                  <span className="font-normal text-[var(--muted)]">{UNIT[rate.employmentType]}</span>
+                  <span className="font-normal text-[var(--muted)]">{UNIT}</span>
                 </p>
                 <p className="ui-hint">
                   {EMPLOYMENT_TYPE_LABELS[rate.employmentType]} · từ {formatDate(rate.effectiveFrom)}
@@ -132,7 +133,7 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="rate-amount" className="ui-label">
-              Số tiền (đồng{UNIT[employmentType]})
+              Số tiền (đồng{UNIT})
             </label>
             <input
               id="rate-amount"

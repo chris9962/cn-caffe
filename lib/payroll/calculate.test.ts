@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { calculatePayslip, needsPayslip, overtimeMinutes, type PayrollInput, type ShiftInput } from "./calculate";
 
-const config = { overtimeStart: "23:00", overtimeEnd: "06:00", overtimeHourlyRate: 30_000 };
+const config = {
+  overtimeStart: "23:00",
+  overtimeEnd: "06:00",
+  overtimeHourlyRate: 30_000,
+  fullTimeDailyMinutes: 600,
+  fullTimeOvertimeHourlyRate: 20_000,
+};
 const employee = { id: "e1", fullName: "Nhân viên A", phone: "84900000001", endDate: null };
 
 let shiftCount = 0;
@@ -75,7 +81,6 @@ describe("calculatePayslip", () => {
       overtimeMinutes: 150,
       regularPay: 309_000,
       overtimePay: 75_000,
-      fixedPay: 0,
       additions: 200_000,
       deductions: -100_000,
       total: 484_000,
@@ -83,25 +88,61 @@ describe("calculatePayslip", () => {
     expect(payslip.employmentTypes).toEqual(["part_time"]);
   });
 
-  it("matches the full time example in spec section 8.8", () => {
+  it("pays full time by the hour up to the daily required hours and the rest as overtime", () => {
     const payslip = calculatePayslip(
       input({
-        rates: [
-          { employmentType: "full_time", amount: 9_000_000, effectiveFrom: "2026-09-01" },
-          { employmentType: "full_time", amount: 10_000_000, effectiveFrom: "2026-10-15" },
-        ],
-        shifts: [shift("2026-10-10T22:00", "2026-10-11T07:00")],
+        rates: [{ employmentType: "full_time", amount: 25_000, effectiveFrom: "2026-10-01" }],
+        shifts: [shift("2026-10-10T08:00", "2026-10-10T20:00"), shift("2026-10-11T08:00", "2026-10-11T16:00")],
       }),
     );
 
-    expect(payslip.fixedSegments).toEqual([
-      { from: "2026-10-01", to: "2026-10-14", days: 14, monthlyAmount: 9_000_000, pay: 4_064_516 },
-      { from: "2026-10-15", to: "2026-10-31", days: 17, monthlyAmount: 10_000_000, pay: 5_483_871 },
+    // 12 hours: 10 × 25.000 + 2 × 20.000. 8 hours: 8 × 25.000.
+    expect(payslip.shifts.map((item) => [item.regularMinutes, item.overtimeMinutes, item.regularPay, item.overtimePay])).toEqual([
+      [600, 120, 250_000, 40_000],
+      [480, 0, 200_000, 0],
     ]);
-    expect(payslip.totals.fixedPay).toBe(9_548_387);
-    // Full time hours are tracked but earn nothing extra, overtime included.
-    expect(payslip.shifts[0]).toMatchObject({ regularMinutes: 540, overtimeMinutes: 0, regularPay: 0, overtimePay: 0 });
-    expect(payslip.totals.total).toBe(9_548_387);
+    expect(payslip.totals).toMatchObject({ regularPay: 450_000, overtimePay: 40_000, total: 490_000 });
+  });
+
+  it("fills a full time day's required hours with its earliest shifts first", () => {
+    const payslip = calculatePayslip(
+      input({
+        rates: [{ employmentType: "full_time", amount: 25_000, effectiveFrom: "2026-10-01" }],
+        shifts: [shift("2026-10-10T16:00", "2026-10-10T22:00"), shift("2026-10-10T08:00", "2026-10-10T14:00")],
+      }),
+    );
+
+    expect(payslip.shifts.map((item) => [item.checkInAt.slice(11, 16), item.regularMinutes, item.overtimeMinutes])).toEqual([
+      ["08:00", 360, 0],
+      ["16:00", 240, 120],
+    ]);
+  });
+
+  it("counts a full time shift past midnight towards the day it started, outside the part time window", () => {
+    const payslip = calculatePayslip(
+      input({
+        rates: [{ employmentType: "full_time", amount: 25_000, effectiveFrom: "2026-10-01" }],
+        shifts: [shift("2026-10-10T20:00", "2026-10-11T07:00"), shift("2026-10-11T08:00", "2026-10-11T12:00")],
+      }),
+    );
+
+    // 11 hours on the 10th, including 23:00–06:00, of which only the hour past 10 is overtime.
+    expect(payslip.shifts.map((item) => [item.regularMinutes, item.overtimeMinutes])).toEqual([
+      [600, 60],
+      [240, 0],
+    ]);
+  });
+
+  it("uses the month's full time settings", () => {
+    const payslip = calculatePayslip(
+      input({
+        config: { ...config, fullTimeDailyMinutes: 480, fullTimeOvertimeHourlyRate: 30_000 },
+        rates: [{ employmentType: "full_time", amount: 25_000, effectiveFrom: "2026-10-01" }],
+        shifts: [shift("2026-10-10T08:00", "2026-10-10T18:00")],
+      }),
+    );
+
+    expect(payslip.shifts[0]).toMatchObject({ regularMinutes: 480, overtimeMinutes: 120, regularPay: 200_000, overtimePay: 60_000 });
   });
 
   it("pays each part of a month under the employment type of that part", () => {
@@ -109,31 +150,19 @@ describe("calculatePayslip", () => {
       input({
         rates: [
           { employmentType: "part_time", amount: 25_000, effectiveFrom: "2026-09-01" },
-          { employmentType: "full_time", amount: 9_300_000, effectiveFrom: "2026-10-21" },
+          { employmentType: "full_time", amount: 30_000, effectiveFrom: "2026-10-21" },
         ],
-        shifts: [shift("2026-10-05T08:00", "2026-10-05T12:00"), shift("2026-10-25T08:00", "2026-10-25T12:00")],
+        shifts: [shift("2026-10-05T22:00", "2026-10-06T00:00"), shift("2026-10-25T22:00", "2026-10-26T00:00")],
       }),
     );
 
-    expect(payslip.shifts.map((item) => item.regularPay)).toEqual([100_000, 0]);
-    expect(payslip.fixedSegments).toEqual([
-      { from: "2026-10-21", to: "2026-10-31", days: 11, monthlyAmount: 9_300_000, pay: 3_300_000 },
+    // The part time night hour earns the window rate; the full time one is within the day's 10 hours.
+    expect(payslip.shifts.map((item) => [item.employmentType, item.regularPay, item.overtimePay])).toEqual([
+      ["part_time", 25_000, 30_000],
+      ["full_time", 60_000, 0],
     ]);
     expect(payslip.employmentTypes).toEqual(["part_time", "full_time"]);
-    expect(payslip.totals.total).toBe(3_400_000);
-  });
-
-  it("starts the fixed amount on the first rate and stops it after the end date", () => {
-    const payslip = calculatePayslip(
-      input({
-        employee: { ...employee, endDate: "2026-10-20" },
-        rates: [{ employmentType: "full_time", amount: 3_100_000, effectiveFrom: "2026-10-11" }],
-      }),
-    );
-
-    expect(payslip.fixedSegments).toEqual([
-      { from: "2026-10-11", to: "2026-10-20", days: 10, monthlyAmount: 3_100_000, pay: 1_000_000 },
-    ]);
+    expect(payslip.totals.total).toBe(115_000);
   });
 
   it("pays nothing for a shift without a rate but still counts its hours per branch", () => {

@@ -59,7 +59,7 @@ export function Tabs({ label, tabs }: TabsProps) {
               onKeyDown={(event) => handleKeyDown(event, index)}
               className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] ${
                 isActive
-                  ? "bg-[var(--surface)] text-[var(--foreground)] shadow-[0_1px_3px_rgba(44,58,49,0.18)]"
+                  ? "bg-[var(--surface)] text-[var(--foreground)] shadow-[0_1px_3px_rgba(81,40,34,0.18)]"
                   : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >
