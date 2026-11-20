@@ -21,12 +21,23 @@ export async function GET(request: Request) {
     // RLS returns only the payslip of the latest version, so older versions never reach the employee.
     const { data, error } = await supabase
       .from("payslips")
-      .select("data")
+      .select("version_id, data")
       .eq("employee_id", employee.id)
-      .eq("data->>month", month)
-      .maybeSingle();
+      .eq("data->>month", month);
     if (error) return dbErrorResponse(error);
-    const result: MyPay = { month, isEstimate: false, payslip: (data?.data as Payslip | undefined) ?? null };
+    let row = data.at(0);
+    // Payroll viewers read every version, and they may also read the table that tells which one is the latest.
+    if (data.length > 1 && period.currentVersion !== null) {
+      const { data: version, error: versionError } = await supabase
+        .from("payroll_versions")
+        .select("id")
+        .eq("month", monthDate)
+        .eq("version", period.currentVersion)
+        .maybeSingle();
+      if (versionError) return dbErrorResponse(versionError);
+      row = data.find((payslip) => payslip.version_id === version?.id);
+    }
+    const result: MyPay = { month, isEstimate: false, payslip: (row?.data as Payslip | undefined) ?? null };
     return Response.json(result);
   }
 
