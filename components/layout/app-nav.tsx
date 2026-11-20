@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppMark } from "@/components/ui/app-mark";
 import { homePath } from "@/lib/employees/home";
@@ -118,7 +118,6 @@ function AppNavIcon({ name }: { name: NavIcon }) {
 
 export function AppNav({ user }: { user: CurrentUser }) {
   const pathname = usePathname();
-  const router = useRouter();
   const { mutate, isPending } = useMutation();
   const items = getNavItems(user);
   const homeHref = homePath(user);
@@ -135,7 +134,8 @@ export function AppNav({ user }: { user: CurrentUser }) {
     } catch {
       return;
     }
-    router.replace("/login");
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- A full reload drops the pages Next keeps alive, which still hold this user's data.
+    window.location.assign("/login");
   }
 
   function isActive(href: string) {

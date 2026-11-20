@@ -54,6 +54,10 @@ export function ManualShiftForm() {
     } catch {
       return;
     }
+    // Next keeps this page alive after leaving it, so the form is emptied for the next shift.
+    setEmployeeId("");
+    setBranchId("");
+    setTimes({ checkIn: "", checkOut: "" });
     router.push(`/manage/shifts/${shift.id}`);
   }
 
