@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { FormSkeleton } from "@/components/ui/skeleton";
+import { TimeField } from "@/components/ui/time-field";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
 import { useToast } from "@/hooks/use-toast";
@@ -59,27 +60,18 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
             <label htmlFor="overtime-start" className="ui-label">
               Tăng ca bắt đầu lúc
             </label>
-            <input
-              id="overtime-start"
-              type="time"
-              required
-              value={overtimeStart}
-              onChange={(event) => setOvertimeStart(event.target.value)}
-              className="ui-field"
-            />
+            <TimeField id="overtime-start" required value={overtimeStart} onChange={setOvertimeStart} />
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="overtime-end" className="ui-label">
               Tăng ca kết thúc lúc
             </label>
-            <input
+            <TimeField
               id="overtime-end"
-              type="time"
               required
               value={overtimeEnd}
-              onChange={(event) => setOvertimeEnd(event.target.value)}
-              aria-describedby="overtime-end-hint"
-              className="ui-field"
+              onChange={setOvertimeEnd}
+              describedBy="overtime-end-hint"
             />
             <p id="overtime-end-hint" className="ui-hint">
               Giờ kết thúc sớm hơn giờ bắt đầu nghĩa là sáng hôm sau, ví dụ 23:00 → 06:00.

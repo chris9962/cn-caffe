@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, useState, type FormEvent } from "react";
 import { BranchPicker } from "@/components/attendance/branch-picker";
-import { MISSING_TIMES_MESSAGE, ShiftTimeFields, type ShiftTimes } from "@/components/shifts/shift-time-fields";
+import { hasBothTimes, MISSING_TIMES_MESSAGE, ShiftTimeFields, type ShiftTimes } from "@/components/shifts/shift-time-fields";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { FormSkeleton } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
@@ -34,8 +34,8 @@ export function ManualShiftForm() {
       setInputError("Bạn chọn nhân viên và chi nhánh.");
       return;
     }
-    // toVietnamIso does not validate, so an empty input would reach the API as a malformed time.
-    if (times.checkIn === "" || times.checkOut === "") {
+    // toVietnamIso does not validate, so a half-filled time would reach the API malformed.
+    if (!hasBothTimes(times)) {
       setInputError(MISSING_TIMES_MESSAGE);
       return;
     }

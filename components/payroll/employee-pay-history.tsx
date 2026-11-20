@@ -14,6 +14,9 @@ import type { EmployeePayHistory as PayHistory } from "@/types/payroll";
 
 const YEARS_SHOWN = 5;
 
+const yearButtonClass =
+  "inline-flex size-10 items-center justify-center rounded-xl text-[var(--accent-strong)] hover:bg-[var(--accent-soft)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-35 disabled:hover:bg-transparent";
+
 type EmployeePayHistoryProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ year?: string | string[] }>;
@@ -45,7 +48,7 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
     const requested = Number(yearParam);
     return Number.isInteger(requested) && requested > 2000 && requested <= thisYear ? requested : thisYear;
   });
-  const yearSelectId = useId();
+  const yearLabelId = useId();
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const { data, error, isLoading } = useFetch<PayHistory>(`/api/admin/payroll/employees/${id}?year=${year}`);
   const months = data?.year === year ? data.months : null;
@@ -69,22 +72,37 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
             </Link>
           )}
         </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={yearSelectId} className="ui-label">
+        <div role="group" aria-labelledby={yearLabelId} className="flex flex-col gap-1.5">
+          <p id={yearLabelId} className="ui-label">
             Năm
-          </label>
-          <select
-            id={yearSelectId}
-            value={year}
-            onChange={(event) => setYear(Number(event.target.value))}
-            className="ui-field w-fit pr-10"
-          >
-            {Array.from({ length: YEARS_SHOWN }, (_, index) => thisYear - index).map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
+          </p>
+          <div className="flex min-h-12 items-center gap-1 rounded-2xl border border-[var(--line)] bg-[var(--background)] px-1">
+            <button
+              type="button"
+              onClick={() => setYear(year - 1)}
+              disabled={year <= thisYear - YEARS_SHOWN + 1}
+              aria-label={`Năm ${year - 1}`}
+              className={yearButtonClass}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <span aria-live="polite" className="min-w-14 text-center font-semibold tabular-nums">
+              {year}
+            </span>
+            <button
+              type="button"
+              onClick={() => setYear(year + 1)}
+              disabled={year >= thisYear}
+              aria-label={`Năm ${year + 1}`}
+              className={yearButtonClass}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 

@@ -17,12 +17,16 @@
     "seed:demo": "node --experimental-strip-types --env-file=.env.local scripts/seed-demo.mjs"
   },
   "dependencies": {
+    "@hookform/resolvers": "5.9.2",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",
     "exceljs": "4.4.0",
     "next": "16.4.3",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-day-picker": "10.0.2",
+    "react-dom": "19.3.0",
+    "react-hook-form": "7.91.0",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

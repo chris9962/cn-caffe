@@ -1,13 +1,30 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, type ChangeEvent } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Switch } from "@/components/ui/switch";
+import { TextField } from "@/components/ui/text-field";
 import { useMutation } from "@/hooks/use-mutation";
+import { useToast } from "@/hooks/use-toast";
 import type { Branch } from "@/types/branch";
 
 const inputClass = "ui-field";
-const buttonClass = "ui-btn";
+
+const branchSchema = z.object({
+  name: z.string().trim().min(1, "Tên là bắt buộc."),
+  address: z.string().trim(),
+  // An empty number input reads as NaN, which z.number rejects with this message.
+  radiusM: z
+    .number({ error: "Bán kính là bắt buộc." })
+    .int("Bán kính phải là số nguyên dương.")
+    .min(1, "Bán kính phải là số nguyên dương."),
+  isActive: z.boolean(),
+});
+
+type BranchValues = z.infer<typeof branchSchema>;
 
 const LOCATION_OPTIONS: PositionOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
 // Above this the fix usually comes from Wi-Fi or cell towers, too rough for a check-in radius of about 20 m.
@@ -23,40 +40,58 @@ type BranchFormProps = {
 };
 
 export function BranchForm({ branch, onSaved }: BranchFormProps) {
-  const save = useMutation<Branch>();
+  const saveBranch = useMutation<Branch>();
   const resolve = useMutation<ResolvedLink>();
-  const [name, setName] = useState(branch?.name ?? "");
-  const [address, setAddress] = useState(branch?.address ?? "");
+  const showToast = useToast();
+  const { register, control, handleSubmit, formState: { errors, isSubmitted } } = useForm<BranchValues>({
+    resolver: zodResolver(branchSchema),
+    mode: "onTouched",
+    defaultValues: {
+      name: branch?.name ?? "",
+      address: branch?.address ?? "",
+      radiusM: branch?.radiusM ?? 20,
+      isActive: branch?.isActive ?? true,
+    },
+  });
   const [googleMapsUrl, setGoogleMapsUrl] = useState(branch?.googleMapsUrl ?? "");
   const [coordinates, setCoordinates] = useState<Coordinates | null>(
     branch ? { latitude: branch.latitude, longitude: branch.longitude } : null,
   );
   const [isLocating, setIsLocating] = useState(false);
   const [locationNote, setLocationNote] = useState<LocationNote | null>(null);
-  const [radiusM, setRadiusM] = useState(String(branch?.radiusM ?? 20));
-  const [isActive, setIsActive] = useState(branch?.isActive ?? true);
+  const [checkedLink, setCheckedLink] = useState<string | null>(null);
 
-  const [radiusError, setRadiusError] = useState<string | null>(null);
+  const isLinkChecked = checkedLink !== null && checkedLink === googleMapsUrl.trim();
 
-  function handleLinkChange(value: string) {
-    setGoogleMapsUrl(value);
-    // The old coordinates belong to the old link; keeping them would let a new link be saved with a stale place.
-    setCoordinates(null);
-    setLocationNote(null);
-  }
-
-  async function handleResolve() {
+  async function resolveLink(link: string) {
+    const url = link.trim();
+    if (url === "") return;
+    setCheckedLink(url);
     let result: ResolvedLink;
     try {
       result = await resolve.mutate("/api/admin/branches/resolve-map-link", {
         method: "POST",
-        body: { url: googleMapsUrl },
+        body: { url },
       });
     } catch {
       return;
     }
     setCoordinates({ latitude: result.latitude, longitude: result.longitude });
     setLocationNote(null);
+  }
+
+  function handleLinkChange(event: ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
+    setGoogleMapsUrl(value);
+    // The old coordinates belong to the old link; keeping them would let a new link be saved with a stale place.
+    setCoordinates(null);
+    setLocationNote(null);
+    if ((event.nativeEvent as InputEvent).inputType === "insertFromPaste") void resolveLink(value);
+  }
+
+  // Covers a link typed by hand or inserted by a phone keyboard, which do not count as a paste.
+  function handleLinkBlur() {
+    if (!coordinates && googleMapsUrl.trim() !== checkedLink) void resolveLink(googleMapsUrl);
   }
 
   function handleUseCurrentLocation() {
@@ -93,69 +128,50 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
     );
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function save({ isActive, ...values }: BranchValues) {
     if (!coordinates) return;
-    const radius = Number(radiusM);
-    if (radiusM.trim() === "" || !Number.isInteger(radius) || radius < 1) {
-      setRadiusError("Bán kính phải là số nguyên dương.");
-      return;
-    }
-    setRadiusError(null);
     const fields = {
-      name,
-      address,
+      ...values,
       googleMapsUrl: googleMapsUrl.trim() === "" ? null : googleMapsUrl,
       latitude: coordinates.latitude,
       longitude: coordinates.longitude,
-      radiusM: radius,
     };
     let result: Branch;
     try {
       result = branch
-        ? await save.mutate(`/api/admin/branches/${branch.id}`, {
+        ? await saveBranch.mutate(`/api/admin/branches/${branch.id}`, {
             method: "PATCH",
             body: { ...fields, isActive },
           })
-        : await save.mutate("/api/admin/branches", { method: "POST", body: fields });
-    } catch {
+        : await saveBranch.mutate("/api/admin/branches", { method: "POST", body: fields });
+    } catch (caught) {
+      if (caught instanceof Error) showToast(caught.message, "error");
       return;
     }
     onSaved(result);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="ui-card flex max-w-2xl flex-col gap-5">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="branch-name" className="ui-label">
-          Tên
-        </label>
-        <input
-          id="branch-name"
-          type="text"
-          autoComplete="off"
-          required
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          className={inputClass}
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="branch-address" className="ui-label">
-          Địa chỉ
-        </label>
-        <input
-          id="branch-address"
-          type="text"
-          autoComplete="off"
-          value={address}
-          onChange={(event) => setAddress(event.target.value)}
-          className={inputClass}
-        />
-      </div>
+    <form onSubmit={handleSubmit(save)} noValidate className="ui-card flex max-w-2xl flex-col gap-5">
+      <TextField
+        id="branch-name"
+        label="Tên"
+        required
+        type="text"
+        autoComplete="off"
+        {...register("name")}
+        error={errors.name?.message}
+      />
+      <TextField id="branch-address" label="Địa chỉ" type="text" autoComplete="off" {...register("address")} />
 
       <fieldset className="flex flex-col gap-4 rounded-lg border border-[var(--line)] p-4">
-        <legend className="ui-label px-1">Vị trí quán</legend>
+        <legend className="ui-label px-1">
+          Vị trí quán
+          <span aria-hidden="true" className="ml-0.5 text-[var(--danger)]">
+            *
+          </span>
+        </legend>
+        {isSubmitted && !coordinates && <ErrorMessage message="Vị trí quán là bắt buộc." />}
         <p role="status" className="text-sm">
           {coordinates ? (
             <>
@@ -194,58 +210,58 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
           <label htmlFor="branch-maps-url" className="ui-label">
             Hoặc dán link Google Maps
           </label>
-          <div className="flex gap-2">
-            <input
-              id="branch-maps-url"
-              type="url"
-              autoComplete="off"
-              value={googleMapsUrl}
-              onChange={(event) => handleLinkChange(event.target.value)}
-              aria-describedby="branch-maps-hint"
-              className={`${inputClass} min-w-0 flex-1`}
-            />
-            <button
-              type="button"
-              onClick={handleResolve}
-              disabled={resolve.isPending || googleMapsUrl.trim() === ""}
-              className={`${buttonClass} shrink-0`}
-            >
-              Lấy toạ độ
-            </button>
-          </div>
+          <input
+            id="branch-maps-url"
+            type="url"
+            autoComplete="off"
+            value={googleMapsUrl}
+            onChange={handleLinkChange}
+            onBlur={handleLinkBlur}
+            readOnly={resolve.isPending}
+            aria-describedby="branch-maps-hint"
+            className={inputClass}
+          />
           <p id="branch-maps-hint" className="ui-hint">
-            Mở Google Maps, chọn đúng quán, bấm &quot;Chia sẻ&quot; rồi copy link dán vào đây.
+            Mở Google Maps, chọn đúng quán, bấm &quot;Chia sẻ&quot; rồi copy link dán vào đây. Form tự lấy toạ độ sau khi bạn
+            dán link.
           </p>
-          {resolve.error && <ErrorMessage message={resolve.error} />}
+          {resolve.isPending && <p className="ui-hint font-medium">Đang lấy toạ độ từ link...</p>}
+          {isLinkChecked && resolve.error && <ErrorMessage message={resolve.error} />}
+          {/* The coordinates line sits at the top of the box, often off screen on a phone, so the result also shows here. */}
+          {isLinkChecked && coordinates && (
+            <p className="rounded-lg bg-[var(--success-soft)] px-3 py-2 text-sm text-[var(--success)]">
+              Đã lấy toạ độ {coordinates.latitude.toFixed(5)}, {coordinates.longitude.toFixed(5)}. Bạn bấm &quot;Lưu&quot; để lưu
+              chi nhánh.
+            </p>
+          )}
         </div>
       </fieldset>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="branch-radius" className="ui-label">
-          Bán kính (m)
-        </label>
-        <input
-          id="branch-radius"
-          type="number"
-          step="any"
-          min={1}
-          value={radiusM}
-          onChange={(event) => setRadiusM(event.target.value)}
-          aria-invalid={radiusError ? true : undefined}
-          className={inputClass}
-        />
-        {radiusError && <ErrorMessage message={radiusError} />}
-      </div>
+      <TextField
+        id="branch-radius"
+        label="Bán kính (m)"
+        required
+        type="number"
+        step="any"
+        min={1}
+        {...register("radiusM", { valueAsNumber: true })}
+        error={errors.radiusM?.message}
+      />
       {branch && (
-        <Switch
-          checked={isActive}
-          onChange={setIsActive}
-          label="Đang hoạt động"
-          description="Tắt để ẩn chi nhánh khỏi danh sách chấm công."
+        <Controller
+          control={control}
+          name="isActive"
+          render={({ field }) => (
+            <Switch
+              checked={field.value}
+              onChange={field.onChange}
+              label="Đang hoạt động"
+              description="Tắt để ẩn chi nhánh khỏi danh sách chấm công."
+            />
+          )}
         />
       )}
-      {save.error && <ErrorMessage message={save.error} />}
-      <button type="submit" disabled={save.isPending || !coordinates} className={buttonClass}>
+      <button type="submit" disabled={saveBranch.isPending} className="ui-btn">
         Lưu
       </button>
     </form>

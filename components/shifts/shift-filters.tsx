@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useRef, useState, type FormEvent } from "react";
+import { DateField } from "@/components/ui/date-field";
 import { Modal } from "@/components/ui/modal";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { currentMonth, formatDate } from "@/lib/date";
@@ -49,19 +50,14 @@ function ShiftFilterForm({ branches, initial, onApply }: ShiftFilterFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <MonthPicker value={draft.month} onChange={(month) => setDraft({ ...draft, month, date: "" })} />
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor={`${id}-date`} className="ui-label">
-          Ngày
-        </label>
-        <input
-          id={`${id}-date`}
-          type="date"
-          value={draft.date}
-          onChange={(event) => setDraft({ ...draft, date: event.target.value })}
-          {...monthBounds(draft.month)}
-          className="ui-field w-fit"
-        />
-      </div>
+      <DateField
+        label="Ngày"
+        value={draft.date}
+        onChange={(date) => setDraft({ ...draft, date })}
+        {...monthBounds(draft.month)}
+        placeholder="Tất cả các ngày"
+        clearLabel="Xem tất cả các ngày"
+      />
       <div className="flex flex-col gap-1.5">
         <label htmlFor={`${id}-branch`} className="ui-label">
           Chi nhánh

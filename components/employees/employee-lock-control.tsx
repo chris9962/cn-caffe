@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DateField } from "@/components/ui/date-field";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { useMutation } from "@/hooks/use-mutation";
 import { formatDate } from "@/lib/date";
@@ -31,19 +32,7 @@ export function EmployeeLockControl({ employee, onChanged }: EmployeeLockControl
           <p className="text-sm leading-6 text-[var(--muted)]">
             Nhân viên bị khoá không đăng nhập được. Các ca đã có vẫn giữ nguyên.
           </p>
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="employee-end-date" className="ui-label">
-              Ngày nghỉ việc
-            </label>
-            <input
-              id="employee-end-date"
-              type="date"
-              required
-              value={endDate}
-              onChange={(event) => setEndDate(event.target.value)}
-              className="ui-field w-fit"
-            />
-          </div>
+          <DateField label="Ngày nghỉ việc" value={endDate} onChange={setEndDate} />
           {error && <ErrorMessage message={error} />}
           <button
             type="button"

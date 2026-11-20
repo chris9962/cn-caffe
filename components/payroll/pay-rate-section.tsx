@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
+import { DateField } from "@/components/ui/date-field";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Modal } from "@/components/ui/modal";
 import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
@@ -160,22 +161,10 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
               className="ui-field"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="rate-from" className="ui-label">
-              Áp dụng từ ngày
-            </label>
-            <input
-              id="rate-from"
-              type="date"
-              required
-              value={effectiveFrom}
-              onChange={(event) => setEffectiveFrom(event.target.value)}
-              className="ui-field"
-            />
-          </div>
+          <DateField label="Áp dụng từ ngày" value={effectiveFrom} onChange={setEffectiveFrom} />
         </div>
         {save.error && <ErrorMessage message={save.error} />}
-        <button type="submit" disabled={save.isPending} className="ui-btn w-full">
+        <button type="submit" disabled={save.isPending || effectiveFrom === ""} className="ui-btn w-full">
           {save.isPending ? "Đang thêm..." : "Thêm mức lương"}
         </button>
       </form>

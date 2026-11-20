@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { MISSING_TIMES_MESSAGE, ShiftTimeFields, type ShiftTimes } from "@/components/shifts/shift-time-fields";
+import { hasBothTimes, MISSING_TIMES_MESSAGE, ShiftTimeFields, type ShiftTimes } from "@/components/shifts/shift-time-fields";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { useMutation } from "@/hooks/use-mutation";
 import { toVietnamIso, toVietnamLocalInput } from "@/lib/date";
@@ -22,8 +22,8 @@ export function ShiftTimeForm({ shift, onSaved }: ShiftTimeFormProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // toVietnamIso does not validate, so an empty input would reach the API as a malformed time.
-    if (times.checkIn === "" || times.checkOut === "") {
+    // toVietnamIso does not validate, so a half-filled time would reach the API malformed.
+    if (!hasBothTimes(times)) {
       setInputError(MISSING_TIMES_MESSAGE);
       return;
     }
