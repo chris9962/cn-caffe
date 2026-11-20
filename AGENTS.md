@@ -12,6 +12,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Mọi người và mọi AI agent làm việc trên repo này phải tuân theo các nguyên tắc dưới đây. Trang `/instruments` là ví dụ mẫu áp dụng đủ 4 nguyên tắc.
 
+Claude Code phải gọi skill `nextjs-skill` trước khi viết, sửa hoặc review code trong repo này. Skill nằm ở `.claude/skills/nextjs-skill/`. Skill gồm 4 nguyên tắc dưới đây, quy tắc giao diện và form, và cách kiểm tra trước khi báo xong.
+
 ## 1. Truy vấn database chỉ nằm trong Route Handler
 
 - Mọi truy vấn Supabase phải nằm trong `app/api/`: Route Handler `route.ts` và helper dùng chung trong `app/api/_lib/`. Truy vấn gồm `.from()`, `.rpc()`, `.storage` và `.auth`.
@@ -52,6 +54,7 @@ Mọi người và mọi AI agent làm việc trên repo này phải tuân theo 
 
 - Code chỉ giải quyết yêu cầu hiện có. Không thêm abstraction, option hay lớp trung gian cho nhu cầu chưa xuất hiện.
 - Không thêm thư viện khi vài dòng code làm được việc đó. Thư viện mới phải cài với `--save-exact`.
+- Form dùng `react-hook-form` và `zod`. Ô văn bản trong form dùng `components/ui/text-field.tsx`.
 - Tên biến và tên hàm phải rõ nghĩa. Comment chỉ giải thích lý do, không mô tả lại code.
 - Kiểu dữ liệu dùng chung giữa Route Handler và FE nằm trong `types/`.
 
