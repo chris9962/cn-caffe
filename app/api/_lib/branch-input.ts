@@ -28,7 +28,7 @@ export function parseCoordinateParams(params: URLSearchParams): { latitude: numb
 
 function parseName(value: unknown): string | Response {
   const name = typeof value === "string" ? value.trim() : "";
-  return name || errorResponse(400, "Tên chi nhánh không được để trống.");
+  return name || errorResponse(400, "Tên chi nhánh là bắt buộc.");
 }
 
 function parseRadius(value: unknown): number | Response {
@@ -38,12 +38,12 @@ function parseRadius(value: unknown): number | Response {
 }
 
 function parseAddress(value: unknown): string | Response {
-  return typeof value === "string" ? value.trim() : errorResponse(400, "Dữ liệu gửi lên không hợp lệ.");
+  return typeof value === "string" ? value.trim() : errorResponse(400, "Dữ liệu không hợp lệ.");
 }
 
 function parseMapsUrl(value: unknown): string | null | Response {
   if (value === null) return null;
-  if (typeof value !== "string") return errorResponse(400, "Dữ liệu gửi lên không hợp lệ.");
+  if (typeof value !== "string") return errorResponse(400, "Dữ liệu không hợp lệ.");
   return value.trim() || null;
 }
 
@@ -65,7 +65,7 @@ export function parseBranchFields(body: Record<string, unknown>, isCreate: boole
     update[column] = parsed;
   }
   if (!isCreate && "isActive" in body) {
-    if (typeof body.isActive !== "boolean") return errorResponse(400, "Dữ liệu gửi lên không hợp lệ.");
+    if (typeof body.isActive !== "boolean") return errorResponse(400, "Dữ liệu không hợp lệ.");
     update.is_active = body.isActive;
   }
   return update;

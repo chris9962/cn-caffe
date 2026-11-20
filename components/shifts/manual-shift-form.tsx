@@ -31,7 +31,7 @@ export function ManualShiftForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (employeeId === "" || branchId === "") {
-      setInputError("Bạn chọn nhân viên và chi nhánh.");
+      setInputError("Nhân viên và chi nhánh là bắt buộc.");
       return;
     }
     // toVietnamIso does not validate, so a half-filled time would reach the API malformed.

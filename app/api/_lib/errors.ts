@@ -1,12 +1,12 @@
 // A Map, not an object literal, so a database message like "constructor" can't hit a prototype key.
 const DB_ERRORS = new Map<string, { status: number; message: string }>([
   ["42501", { status: 403, message: "Bạn không có quyền thực hiện thao tác này." }],
-  ["open_shift_exists", { status: 409, message: "Bạn đang có một ca chưa check out." }],
-  ["no_open_shift", { status: 409, message: "Bạn chưa check in." }],
+  ["open_shift_exists", { status: 409, message: "Bạn đang có một ca chưa kết thúc." }],
+  ["no_open_shift", { status: 409, message: "Bạn chưa vào ca." }],
   ["invalid_photo", { status: 400, message: "Ảnh không hợp lệ." }],
   ["branch_not_found", { status: 404, message: "Không tìm thấy chi nhánh." }],
   ["invalid_status", { status: 409, message: "Trạng thái của ca không cho phép thao tác này." }],
-  ["invalid_times", { status: 400, message: "Giờ check out phải sau giờ check in." }],
+  ["invalid_times", { status: 400, message: "Giờ ra phải sau giờ vào." }],
   ["future_times", { status: 400, message: "Giờ vào và giờ ra không được ở tương lai." }],
   ["overlap", { status: 409, message: "Ca này trùng giờ với một ca khác của nhân viên." }],
   ["not_a_manager", { status: 400, message: "Nhân viên này không có vai trò quản lý." }],
@@ -14,10 +14,10 @@ const DB_ERRORS = new Map<string, { status: number; message: string }>([
   ["invalid_month", { status: 400, message: "Tháng không hợp lệ." }],
   ["month_closed", { status: 409, message: "Tháng này đã chốt lương nên không sửa được. Mở lại tháng trước khi sửa." }],
   ["month_not_ended", { status: 409, message: "Tháng chưa kết thúc nên chưa chốt được." }],
-  ["blocking_shifts", { status: 409, message: "Tháng còn ca đang làm, thiếu check out hoặc chờ duyệt." }],
+  ["blocking_shifts", { status: 409, message: "Tháng còn ca đang làm, thiếu giờ ra hoặc chờ duyệt." }],
   ["not_closing", { status: 409, message: "Tháng này không ở trạng thái đang chốt. Bạn thử chốt lại." }],
   ["month_not_closed", { status: 409, message: "Tháng này chưa chốt." }],
-  ["reason_required", { status: 400, message: "Bạn cần nhập lý do mở lại tháng." }],
+  ["reason_required", { status: 400, message: "Lý do mở lại tháng là bắt buộc." }],
 ]);
 
 export function errorResponse(status: number, message: string): Response {

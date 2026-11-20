@@ -5,7 +5,7 @@ import { PERMISSION_LABELS } from "@/lib/employees/permission-labels";
 import type { ManagerPermission } from "@/types/employee";
 
 const NOT_FOUND = "Không tìm thấy nhân viên.";
-const INVALID = "Dữ liệu gửi lên không hợp lệ.";
+const INVALID = "Dữ liệu không hợp lệ.";
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === "string" && isUuid(item));

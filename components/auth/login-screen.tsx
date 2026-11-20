@@ -55,7 +55,7 @@ export function LoginScreen() {
             <em className="font-normal">ngay trên điện thoại.</em>
           </h1>
           <p className="mt-5 hidden max-w-md text-sm lg:block leading-7 text-[color-mix(in_oklab,var(--surface)_78%,transparent)] sm:text-base">
-            Vào ca bằng một ảnh và vị trí. Xem lại ca đã làm và lương từng tháng.
+            Chụp một ảnh và gửi vị trí để vào ca. Xem lại ca đã làm và lương từng tháng.
           </p>
         </div>
       </section>

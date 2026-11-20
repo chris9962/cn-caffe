@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const body = await readJsonObject(request);
   if (!body) return errorResponse(400, "Dữ liệu không hợp lệ.");
   if (typeof body.employeeId !== "string" || !isUuid(body.employeeId)) {
-    return errorResponse(400, "Bạn chọn nhân viên.");
+    return errorResponse(400, "Nhân viên là bắt buộc.");
   }
   const monthDate = parseMonth(body.month);
   if (monthDate instanceof Response) return monthDate;

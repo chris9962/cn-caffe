@@ -49,7 +49,7 @@ export function EmployeeList() {
                 </span>
               </td>
               <td className="whitespace-nowrap">
-                {employee.isActive ? "Đang làm" : "Đã khoá"}
+                {employee.isActive ? "Đang hoạt động" : "Đã khoá"}
                 {!employee.requiresAttendance && (
                   <span className="mt-0.5 block text-sm text-[var(--muted)]">Không chấm công</span>
                 )}

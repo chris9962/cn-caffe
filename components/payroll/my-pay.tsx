@@ -56,8 +56,8 @@ export function MyPay() {
             </div>
             {data.isEstimate && (
               <p className="ui-hint">
-                Số này còn đổi khi ca được duyệt, sửa giờ hoặc có khoản thưởng, trừ mới. Lương chính thức có sau khi quán chốt
-                tháng.
+                Lương tạm tính thay đổi khi quản lý duyệt ca, sửa giờ hoặc thêm khoản cộng/trừ. Lương chính thức có sau khi
+                quán chốt lương tháng.
               </p>
             )}
             {data.payslip ? (

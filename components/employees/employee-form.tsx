@@ -135,7 +135,8 @@ export function EmployeeForm({ employee, onSaved }: EmployeeFormProps) {
           ))}
         </select>
         <p className="ui-hint">
-          Dùng làm loại mặc định khi thêm mức lương. Cách tính lương theo từng mức lương, không quyết định việc chấm công.
+          Hình thức mặc định khi bạn thêm mức lương. Lương tính theo hình thức của từng mức lương. Ô &quot;Cần chấm công&quot;
+          quyết định việc chấm công.
         </p>
       </div>
       <div className="rounded-lg border border-[var(--line)] bg-[var(--background)] p-4">

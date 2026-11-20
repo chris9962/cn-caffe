@@ -14,7 +14,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!isUuid(id)) return errorResponse(404, NOT_FOUND);
 
   const body = await readJsonObject(request);
-  if (!body) return errorResponse(400, "Dữ liệu gửi lên không hợp lệ.");
+  if (!body) return errorResponse(400, "Dữ liệu không hợp lệ.");
 
   const fields = parseBranchFields(body, false);
   if (fields instanceof Response) return fields;

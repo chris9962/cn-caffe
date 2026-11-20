@@ -122,7 +122,7 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
                 <th scope="col">Trạng thái</th>
                 <th scope="col" className="text-right">Giờ làm</th>
                 <th scope="col" className="text-right">Tiền theo giờ</th>
-                <th scope="col" className="text-right">Cộng / trừ</th>
+                <th scope="col" className="text-right">Cộng/trừ</th>
                 <th scope="col" className="text-right">Tổng lương</th>
                 <th scope="col">
                   <span className="sr-only">Chi tiết</span>

@@ -129,7 +129,7 @@ Hàm kiểm tra dùng chung với server nằm trong `lib/`, ví dụ `normalize
 | Đổi ô này khi ô khác đổi | `register("role", { onChange })` rồi `setValue(...)` trong handler |
 | Giá trị đến từ GPS, API, link | Giữ trong `useState`. Hàm `save` kiểm tra giá trị đó. Lỗi hiện khi `formState.isSubmitted` và giá trị còn thiếu |
 
-Ví dụ trong form chi nhánh: toạ độ đến từ GPS hoặc từ link Google Maps, nên toạ độ nằm trong `useState`. Câu "Vị trí quán là bắt buộc." hiện khi `isSubmitted && !coordinates`.
+Ví dụ trong form chi nhánh: toạ độ đến từ GPS hoặc từ liên kết Google Maps, nên toạ độ nằm trong `useState`. Câu "Vị trí chi nhánh là bắt buộc." hiện khi `isSubmitted && !coordinates`.
 
 ## 5. Chỗ dễ sai
 

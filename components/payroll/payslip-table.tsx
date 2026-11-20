@@ -36,10 +36,10 @@ export function PayslipTable({ month, payslips, isEstimate, onAdjustmentsChanged
           <thead>
             <tr>
               <th scope="col">Nhân viên</th>
-              <th scope="col">Loại</th>
+              <th scope="col">Hình thức làm việc</th>
               <th scope="col" className="text-right">Giờ làm</th>
               <th scope="col" className="text-right">Tiền theo giờ</th>
-              <th scope="col" className="text-right">Cộng / trừ</th>
+              <th scope="col" className="text-right">Cộng/trừ</th>
               <th scope="col" className="text-right">Tổng lương</th>
               <th scope="col">
                 <span className="sr-only">Chi tiết</span>

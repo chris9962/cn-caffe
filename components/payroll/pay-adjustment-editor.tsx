@@ -46,7 +46,7 @@ export function PayAdjustmentEditor({ payslip, onChanged }: PayAdjustmentEditorP
   return (
     <section aria-labelledby="adjustment-editor-heading" className="flex flex-col gap-4 border-t border-[var(--line)] pt-5">
       <h3 id="adjustment-editor-heading" className="ui-label">
-        Khoản cộng, trừ
+        Khoản cộng/trừ
       </h3>
 
       {payslip.adjustments.length > 0 && (
@@ -117,7 +117,7 @@ export function PayAdjustmentEditor({ payslip, onChanged }: PayAdjustmentEditorP
         </div>
         {save.error && <ErrorMessage message={save.error} />}
         <button type="submit" disabled={save.isPending} className="ui-btn">
-          {save.isPending ? "Đang thêm..." : "Thêm khoản"}
+          {save.isPending ? "Đang thêm…" : "Thêm khoản"}
         </button>
       </form>
     </section>

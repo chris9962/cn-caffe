@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const monthDate = parseMonth(body.month);
   if (monthDate instanceof Response) return monthDate;
   const reason = typeof body.reason === "string" ? body.reason.trim() : "";
-  if (!reason) return errorResponse(400, "Bạn cần nhập lý do mở lại tháng.");
+  if (!reason) return errorResponse(400, "Lý do mở lại tháng là bắt buộc.");
 
   const { error } = await auth.supabase.rpc("reopen_payroll_month", { p_month: monthDate, p_reason: reason });
   if (error) return dbErrorResponse(error);

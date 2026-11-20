@@ -14,7 +14,7 @@ import type { Branch } from "@/types/branch";
 const inputClass = "ui-field";
 
 const branchSchema = z.object({
-  name: z.string().trim().min(1, "Tên là bắt buộc."),
+  name: z.string().trim().min(1, "Tên chi nhánh là bắt buộc."),
   address: z.string().trim(),
   // An empty number input reads as NaN, which z.number rejects with this message.
   radiusM: z
@@ -110,7 +110,7 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
         const accuracy = Math.round(coords.accuracy);
         setLocationNote(
           accuracy > ROUGH_ACCURACY_M
-            ? { kind: "warning", text: `Độ chính xác khoảng ${accuracy} m. Bạn nên đứng tại quán, bật GPS rồi thử lại.` }
+            ? { kind: "warning", text: `Độ chính xác khoảng ${accuracy} m. Bạn nên đứng tại chi nhánh, bật GPS rồi thử lại.` }
             : { kind: "success", text: `Đã lấy vị trí hiện tại, độ chính xác khoảng ${accuracy} m.` },
         );
       },
@@ -121,7 +121,7 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
           text:
             error.code === error.PERMISSION_DENIED
               ? "Bạn cần cho phép trình duyệt dùng vị trí."
-              : "Không lấy được vị trí. Bạn thử lại hoặc dán link Google Maps.",
+              : "Không lấy được vị trí. Bạn thử lại hoặc dán liên kết Google Maps.",
         });
       },
       LOCATION_OPTIONS,
@@ -155,7 +155,7 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
     <form onSubmit={handleSubmit(save)} noValidate className="ui-card flex max-w-2xl flex-col gap-5">
       <TextField
         id="branch-name"
-        label="Tên"
+        label="Tên chi nhánh"
         required
         type="text"
         autoComplete="off"
@@ -166,12 +166,12 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
 
       <fieldset className="flex flex-col gap-4 rounded-lg border border-[var(--line)] p-4">
         <legend className="ui-label px-1">
-          Vị trí quán
+          Vị trí chi nhánh
           <span aria-hidden="true" className="ml-0.5 text-[var(--danger)]">
             *
           </span>
         </legend>
-        {isSubmitted && !coordinates && <ErrorMessage message="Vị trí quán là bắt buộc." />}
+        {isSubmitted && !coordinates && <ErrorMessage message="Vị trí chi nhánh là bắt buộc." />}
         <p role="status" className="text-sm">
           {coordinates ? (
             <>
@@ -189,7 +189,7 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
               </a>
             </>
           ) : (
-            "Chưa có toạ độ. Bạn dùng vị trí hiện tại hoặc dán link Google Maps."
+            "Chưa có toạ độ. Bạn dùng vị trí hiện tại hoặc dán liên kết Google Maps."
           )}
         </p>
 
@@ -198,7 +198,7 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
             <path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" />
             <circle cx="12" cy="9" r="2.5" />
           </svg>
-          {isLocating ? "Đang lấy vị trí..." : "Dùng vị trí hiện tại"}
+          {isLocating ? "Đang lấy vị trí…" : "Dùng vị trí hiện tại"}
         </button>
         {locationNote?.kind === "error" && <ErrorMessage message={locationNote.text} />}
         {locationNote?.kind === "warning" && (
@@ -208,7 +208,7 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
 
         <div className="flex flex-col gap-2 border-t border-[var(--line)] pt-4">
           <label htmlFor="branch-maps-url" className="ui-label">
-            Hoặc dán link Google Maps
+            Hoặc dán liên kết Google Maps
           </label>
           <input
             id="branch-maps-url"
@@ -222,10 +222,10 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
             className={inputClass}
           />
           <p id="branch-maps-hint" className="ui-hint">
-            Mở Google Maps, chọn đúng quán, bấm &quot;Chia sẻ&quot; rồi copy link dán vào đây. Form tự lấy toạ độ sau khi bạn
-            dán link.
+            Mở Google Maps, chọn đúng chi nhánh, bấm &quot;Chia sẻ&quot; rồi sao chép liên kết. Sau khi bạn dán liên kết vào
+            đây, ứng dụng tự lấy toạ độ.
           </p>
-          {resolve.isPending && <p className="ui-hint font-medium">Đang lấy toạ độ từ link...</p>}
+          {resolve.isPending && <p className="ui-hint font-medium">Đang lấy toạ độ từ liên kết…</p>}
           {isLinkChecked && resolve.error && <ErrorMessage message={resolve.error} />}
           {/* The coordinates line sits at the top of the box, often off screen on a phone, so the result also shows here. */}
           {isLinkChecked && coordinates && (

@@ -73,7 +73,7 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
           </button>
         </div>
         <p className="ui-hint mt-1">
-          Mỗi ca dùng mức lương có hiệu lực vào ngày của ca. Thêm mức mới khi tăng lương hoặc đổi loại nhân viên.{" "}
+          Mỗi ca dùng mức lương có hiệu lực vào ngày của ca. Thêm mức mới khi tăng lương hoặc đổi hình thức làm việc.{" "}
           <Link href={`/admin/payroll/employees/${employee.id}`} className="ui-link">
             Xem lương các tháng
           </Link>
@@ -134,7 +134,7 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="rate-type" className="ui-label">
-              Loại
+              Hình thức làm việc
             </label>
             <select
               id="rate-type"
@@ -156,7 +156,7 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
         </div>
         {save.error && <ErrorMessage message={save.error} />}
         <button type="submit" disabled={save.isPending || effectiveFrom === ""} className="ui-btn w-full">
-          {save.isPending ? "Đang thêm..." : "Thêm mức lương"}
+          {save.isPending ? "Đang thêm…" : "Thêm mức lương"}
         </button>
       </form>
       </Modal>

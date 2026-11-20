@@ -195,7 +195,7 @@ describe("estimate, close and reopen", () => {
     expect((await close({ month: currentMonth() })).status).toBe(409);
     const blocked = await close();
     expect(blocked.status).toBe(409);
-    expect(await blocked.json()).toEqual({ error: "Tháng còn ca đang làm, thiếu check out hoặc chờ duyệt." });
+    expect(await blocked.json()).toEqual({ error: "Tháng còn ca đang làm, thiếu giờ ra hoặc chờ duyệt." });
   });
 
   it("closes the month, locks it and shows the stored payslip to the employee", async () => {

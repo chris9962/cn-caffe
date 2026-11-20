@@ -78,7 +78,7 @@ export function EmployeeDetail({ params }: { params: Promise<{ id: string }> }) 
                   : "bg-[var(--danger-soft)] text-[var(--danger)]"
               }`}
             >
-              {employee.isActive ? "Đang làm" : "Đã khoá"}
+              {employee.isActive ? "Đang hoạt động" : "Đã khoá"}
             </span>
           </p>
         </div>

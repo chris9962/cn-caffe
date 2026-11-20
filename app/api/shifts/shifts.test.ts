@@ -190,7 +190,7 @@ describe("PATCH /api/shifts/[id]", () => {
     await signInAs(manager);
     const res = await edit(pendingShiftId, { checkInAt: at("04:00"), checkOutAt: at("02:00") });
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "Giờ check out phải sau giờ check in." });
+    expect(await res.json()).toEqual({ error: "Giờ ra phải sau giờ vào." });
   });
 
   it("rejects times without an offset", async () => {
@@ -211,7 +211,7 @@ describe("PATCH /api/shifts/[id]", () => {
     await signInAs(manager);
     const res = await edit(pendingShiftId, null);
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "Dữ liệu gửi lên không hợp lệ." });
+    expect(await res.json()).toEqual({ error: "Dữ liệu không hợp lệ." });
   });
 
   it("rejects an end in the future", async () => {
@@ -281,7 +281,7 @@ describe("POST /api/shifts", () => {
     expect(await noBranch.json()).toEqual({ error: "Không tìm thấy chi nhánh." });
     const badId = await manual({ employeeId: "x", branchId: branch1.id, ...times });
     expect(badId.status).toBe(400);
-    expect(await badId.json()).toEqual({ error: "Dữ liệu gửi lên không hợp lệ." });
+    expect(await badId.json()).toEqual({ error: "Dữ liệu không hợp lệ." });
   });
 });
 

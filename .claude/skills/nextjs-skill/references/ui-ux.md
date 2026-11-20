@@ -43,7 +43,7 @@ Mỗi nút hoặc thao tác phải cho người dùng thấy 3 trạng thái, ng
 
 | Trạng thái | Cách hiện |
 |---|---|
-| Đang xử lý | Nút đổi chữ, ví dụ "Đang lấy toạ độ từ link...". Nút bị khoá trong lúc chờ |
+| Đang xử lý | Nút đổi chữ, ví dụ "Đang lấy toạ độ từ liên kết…". Nút bị khoá trong lúc chờ |
 | Thành công | Dòng xanh lá có kết quả cụ thể, ví dụ "Đã lấy toạ độ 10.77250, 106.69800." |
 | Thất bại | Dòng đỏ có lý do và cách sửa |
 
@@ -60,7 +60,7 @@ Lỗi gốc: form chi nhánh bắt người dùng dán link rồi bấm "Lấy t
 ## 4. Trạng thái tải
 
 - Lần tải đầu của app dùng `AppLoading` trong `components/layout/app-loading.tsx`. Màn này hiện logo Ấm nhấp nháy giữa màn hình và chữ "Đang tải…" bên dưới. `AppShell` hiện màn này khi chờ `/api/me` và khi chuyển trang theo quyền. Người dùng yêu cầu màn này theo mẫu của mgst-app.
-- Nội dung bên trong trang dùng skeleton có hình gần giống nội dung thật. Bạn không dùng chữ "Đang tải..." cho nội dung trong trang.
+- Nội dung bên trong trang dùng skeleton có hình gần giống nội dung thật. Bạn không dùng chữ "Đang tải…" cho nội dung trong trang.
 - Skeleton nằm trong `SkeletonRegion` có nhãn cho trình đọc màn hình.
 - Page có `Suspense` dùng cùng skeleton với component làm `fallback`.
 
@@ -87,7 +87,30 @@ Chỗ dễ sai: `Modal` dùng `<dialog>` ở lớp trên cùng của trang, nên
 - Chữ viết bằng tiếng Việt, câu chủ động, một ý một câu.
 - Câu lỗi nói đúng loại lỗi. Ô trống báo "Số điện thoại là bắt buộc.". Bạn không viết "Bạn nhập số điện thoại.", vì câu này đọc như lỗi nhập sai.
 - Câu lỗi về định dạng nói rõ định dạng đúng, ví dụ "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.".
-- Khi app tự làm một bước, gợi ý nói rõ điều đó, ví dụ "Form tự lấy toạ độ sau khi bạn dán link.".
+- Khi app tự làm một bước, gợi ý nói rõ điều đó, ví dụ "Sau khi bạn dán liên kết vào đây, ứng dụng tự lấy toạ độ.".
+- Chữ trạng thái đang xử lý kết thúc bằng dấu `…`, không dùng `...`. Ví dụ "Đang lưu…".
+- Toast là câu hoàn chỉnh và có dấu chấm cuối câu. Ví dụ "Đã chốt lương và xoá 12 ảnh.".
+
+### Thuật ngữ
+
+Người dùng duyệt bảng thuật ngữ này ngày 2026-11-20, sau khi Codex review chữ trên giao diện. Mỗi khái niệm chỉ dùng một cách gọi trong toàn app, kể cả câu lỗi của Route Handler.
+
+| Khái niệm | Dùng | Không dùng |
+|---|---|---|
+| Trang và chức năng chấm công | Chấm công | Check in |
+| Thao tác bắt đầu, kết thúc ca | Vào ca, Kết thúc ca, Vào ca mới | check in, check out |
+| Mốc giờ của ca | Giờ vào, Giờ ra | giờ check in, giờ check out |
+| Trạng thái ca | Đang làm, Thiếu giờ ra, Chờ duyệt, Hợp lệ, Đã từ chối | Thiếu check out, Từ chối |
+| Trạng thái tài khoản nhân viên | Đang hoạt động, Đã khoá | Đang làm |
+| Người lao động | Nhân viên | Nhân sự |
+| Bán thời gian, toàn thời gian | Hình thức làm việc | Loại, Loại nhân viên |
+| Nơi làm việc trong hệ thống | Chi nhánh | quán, khi nói về một chi nhánh |
+| Tiền cho một giờ làm | Mức lương | lương giờ |
+| Mốc giờ trong ngày của nhân viên toàn thời gian | Số giờ thường mỗi ngày | Số giờ bắt buộc |
+| Thưởng, phạt trong tháng | Khoản cộng/trừ, cột "Cộng/trừ" | Khoản cộng, trừ; Cộng / trừ; khoản thưởng, trừ |
+| Lương chưa chốt | Tạm tính | Đang sửa (tạm tính) |
+| Đường dẫn Google Maps | Liên kết, sao chép | link, copy |
+| Request sai dạng | "Dữ liệu không hợp lệ." | "Dữ liệu gửi lên không hợp lệ." |
 
 ## 8. Tính nhất quán giữa các màn hình
 

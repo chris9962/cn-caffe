@@ -5,7 +5,7 @@ import { DateField } from "@/components/ui/date-field";
 import { TimeField } from "@/components/ui/time-field";
 import { toVietnamLocalInput } from "@/lib/date";
 
-export const MISSING_TIMES_MESSAGE = "Bạn nhập đủ giờ vào và giờ ra.";
+export const MISSING_TIMES_MESSAGE = "Giờ vào và giờ ra là bắt buộc.";
 
 export type ShiftTimes = { checkIn: string; checkOut: string };
 

@@ -63,7 +63,7 @@ describe("POST /api/auth/login", () => {
       json: { phone: "0123", password: "Init1234" },
     });
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("Số điện thoại không hợp lệ.");
+    expect((await res.json()).error).toBe("Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.");
   });
 });
 

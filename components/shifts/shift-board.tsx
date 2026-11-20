@@ -94,7 +94,7 @@ export function ShiftBoard() {
                     <tr>
                       {/* w-px shrinks the column to the photo; the long header text used to set its width. */}
                       <th scope="col" className="w-px">
-                        Ảnh<span className="sr-only"> check in</span>
+                        Ảnh<span className="sr-only"> vào ca</span>
                       </th>
                       {/* Short facts share a cell as two lines, so the reason column gets the remaining width. */}
                       <th scope="col" className="w-px">
@@ -121,7 +121,7 @@ export function ShiftBoard() {
                             // eslint-disable-next-line @next/next/no-img-element -- the signed URL changes on every load, so next/image could never reuse its optimised copy.
                             <img
                               src={shift.checkInPhotoUrl}
-                              alt={`Ảnh check in của ${shift.employeeName}`}
+                              alt={`Ảnh vào ca của ${shift.employeeName}`}
                               width={72}
                               height={72}
                               className="size-[4.5rem] rounded-xl object-cover"

@@ -2,7 +2,7 @@ import { requireAdmin } from "@/app/api/_lib/auth";
 import { isUuid } from "@/app/api/_lib/employee-input";
 import { dbErrorResponse, errorResponse } from "@/app/api/_lib/errors";
 
-const NOT_FOUND = "Không tìm thấy khoản cộng trừ.";
+const NOT_FOUND = "Không tìm thấy khoản cộng/trừ.";
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin();

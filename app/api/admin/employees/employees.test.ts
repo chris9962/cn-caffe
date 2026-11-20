@@ -122,8 +122,8 @@ describe("employee admin API", () => {
       return [res.status, (await res.json()).error];
     };
     const valid = { fullName: "A", phone: local(phone), role: "staff", password: "Init1234" };
-    expect(await post({ ...valid, fullName: "  " })).toEqual([400, "Họ tên không được để trống."]);
-    expect(await post({ ...valid, phone: "0123" })).toEqual([400, "Số điện thoại không hợp lệ."]);
+    expect(await post({ ...valid, fullName: "  " })).toEqual([400, "Họ tên là bắt buộc."]);
+    expect(await post({ ...valid, phone: "0123" })).toEqual([400, "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0."]);
     expect(await post({ ...valid, password: "short" })).toEqual([400, "Mật khẩu phải có ít nhất 8 ký tự."]);
     expect(await post({ ...valid, role: "root" })).toEqual([400, "Vai trò không hợp lệ."]);
     expect((await post(null))[0]).toBe(400);
@@ -220,8 +220,8 @@ describe("employee admin API", () => {
       400,
       "Hình thức làm việc không hợp lệ.",
     ]);
-    expect(await patch({ fullName: "" })).toEqual([400, "Họ tên không được để trống."]);
-    expect(await patch({ phone: "12" })).toEqual([400, "Số điện thoại không hợp lệ."]);
+    expect(await patch({ fullName: "" })).toEqual([400, "Họ tên là bắt buộc."]);
+    expect(await patch({ phone: "12" })).toEqual([400, "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0."]);
     expect((await patch(null))[0]).toBe(400);
     expect(await patch({ fullName: "X" }, crypto.randomUUID())).toEqual([404, "Không tìm thấy nhân viên."]);
   });

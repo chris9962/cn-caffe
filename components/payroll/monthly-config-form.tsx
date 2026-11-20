@@ -93,14 +93,14 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
           />
           <p id="overtime-rate-hint" className="ui-hint">
             Một mức chung cho mọi nhân viên bán thời gian. Giờ làm trong khung tăng ca chỉ tính theo mức này,
-            không tính thêm lương giờ thường.
+            không tính thêm theo mức lương của nhân viên.
           </p>
         </div>
         <h3 className="ui-label border-t border-[var(--line)] pt-5">Toàn thời gian</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="full-time-daily-hours" className="ui-label">
-              Số giờ bắt buộc mỗi ngày
+              Số giờ thường mỗi ngày
             </label>
             <input
               id="full-time-daily-hours"
@@ -116,7 +116,7 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
               className="ui-field"
             />
             <p id="full-time-daily-hint" className="ui-hint">
-              Giờ làm trong ngày đến mức này tính theo lương giờ của từng nhân viên.
+              Giờ làm trong ngày đến mức này tính theo mức lương của từng nhân viên.
             </p>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -132,7 +132,7 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
               className="ui-field"
             />
             <p id="full-time-overtime-hint" className="ui-hint">
-              Một mức chung cho giờ vượt số giờ bắt buộc của ngày, không tính thêm lương giờ thường.
+              Một mức chung cho giờ làm vượt số giờ thường của ngày, không tính thêm theo mức lương của nhân viên.
             </p>
           </div>
         </div>
@@ -157,7 +157,7 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
         </div>
         {error && <ErrorMessage message={error} />}
         <button type="submit" disabled={isPending} className="ui-btn">
-          {isPending ? "Đang lưu..." : "Lưu cấu hình"}
+          {isPending ? "Đang lưu…" : "Lưu cấu hình"}
         </button>
       </fieldset>
     </form>

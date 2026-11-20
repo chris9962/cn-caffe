@@ -30,7 +30,7 @@ function getNavItems(user: CurrentUser): NavItem[] {
   }
   if (isAdminOrDirector) {
     items.push(
-      { href: "/admin/employees", label: "Nhân viên", shortLabel: "Nhân sự", icon: "people" },
+      { href: "/admin/employees", label: "Nhân viên", shortLabel: "Nhân viên", icon: "people" },
       { href: "/admin/branches", label: "Chi nhánh", shortLabel: "Chi nhánh", icon: "branch" },
       { href: "/admin/payroll", label: "Bảng lương", shortLabel: "Lương", icon: "wallet" },
       { href: "/admin/monthly-config", label: "Cấu hình tháng", shortLabel: "Cấu hình", icon: "sliders" },
@@ -207,7 +207,7 @@ export function AppNav({ user }: { user: CurrentUser }) {
             disabled={isPending}
             className="ui-btn-quiet w-full"
           >
-            {isPending ? "Đang đăng xuất..." : "Đăng xuất"}
+            {isPending ? "Đang đăng xuất…" : "Đăng xuất"}
           </button>
         </div>
       </aside>

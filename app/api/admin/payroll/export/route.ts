@@ -41,7 +41,7 @@ export async function GET(request: Request) {
   sheet.columns = [
     { header: "Họ tên", key: "name", width: 26 },
     { header: "Số điện thoại", key: "phone", width: 14 },
-    { header: "Loại nhân viên", key: "type", width: 26 },
+    { header: "Hình thức làm việc", key: "type", width: 26 },
     ...branchNames.map((name, index) => ({
       header: `Giờ tại ${name || "chi nhánh đã đóng"}`,
       key: `branch${index}`,

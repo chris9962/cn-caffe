@@ -9,7 +9,7 @@ import { GET } from "./route";
 const LONG_URL =
   "https://www.google.com/maps/place/Ben+Thanh/@10.7720,106.6980,17z/data=!3m1!4b1!4m6!3m5!1s0x0:0x0!8m2!3d10.772463!4d106.698017";
 const NO_COORDINATES =
-  "Link không có toạ độ. Bạn mở Google Maps, chọn đúng quán, bấm Chia sẻ rồi copy link.";
+  "Liên kết không có toạ độ. Bạn mở Google Maps, chọn đúng chi nhánh, bấm Chia sẻ rồi sao chép liên kết.";
 
 beforeEach(signOut);
 afterEach(() => vi.restoreAllMocks());
@@ -87,8 +87,8 @@ describe("admin branches API", () => {
   });
 
   it.each([
-    [null, "Dữ liệu gửi lên không hợp lệ."],
-    [{ ...newBranch, name: "  " }, "Tên chi nhánh không được để trống."],
+    [null, "Dữ liệu không hợp lệ."],
+    [{ ...newBranch, name: "  " }, "Tên chi nhánh là bắt buộc."],
     [{ ...newBranch, latitude: 91 }, "Toạ độ không hợp lệ."],
     [{ ...newBranch, longitude: "1" }, "Toạ độ không hợp lệ."],
     [{ ...newBranch, radiusM: 0 }, "Bán kính phải là số nguyên dương."],
@@ -186,6 +186,6 @@ describe("POST /api/admin/branches/resolve-map-link", () => {
     );
     const res = await resolve("https://maps.app.goo.gl/abc");
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("Không mở được link Google Maps. Bạn kiểm tra lại link.");
+    expect((await res.json()).error).toBe("Không mở được liên kết Google Maps. Bạn kiểm tra lại liên kết.");
   });
 });

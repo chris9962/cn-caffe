@@ -6,7 +6,7 @@ import { ErrorMessage } from "@/components/ui/error-message";
 
 const MAX_PHOTO_WIDTH = 720;
 const JPEG_QUALITY = 0.8;
-const CAMERA_DENIED = "Bạn cần cho phép dùng camera để check in.";
+const CAMERA_DENIED = "Bạn cần cho phép dùng camera để chấm công.";
 const CAMERA_UNAVAILABLE = "Không mở được camera. Bạn kiểm tra camera rồi thử lại.";
 
 // Controls sit on the camera image, so they need a light focus ring instead of the app's green one.
@@ -124,7 +124,7 @@ export function CameraCapture({ onCapture, onCancel, overlay, confirmAction, chi
         )}
         {!previewUrl && !isReady && (
           <p role="status" className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
-            Đang mở camera...
+            Đang mở camera…
           </p>
         )}
 

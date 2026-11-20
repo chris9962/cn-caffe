@@ -48,11 +48,11 @@ export function parseSignedAmount(value: unknown): number | Response {
 
 export function parseNote(value: unknown): string | Response {
   const note = typeof value === "string" ? value.trim() : "";
-  return note || errorResponse(400, "Bạn cần ghi lý do cho khoản này.");
+  return note || errorResponse(400, "Lý do là bắt buộc.");
 }
 
 export function parseRateEmploymentType(value: unknown): EmploymentType | Response {
   return typeof value === "string" && EMPLOYMENT_TYPES.has(value)
     ? (value as EmploymentType)
-    : errorResponse(400, "Loại nhân viên không hợp lệ.");
+    : errorResponse(400, "Hình thức làm việc không hợp lệ.");
 }

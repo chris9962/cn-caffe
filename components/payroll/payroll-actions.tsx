@@ -22,8 +22,8 @@ function CloseButton({ payroll, onChanged }: PayrollActionsProps) {
   async function handleClose() {
     const monthLabel = formatMonthLabel(payroll.month).toLowerCase();
     const message =
-      `Chốt lương ${monthLabel}? Ca và khoản cộng trừ của tháng sẽ bị khoá.\n\n` +
-      `Toàn bộ ảnh check in và check out của ${monthLabel} sẽ bị xoá vĩnh viễn và không khôi phục được, kể cả khi mở lại tháng.`;
+      `Chốt lương ${monthLabel}? Sau khi chốt, bạn không sửa được ca và khoản cộng/trừ của tháng.\n\n` +
+      `Ứng dụng xoá vĩnh viễn mọi ảnh vào ca và kết thúc ca của ${monthLabel}. Bạn không khôi phục được ảnh, kể cả khi mở lại tháng.`;
     if (!window.confirm(message)) return;
     let result: { deletedPhotos: number };
     try {
@@ -31,7 +31,7 @@ function CloseButton({ payroll, onChanged }: PayrollActionsProps) {
     } catch {
       return;
     }
-    showToast(`Đã chốt lương, đã xoá ${result.deletedPhotos} ảnh`);
+    showToast(`Đã chốt lương và xoá ${result.deletedPhotos} ảnh.`);
     onChanged();
   }
 
@@ -45,7 +45,7 @@ function CloseButton({ payroll, onChanged }: PayrollActionsProps) {
         aria-describedby={hint ? "close-hint" : undefined}
         className="ui-btn"
       >
-        {isPending ? "Đang chốt..." : "Chốt lương"}
+        {isPending ? "Đang chốt…" : "Chốt lương"}
       </button>
       {hint && (
         <p id="close-hint" className="ui-hint absolute top-full right-0 mt-1 text-xs whitespace-nowrap">
@@ -108,7 +108,7 @@ function ReopenButton({ payroll, onChanged }: PayrollActionsProps) {
           </div>
           {error && <ErrorMessage message={error} />}
           <button type="submit" disabled={isPending} className="ui-btn-danger">
-            {isPending ? "Đang mở lại..." : "Mở lại tháng"}
+            {isPending ? "Đang mở lại…" : "Mở lại tháng"}
           </button>
         </form>
       </SideDrawer>

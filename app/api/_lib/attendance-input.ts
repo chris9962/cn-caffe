@@ -18,7 +18,7 @@ const formNumber = (value: FormDataEntryValue | null) =>
 export async function readMultipartForm(request: Request): Promise<FormData | Response> {
   const isMultipart = /^multipart\/form-data/i.test(request.headers.get("content-type") ?? "");
   const form = isMultipart ? await request.formData().catch(() => null) : null;
-  return form ?? errorResponse(400, "Dữ liệu gửi lên không hợp lệ.");
+  return form ?? errorResponse(400, "Dữ liệu không hợp lệ.");
 }
 
 export function parseAttendanceFields(form: FormData): AttendanceFields | Response {

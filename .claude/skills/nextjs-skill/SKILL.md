@@ -54,7 +54,8 @@ Danh sách này là bản tóm tắt. Chi tiết và ví dụ nằm trong các f
 - Không dùng ô ngày, giờ, tháng mặc định của trình duyệt. Dùng `DateField`, `TimeField`, `MonthPicker`.
 - Mỗi thao tác có phản hồi ngay chỗ thao tác: đang xử lý, thành công, thất bại kèm lý do.
 - Việc app tự làm được thì không bắt người dùng bấm nút.
-- Lần tải đầu của app hiện `AppLoading`: logo và chữ "Đang tải…". Nội dung trong trang dùng skeleton, không dùng chữ "Đang tải...".
+- Lần tải đầu của app hiện `AppLoading`: logo và chữ "Đang tải…". Nội dung trong trang dùng skeleton, không dùng chữ "Đang tải…".
+- Chữ trên giao diện theo bảng thuật ngữ trong `references/ui-ux.md`, ví dụ "Vào ca", "Kết thúc ca", không dùng "check in".
 - Trang chi tiết và trang thêm mới có `BackLink` về danh sách.
 - Chữ trên giao diện ngắn. Không thêm câu giải thích thừa.
 

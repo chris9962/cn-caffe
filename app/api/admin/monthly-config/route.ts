@@ -39,9 +39,9 @@ export async function PUT(request: Request) {
   const maxShiftMinutes = parsePositiveAmount(body.maxShiftMinutes, "Thời lượng tối đa của ca không hợp lệ.");
   if (maxShiftMinutes instanceof Response) return maxShiftMinutes;
   if (maxShiftMinutes > 48 * 60) return errorResponse(400, "Thời lượng tối đa của ca không được quá 48 giờ.");
-  const fullTimeDailyMinutes = parsePositiveAmount(body.fullTimeDailyMinutes, "Số giờ bắt buộc mỗi ngày không hợp lệ.");
+  const fullTimeDailyMinutes = parsePositiveAmount(body.fullTimeDailyMinutes, "Số giờ thường mỗi ngày phải lớn hơn 0.");
   if (fullTimeDailyMinutes instanceof Response) return fullTimeDailyMinutes;
-  if (fullTimeDailyMinutes > 24 * 60) return errorResponse(400, "Số giờ bắt buộc mỗi ngày không được quá 24 giờ.");
+  if (fullTimeDailyMinutes > 24 * 60) return errorResponse(400, "Số giờ thường mỗi ngày không được quá 24 giờ.");
   const fullTimeOvertimeHourlyRate = parseNonNegativeAmount(
     body.fullTimeOvertimeHourlyRate,
     "Lương tăng ca toàn thời gian phải là số nguyên không âm.",

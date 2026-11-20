@@ -3,10 +3,10 @@ import type { FailReason, Shift, ShiftStatus } from "@/types/shift";
 
 export const STATUS_LABELS: Record<ShiftStatus, string> = {
   open: "Đang làm",
-  missing_checkout: "Thiếu check out",
+  missing_checkout: "Thiếu giờ ra",
   pending_review: "Chờ duyệt",
   valid: "Hợp lệ",
-  rejected: "Từ chối",
+  rejected: "Đã từ chối",
 };
 
 export const FAIL_REASON_LABELS: Record<FailReason, string> = {
@@ -21,7 +21,7 @@ const AUDIT_ACTION_LABELS = new Map<string, string>([
   ["shift.rejected", "Từ chối"],
   ["shift.edited", "Sửa giờ"],
   ["shift.created_manually", "Thêm thủ công"],
-  ["shift.abandoned", "Bắt đầu ca mới khi chưa check out"],
+  ["shift.abandoned", "Vào ca mới khi chưa kết thúc ca trước"],
 ]);
 
 export function formatFailReasons(reasons: FailReason[]) {

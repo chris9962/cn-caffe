@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(request: Request) {
   const { phone, password } = await request.json().catch(() => ({}));
   const normalizedPhone = typeof phone === "string" ? normalizePhone(phone) : null;
-  if (!normalizedPhone) return errorResponse(400, "Số điện thoại không hợp lệ.");
+  if (!normalizedPhone) return errorResponse(400, "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.");
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({

@@ -21,7 +21,7 @@ const focusClass =
 type ShiftDetailData = { shift: Shift; auditLogs: AuditLog[] };
 
 type CheckPoint = {
-  title: "Check in" | "Check out";
+  title: "Vào ca" | "Kết thúc ca";
   time: string | null;
   photoUrl: string | null;
   photosDeleted: boolean;
@@ -48,7 +48,7 @@ function CheckPointSection({ point }: { point: CheckPoint }) {
         {point.title}
       </h2>
       {point.time === null ? (
-        <p>Chưa có {name}.</p>
+        <p>Chưa {name}.</p>
       ) : (
         <>
           <p>Lúc {formatDateTime(point.time)}</p>
@@ -182,12 +182,12 @@ function ShiftView({ user, shift, auditLogs, headingRef, onDone }: ShiftViewProp
           <dt className="ui-hint">Lý do</dt>
           <dd>{shift.failReasons.length > 0 ? formatFailReasons(shift.failReasons) : "—"}</dd>
           <dt className="ui-hint">Nguồn</dt>
-          <dd>{shift.source === "manual" ? "Thủ công" : "Check in"}</dd>
+          <dd>{shift.source === "manual" ? "Thủ công" : "Chấm công"}</dd>
         </dl>
       </div>
       <CheckPointSection
         point={{
-          title: "Check in",
+          title: "Vào ca",
           time: shift.checkInAt,
           photoUrl: shift.checkInPhotoUrl,
           photosDeleted: shift.photosDeleted,
@@ -199,7 +199,7 @@ function ShiftView({ user, shift, auditLogs, headingRef, onDone }: ShiftViewProp
       />
       <CheckPointSection
         point={{
-          title: "Check out",
+          title: "Kết thúc ca",
           time: shift.checkOutAt,
           photoUrl: shift.checkOutPhotoUrl,
           photosDeleted: shift.photosDeleted,

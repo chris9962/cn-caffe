@@ -28,7 +28,7 @@ export function PayrollVersionSelect({ payroll, onChange }: PayrollVersionSelect
         }}
         className="ui-field w-fit max-w-64 pr-10"
       >
-        {payroll.status !== "closed" && <option value="estimate">Đang sửa (tạm tính)</option>}
+        {payroll.status !== "closed" && <option value="estimate">Tạm tính</option>}
         {payroll.versions.map((item) => (
           <option key={item.version} value={item.version}>
             {`Bản ${item.version} · chốt ${formatDateTime(item.closedAt).slice(0, 10)}`}

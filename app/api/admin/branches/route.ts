@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   if ("response" in auth) return auth.response;
 
   const body = await readJsonObject(request);
-  if (!body) return errorResponse(400, "Dữ liệu gửi lên không hợp lệ.");
+  if (!body) return errorResponse(400, "Dữ liệu không hợp lệ.");
 
   const fields = parseBranchFields(body, true);
   if (fields instanceof Response) return fields;

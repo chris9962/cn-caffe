@@ -72,7 +72,7 @@ describe("manager access API", () => {
     for (const json of invalid) {
       const res = await put(manager.id, json);
       expect(res.status).toBe(400);
-      expect((await res.json()).error).toBe("Dữ liệu gửi lên không hợp lệ.");
+      expect((await res.json()).error).toBe("Dữ liệu không hợp lệ.");
     }
   });
 

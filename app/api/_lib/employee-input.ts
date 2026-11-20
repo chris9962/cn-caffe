@@ -21,12 +21,12 @@ export async function readJsonObject(request: Request): Promise<Record<string, u
 
 export function parseFullName(value: unknown): string | Response {
   const name = typeof value === "string" ? value.trim() : "";
-  return name || errorResponse(400, "Họ tên không được để trống.");
+  return name || errorResponse(400, "Họ tên là bắt buộc.");
 }
 
 export function parsePhone(value: unknown): string | Response {
   const phone = typeof value === "string" ? normalizePhone(value) : null;
-  return phone ?? errorResponse(400, "Số điện thoại không hợp lệ.");
+  return phone ?? errorResponse(400, "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.");
 }
 
 export function parseRole(value: unknown): EmployeeRole | Response {

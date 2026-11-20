@@ -3,15 +3,15 @@ import { readJsonObject } from "@/app/api/_lib/employee-input";
 import { errorResponse } from "@/app/api/_lib/errors";
 import { parseGoogleMapsCoordinates, resolveGoogleMapsUrl } from "@/lib/branches/google-maps";
 
-const NO_COORDINATES = "Link không có toạ độ. Bạn mở Google Maps, chọn đúng quán, bấm Chia sẻ rồi copy link.";
-const UNREACHABLE = "Không mở được link Google Maps. Bạn kiểm tra lại link.";
+const NO_COORDINATES = "Liên kết không có toạ độ. Bạn mở Google Maps, chọn đúng chi nhánh, bấm Chia sẻ rồi sao chép liên kết.";
+const UNREACHABLE = "Không mở được liên kết Google Maps. Bạn kiểm tra lại liên kết.";
 
 export async function POST(request: Request) {
   const auth = await requireAdmin();
   if ("response" in auth) return auth.response;
 
   const body = await readJsonObject(request);
-  if (!body || typeof body.url !== "string") return errorResponse(400, "Dữ liệu gửi lên không hợp lệ.");
+  if (!body || typeof body.url !== "string") return errorResponse(400, "Dữ liệu không hợp lệ.");
 
   let resolvedUrl: string;
   try {

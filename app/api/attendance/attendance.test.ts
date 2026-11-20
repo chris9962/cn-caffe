@@ -104,7 +104,7 @@ describe("POST /api/attendance/check-in", () => {
     const again = await checkIn({ branchId: branch.id, ...AT_BRANCH });
     expect(again.status).toBe(409);
     const conflict = await again.json();
-    expect(conflict.error).toBe("Bạn đang có một ca chưa check out.");
+    expect(conflict.error).toBe("Bạn đang có một ca chưa kết thúc.");
     expect(conflict.openShift.id).toBe(first.id);
     expect(conflict.openShift.checkInPhotoUrl).toMatch(/^http/);
     expect(await photoCount(employee.id)).toBe(1);
@@ -195,7 +195,7 @@ describe("POST /api/attendance/check-in", () => {
 
     const res = await callRoute(checkInPOST, { method: "POST", json: { branchId: branch.id, ...AT_BRANCH } });
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("Dữ liệu gửi lên không hợp lệ.");
+    expect((await res.json()).error).toBe("Dữ liệu không hợp lệ.");
   });
 
   it("returns 404 for an inactive or unknown branch and removes the uploaded photo", async () => {
@@ -267,7 +267,7 @@ describe("POST /api/attendance/check-out", () => {
 
     const again = await checkOut(AT_BRANCH);
     expect(again.status).toBe(409);
-    expect((await again.json()).error).toBe("Bạn chưa check in.");
+    expect((await again.json()).error).toBe("Bạn chưa vào ca.");
     expect(await photoCount(employee.id)).toBe(2);
 
     expect(await (await current()).json()).toEqual({ shift: null });

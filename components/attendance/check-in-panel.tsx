@@ -60,9 +60,14 @@ function requestLocation(): Promise<Location | null> {
 
 const shortDate = (date: string) => formatDate(date).slice(0, 5);
 
+const RESULT_ACTIONS: Record<Mode, string> = {
+  "check-in": "Đã vào ca",
+  "check-out": "Đã kết thúc ca",
+  "start-new": "Đã vào ca mới",
+};
+
 function resultMessage(mode: Mode, shift: Shift, unfinishedDate: string | null) {
-  const action = mode === "check-out" ? "Đã check out" : mode === "start-new" ? "Đã vào ca mới" : "Đã check in";
-  const done = `${action} lúc ${formatTime(shift.checkOutAt ?? shift.checkInAt)}`;
+  const done = `${RESULT_ACTIONS[mode]} lúc ${formatTime(shift.checkOutAt ?? shift.checkInAt)}`;
   const review = shift.failReasons.length > 0 ? `, chờ quản lý duyệt: ${formatFailReasons(shift.failReasons)}` : "";
   const unfinished =
     mode === "start-new" && unfinishedDate ? ` Ca ngày ${shortDate(unfinishedDate)} chờ quản lý nhập giờ ra.` : "";
@@ -121,8 +126,8 @@ function AttendanceOverview({ now, openShift, onStart }: AttendanceOverviewProps
           </p>
         </div>
         <p className="text-sm leading-6">
-          Nếu ca đó đã xong, bấm <strong>Vào ca mới</strong>. Quản lý sẽ nhập giờ ra cho ca {day}; ca đó chưa được tính lương
-          cho tới khi có giờ ra.
+          Nếu ca đó đã xong, bạn bấm <strong>Vào ca mới</strong>. Quản lý sẽ nhập giờ ra cho ca {day}. Ứng dụng chỉ tính
+          lương ca đó sau khi có giờ ra.
         </p>
         <div className="flex flex-col gap-3">
           <button type="button" onClick={() => onStart("start-new")} className={primaryButtonClass}>
@@ -224,7 +229,7 @@ function AttendanceFlow({ mode, unfinishedDate, openShiftBranchName, onCancel, o
   const isResolvingBranch = needsBranch && (isLocating || (branches.data === null && !branches.error));
   const branchLabel = needsBranch
     ? isResolvingBranch
-      ? "Đang xác định chi nhánh..."
+      ? "Đang xác định chi nhánh…"
       : (branchList.find((branch) => branch.id === branchId)?.name ?? "Chưa chọn chi nhánh")
     : (openShiftBranchName ?? "Chi nhánh của ca đang mở");
   const reviewNote =
@@ -290,7 +295,7 @@ function AttendanceFlow({ mode, unfinishedDate, openShiftBranchName, onCancel, o
           disabled={!canConfirm}
           className="min-h-11 whitespace-nowrap rounded-full bg-white px-5 text-base font-semibold text-black disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
-          {isPending ? "Đang gửi..." : "Xác nhận"}
+          {isPending ? "Đang gửi…" : "Xác nhận"}
         </button>
       }
     >
