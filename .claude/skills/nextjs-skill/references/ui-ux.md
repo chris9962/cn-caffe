@@ -59,7 +59,8 @@ Lỗi gốc: form chi nhánh bắt người dùng dán link rồi bấm "Lấy t
 
 ## 4. Trạng thái tải
 
-- Trạng thái tải dùng skeleton có hình gần giống nội dung thật. Bạn không dùng chữ "Đang tải...".
+- Lần tải đầu của app dùng `AppLoading` trong `components/layout/app-loading.tsx`. Màn này hiện logo Ấm nhấp nháy giữa màn hình và chữ "Đang tải…" bên dưới. `AppShell` hiện màn này khi chờ `/api/me` và khi chuyển trang theo quyền. Người dùng yêu cầu màn này theo mẫu của mgst-app.
+- Nội dung bên trong trang dùng skeleton có hình gần giống nội dung thật. Bạn không dùng chữ "Đang tải..." cho nội dung trong trang.
 - Skeleton nằm trong `SkeletonRegion` có nhãn cho trình đọc màn hình.
 - Page có `Suspense` dùng cùng skeleton với component làm `fallback`.
 

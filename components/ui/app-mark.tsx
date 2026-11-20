@@ -1,9 +1,9 @@
 import Image from "next/image";
 
-type AppMarkProps = { size?: "default" | "large" };
+type AppMarkProps = { size?: "default" | "large"; loading?: "eager" | "lazy" };
 
 // The Ấm logo; decorative because the shop name is always written next to it.
-export function AppMark({ size = "default" }: AppMarkProps) {
+export function AppMark({ size = "default", loading }: AppMarkProps) {
   const pixels = size === "large" ? 56 : 40;
   return (
     <Image
@@ -11,6 +11,7 @@ export function AppMark({ size = "default" }: AppMarkProps) {
       alt=""
       width={pixels}
       height={pixels}
+      loading={loading}
       className={`shrink-0 ${size === "large" ? "rounded-[1.25rem]" : "rounded-[14px]"}`}
     />
   );

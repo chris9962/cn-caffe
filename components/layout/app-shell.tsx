@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { ChangePasswordForm } from "@/components/auth/change-password-form";
+import { AppLoading } from "@/components/layout/app-loading";
 import { AppNav } from "@/components/layout/app-nav";
-import { AppShellSkeleton } from "@/components/layout/app-shell-skeleton";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { ToastProvider } from "@/components/ui/toast";
 import { useFetch } from "@/hooks/use-fetch";
@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [needsAttendanceRedirect, router, user]);
 
   if (isLoading) {
-    return <AppShellSkeleton label="Đang tải trang" />;
+    return <AppLoading label="Đang tải…" />;
   }
 
   if (error || !user) {
@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   if (needsAttendanceRedirect) {
-    return <AppShellSkeleton label="Đang chuyển trang" />;
+    return <AppLoading label="Đang chuyển trang…" />;
   }
 
   if (user.mustChangePassword) {
