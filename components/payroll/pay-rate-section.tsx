@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
 import { Modal } from "@/components/ui/modal";
+import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
 import { useToast } from "@/hooks/use-toast";
@@ -81,7 +81,20 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
       {rates.error ? (
         <ErrorMessage message={rates.error} />
       ) : !rates.data ? (
-        <Loading label="Đang tải mức lương..." />
+        <SkeletonRegion
+          label="Đang tải mức lương"
+          className="flex flex-col divide-y divide-[var(--line)] rounded-lg border border-[var(--line)]"
+        >
+          {Array.from({ length: 2 }, (_, row) => (
+            <div key={row} className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-3.5 w-40" />
+              </div>
+              <Skeleton className="h-10 w-16 rounded-full" />
+            </div>
+          ))}
+        </SkeletonRegion>
       ) : rates.data.length === 0 ? (
         <p className="rounded-lg bg-[var(--warning-soft)] px-4 py-3 text-sm text-[var(--warning)]">
           Chưa có mức lương. Ca của nhân viên này sẽ chưa được tính tiền.

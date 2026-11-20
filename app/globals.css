@@ -247,6 +247,12 @@ select {
   .ui-table tbody tr:hover > * {
     background: color-mix(in oklab, var(--accent-soft) 40%, transparent);
   }
+
+  /* Lives in the components layer so a rounded-* utility on a skeleton always wins over this default. */
+  .ui-skeleton {
+    border-radius: 0.375rem;
+    background: var(--surface-strong);
+  }
 }
 
 @keyframes toast-in {

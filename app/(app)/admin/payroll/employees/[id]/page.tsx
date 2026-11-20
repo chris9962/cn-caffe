@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { EmployeePayHistory } from "@/components/payroll/employee-pay-history";
-import { Loading } from "@/components/ui/loading";
+import { EmployeePayHistory, EmployeePayHistorySkeleton } from "@/components/payroll/employee-pay-history";
 
 // AppShell resolves the session client-side, so this segment never renders on the server shell.
 export const instant = false;
@@ -16,7 +15,7 @@ export default function EmployeePayHistoryPage({
   searchParams: Promise<{ year?: string | string[] }>;
 }) {
   return (
-    <Suspense fallback={<Loading label="Đang tải..." />}>
+    <Suspense fallback={<EmployeePayHistorySkeleton />}>
       <EmployeePayHistory params={params} searchParams={searchParams} />
     </Suspense>
   );

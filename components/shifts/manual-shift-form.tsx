@@ -5,7 +5,7 @@ import { useId, useState, type FormEvent } from "react";
 import { BranchPicker } from "@/components/attendance/branch-picker";
 import { MISSING_TIMES_MESSAGE, ShiftTimeFields, type ShiftTimes } from "@/components/shifts/shift-time-fields";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
+import { FormSkeleton } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
 import { toVietnamIso } from "@/lib/date";
@@ -59,7 +59,7 @@ export function ManualShiftForm() {
 
   const loadError = me.error ?? employees.error ?? branches.error;
   if (loadError) return <ErrorMessage message={loadError} />;
-  if (!me.data || !employees.data || !branches.data) return <Loading label="Đang tải..." />;
+  if (!me.data || !employees.data || !branches.data) return <FormSkeleton label="Đang tải biểu mẫu thêm ca" fields={4} />;
 
   const user = me.data;
   // Managers may not add their own shifts; only an admin or director may.

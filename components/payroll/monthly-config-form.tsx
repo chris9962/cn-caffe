@@ -2,8 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
 import { MonthPicker } from "@/components/ui/month-picker";
+import { FormSkeleton } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
 import { useToast } from "@/hooks/use-toast";
@@ -191,7 +191,7 @@ export function MonthlyConfigForm() {
       {error ? (
         <ErrorMessage message={error} />
       ) : !data || (isLoading && data.month !== month) ? (
-        <Loading label="Đang tải cấu hình..." />
+        <FormSkeleton label="Đang tải cấu hình tháng" fields={6} />
       ) : (
         // Keyed so switching months resets the inputs to that month's values.
         <MonthlyConfigFields key={`${data.month}-${data.isLocked}`} config={data} onSaved={reload} />

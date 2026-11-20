@@ -3,10 +3,19 @@
 import { use } from "react";
 import { BranchForm } from "@/components/branches/branch-form";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
+import { FormSkeleton, Skeleton } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { useToast } from "@/hooks/use-toast";
 import type { Branch } from "@/types/branch";
+
+export function BranchDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-8">
+      <Skeleton className="h-10 w-64 max-w-full" />
+      <FormSkeleton label="Đang tải chi nhánh" fields={4} />
+    </div>
+  );
+}
 
 export function BranchDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -26,7 +35,7 @@ export function BranchDetail({ params }: { params: Promise<{ id: string }> }) {
       {error ? (
         <ErrorMessage message={error} />
       ) : data === null && isLoading ? (
-        <Loading label="Đang tải..." />
+        <BranchDetailSkeleton />
       ) : !branch ? (
         <ErrorMessage message="Không tìm thấy chi nhánh." />
       ) : (

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
 import { MonthPicker } from "@/components/ui/month-picker";
+import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useFetch } from "@/hooks/use-fetch";
 import { currentMonth, formatDate, formatTime } from "@/lib/date";
@@ -21,7 +21,27 @@ export function MyShiftList() {
     <div className="flex flex-col gap-5">
       <MonthPicker value={month} onChange={setMonth} />
       {isLoading ? (
-        <Loading label="Đang tải..." />
+        <SkeletonRegion label="Đang tải ca của tôi" className="flex flex-col gap-3">
+          {Array.from({ length: 3 }, (_, card) => (
+            <div key={card} className="ui-card flex flex-col gap-3 rounded-lg sm:p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-6 w-28" />
+                  <Skeleton className="h-4 w-36" />
+                </div>
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+              <div className="grid grid-cols-3 gap-2 rounded-lg bg-[var(--background)] p-3">
+                {Array.from({ length: 3 }, (_, cell) => (
+                  <div key={cell} className="flex flex-col gap-1.5">
+                    <Skeleton className="h-3 w-12" />
+                    <Skeleton className="h-4 w-14" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </SkeletonRegion>
       ) : error ? (
         <ErrorMessage message={error} />
       ) : data?.length === 0 ? (

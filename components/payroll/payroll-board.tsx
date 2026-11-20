@@ -6,8 +6,8 @@ import { PayrollActions } from "@/components/payroll/payroll-actions";
 import { PayrollVersionSelect } from "@/components/payroll/payroll-version-select";
 import { PayslipTable } from "@/components/payroll/payslip-table";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
 import { MonthPicker } from "@/components/ui/month-picker";
+import { TableSkeleton } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { currentMonth } from "@/lib/date";
 import type { PayrollMonth } from "@/types/payroll";
@@ -62,7 +62,7 @@ export function PayrollBoard() {
       {error ? (
         <ErrorMessage message={error} />
       ) : !payroll ? (
-        <Loading label="Đang tính bảng lương..." />
+        <TableSkeleton label="Đang tính bảng lương" columns={7} />
       ) : (
         <>
           {payroll.status !== "closed" && payroll.blockingShifts.length > 0 && <BlockingShiftList shifts={payroll.blockingShifts} />}

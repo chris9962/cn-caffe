@@ -4,9 +4,9 @@ import Link from "next/link";
 import { use, useId, useState } from "react";
 import { PayslipView } from "@/components/payroll/payslip-view";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
 import { isRowControlClick, RowDetailButton } from "@/components/ui/row-detail-button";
 import { SideDrawer } from "@/components/ui/side-drawer";
+import { Skeleton, TableSkeleton } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { currentMonth } from "@/lib/date";
 import { formatHours, formatMonthLabel, formatMoney, formatSignedMoney } from "@/lib/payroll/format";
@@ -18,6 +18,24 @@ type EmployeePayHistoryProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ year?: string | string[] }>;
 };
+
+export function EmployeePayHistorySkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <Skeleton className="mb-3 h-3 w-36" />
+          <Skeleton className="h-10 w-64 max-w-full" />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-4 w-12" />
+          <Skeleton className="h-12 w-28 rounded-2xl" />
+        </div>
+      </div>
+      <TableSkeleton label="Đang tải lương theo tháng" columns={7} />
+    </div>
+  );
+}
 
 export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryProps) {
   const { id } = use(params);
@@ -73,7 +91,7 @@ export function EmployeePayHistory({ params, searchParams }: EmployeePayHistoryP
       {error ? (
         <ErrorMessage message={error} />
       ) : !months || isLoading ? (
-        <Loading label="Đang tính lương các tháng..." />
+        <TableSkeleton label="Đang tính lương các tháng" columns={7} />
       ) : months.length === 0 ? (
         <p className="ui-card ui-lead text-center">Năm {year} chưa có tháng nào có lương.</p>
       ) : (

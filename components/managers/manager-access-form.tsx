@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
+import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
 import { useToast } from "@/hooks/use-toast";
@@ -109,7 +109,20 @@ export function ManagerAccessForm({ managerId }: { managerId: string }) {
           initial={access.data}
         />
       ) : (
-        <Loading label="Đang tải..." />
+        <SkeletonRegion label="Đang tải phân quyền" className="flex flex-col gap-5">
+          {Array.from({ length: 2 }, (_, group) => (
+            <div key={group} className="flex flex-col gap-3">
+              <Skeleton className="mb-1 h-4 w-32" />
+              {Array.from({ length: 3 }, (_, row) => (
+                <div key={row} className="flex items-center gap-2">
+                  <Skeleton className="size-5 rounded" />
+                  <Skeleton className="h-4 w-40" />
+                </div>
+              ))}
+            </div>
+          ))}
+          <Skeleton className="h-12 w-28 rounded-full" />
+        </SkeletonRegion>
       )}
     </section>
   );

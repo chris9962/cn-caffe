@@ -1,11 +1,11 @@
 "use client";
 
-import { useId, useRef, useState, type RefObject } from "react";
+import { Fragment, useId, useRef, useState, type RefObject } from "react";
 import { ShiftActions } from "@/components/shifts/shift-actions";
 import { ShiftTimeForm } from "@/components/shifts/shift-time-form";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
 import { Modal } from "@/components/ui/modal";
+import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useFetch } from "@/hooks/use-fetch";
 import { useToast } from "@/hooks/use-toast";
@@ -230,6 +230,28 @@ function ShiftView({ user, shift, auditLogs, headingRef, onDone }: ShiftViewProp
   );
 }
 
+export function ShiftDetailSkeleton() {
+  return (
+    <SkeletonRegion label="Đang tải ca" className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-10 w-96 max-w-full" />
+        <div className="ui-card grid max-w-2xl grid-cols-[auto_1fr] items-center gap-x-6 gap-y-4">
+          {Array.from({ length: 6 }, (_, row) => (
+            <Fragment key={row}>
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-5 w-40 max-w-full" />
+            </Fragment>
+          ))}
+        </div>
+      </div>
+      <div className="ui-card flex max-w-2xl flex-col gap-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="aspect-[4/3] w-full max-w-sm rounded-lg" />
+      </div>
+    </SkeletonRegion>
+  );
+}
+
 export function ShiftDetail({ shiftId }: { shiftId: string }) {
   const me = useFetch<CurrentUser>("/api/me");
   const detail = useFetch<ShiftDetailData>(`/api/shifts/${shiftId}`);
@@ -258,7 +280,7 @@ export function ShiftDetail({ shiftId }: { shiftId: string }) {
           onDone={handleDone}
         />
       ) : (
-        <Loading label="Đang tải..." />
+        <ShiftDetailSkeleton />
       )}
     </div>
   );

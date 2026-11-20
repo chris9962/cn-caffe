@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { PayslipView } from "@/components/payroll/payslip-view";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
 import { MonthPicker } from "@/components/ui/month-picker";
+import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { currentMonth } from "@/lib/date";
 import { formatMonthLabel } from "@/lib/payroll/format";
@@ -21,7 +21,20 @@ export function MyPay() {
     <div className="flex flex-col gap-5">
       <MonthPicker value={month} onChange={setMonth} />
       {isLoading ? (
-        <Loading label="Đang tính lương..." />
+        <SkeletonRegion label="Đang tính lương" className="ui-card flex flex-col gap-4 rounded-lg">
+          <div className="flex items-center justify-between gap-3">
+            <Skeleton className="h-7 w-36" />
+            <Skeleton className="h-6 w-20 rounded-full" />
+          </div>
+          <div className="flex flex-col divide-y divide-[var(--line)]">
+            {Array.from({ length: 4 }, (_, row) => (
+              <div key={row} className="flex items-center justify-between gap-4 py-3">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        </SkeletonRegion>
       ) : error ? (
         <ErrorMessage message={error} />
       ) : (

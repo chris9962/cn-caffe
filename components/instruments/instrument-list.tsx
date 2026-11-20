@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import type { Instrument } from "@/types/instrument";
 
@@ -11,7 +12,13 @@ export function InstrumentList() {
   } = useFetch<Instrument[]>("/api/instruments");
 
   if (isLoading) {
-    return <p role="status">Loading instruments...</p>;
+    return (
+      <SkeletonRegion label="Loading instruments..." className="flex flex-col gap-2 pl-6">
+        {Array.from({ length: 3 }, (_, row) => (
+          <Skeleton key={row} className="h-4 w-40" />
+        ))}
+      </SkeletonRegion>
+    );
   }
 
   if (error) {

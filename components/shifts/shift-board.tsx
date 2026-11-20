@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ShiftFilters, type ShiftFilterValues } from "@/components/shifts/shift-filters";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
+import { Skeleton, TableSkeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useFetch } from "@/hooks/use-fetch";
 import { currentMonth, formatDate, formatTime } from "@/lib/date";
@@ -63,7 +63,13 @@ export function ShiftBoard() {
       {setupError ? (
         <ErrorMessage message={setupError} />
       ) : !me.data || !branches.data ? (
-        <Loading label="Đang tải..." />
+        <>
+          <div className="flex items-center justify-between gap-3">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-11 w-28 rounded-full" />
+          </div>
+          <TableSkeleton label="Đang tải danh sách ca" columns={5} />
+        </>
       ) : (
         <>
           <ShiftFilters branches={managedBranches(me.data, branches.data)} value={filters} onChange={setFilters} />
@@ -74,7 +80,7 @@ export function ShiftBoard() {
             </p>
           )}
           {shifts.isLoading ? (
-            <Loading label="Đang tải..." />
+            <TableSkeleton label="Đang tải danh sách ca" columns={5} />
           ) : shifts.error ? (
             <ErrorMessage message={shifts.error} />
           ) : shifts.data?.shifts.length === 0 ? (

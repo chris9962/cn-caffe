@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
+import { TableSkeleton } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import type { Branch } from "@/types/branch";
 
@@ -10,7 +10,7 @@ import type { Branch } from "@/types/branch";
 export function BranchList() {
   const { data, error, isLoading } = useFetch<Branch[]>("/api/admin/branches");
 
-  if (isLoading) return <Loading label="Đang tải..." />;
+  if (isLoading) return <TableSkeleton label="Đang tải danh sách chi nhánh" columns={4} />;
   if (error) return <ErrorMessage message={error} />;
 
   return (

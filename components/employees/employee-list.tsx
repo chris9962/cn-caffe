@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
+import { TableSkeleton } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { EMPLOYMENT_TYPE_LABELS, formatPhone, ROLE_LABELS } from "@/lib/employees/labels";
 import type { Employee } from "@/types/employee";
@@ -11,7 +11,7 @@ import type { Employee } from "@/types/employee";
 export function EmployeeList() {
   const { data, error, isLoading } = useFetch<Employee[]>("/api/admin/employees");
 
-  if (isLoading) return <Loading label="Đang tải..." />;
+  if (isLoading) return <TableSkeleton label="Đang tải danh sách nhân viên" columns={3} />;
   if (error) return <ErrorMessage message={error} />;
 
   return (

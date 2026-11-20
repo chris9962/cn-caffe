@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { BranchPicker } from "@/components/attendance/branch-picker";
 import { CameraCapture } from "@/components/attendance/camera-capture";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
+import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
 import { formatDate, formatTime, toVietnamLocalInput } from "@/lib/date";
@@ -378,9 +378,11 @@ export function CheckInPanel() {
       {error ? (
         <ErrorMessage message={error} />
       ) : !data ? (
-        <div className="ui-card rounded-lg">
-          <Loading label="Đang kiểm tra ca hiện tại..." />
-        </div>
+        <SkeletonRegion label="Đang kiểm tra ca hiện tại" className="ui-card flex flex-col rounded-lg">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="mt-3 h-[clamp(3.75rem,18vw,6rem)] w-48" />
+          <Skeleton className="mt-6 h-14 w-full rounded-full" />
+        </SkeletonRegion>
       ) : activeMode ? (
         <AttendanceFlow
           key={flowKey}

@@ -7,8 +7,8 @@ import { ResetPasswordForm } from "@/components/employees/reset-password-form";
 import { ManagerAccessForm } from "@/components/managers/manager-access-form";
 import { PayRateSection } from "@/components/payroll/pay-rate-section";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Loading } from "@/components/ui/loading";
 import { Modal } from "@/components/ui/modal";
+import { FormSkeleton, Skeleton } from "@/components/ui/skeleton";
 import { Tabs } from "@/components/ui/tabs";
 import { useFetch } from "@/hooks/use-fetch";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +18,25 @@ import type { Employee } from "@/types/employee";
 type AccountAction = "reset-password" | "lock";
 
 const actionButtonClass = "min-h-10 px-4 text-sm";
+
+export function EmployeeDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
+        <div>
+          <Skeleton className="h-10 w-64 max-w-full" />
+          <Skeleton className="mt-3 h-4 w-56" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-36 rounded-full" />
+          <Skeleton className="h-10 w-32 rounded-full" />
+        </div>
+      </div>
+      <Skeleton className="h-12 w-64 max-w-full rounded-full" />
+      <FormSkeleton label="Đang tải hồ sơ nhân viên" fields={5} />
+    </div>
+  );
+}
 
 export function EmployeeDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -40,7 +59,7 @@ export function EmployeeDetail({ params }: { params: Promise<{ id: string }> }) 
   const employee = data?.find((item) => item.id === id);
 
   if (error) return <ErrorMessage message={error} />;
-  if (data === null && isLoading) return <Loading label="Đang tải..." />;
+  if (data === null && isLoading) return <EmployeeDetailSkeleton />;
   if (!employee) return <ErrorMessage message="Không tìm thấy nhân viên." />;
 
   return (
