@@ -25,6 +25,7 @@ Bạn dùng component trong `components/ui/` trước khi viết mới.
 | `TimeField` | Nhập giờ `HH:mm`, bàn phím số trên điện thoại, tự chèn dấu `:` |
 | `PickerPopover` | Khung popup cho các bộ chọn. Dùng Popover API và CSS anchor positioning |
 | `TextField` | Ô văn bản trong form: label, dấu `*`, gợi ý, lỗi, ARIA |
+| `MoneyField` | Ô nhập tiền. Tự thêm dấu chấm hàng nghìn khi gõ, ví dụ `100000` thành `100.000`. Mở bàn phím số. `value` chỉ chứa chữ số |
 | `Switch` | Bật hoặc tắt một tuỳ chọn |
 | `Modal`, `SideDrawer`, `Tabs` | Hộp thoại, ngăn bên, tab |
 | `Skeleton`, `TableSkeleton`, `FormSkeleton`, `SkeletonRegion` | Trạng thái tải |
@@ -32,7 +33,9 @@ Bạn dùng component trong `components/ui/` trước khi viết mới.
 | `ErrorMessage` | Câu lỗi màu đỏ, `role="alert"`, có `id` để nối với `aria-describedby` |
 | `useToast()` | Toast: `showToast(text)` cho thành công, `showToast(text, "error")` cho lỗi |
 
-**Không dùng ô ngày, giờ, tháng mặc định của trình duyệt.** Bạn không được dùng `type="date"`, `type="time"`, `type="datetime-local"` hoặc `type="month"`. Người dùng đánh giá các ô này là xấu, và mỗi trình duyệt hiện mỗi kiểu. Một số form vẫn còn `select` mặc định. Khi bạn làm `select` mới, bạn hỏi người dùng có muốn component tuỳ biến hay không.
+**Không dùng ô ngày, giờ, tháng mặc định của trình duyệt.** Bạn không được dùng `type="date"`, `type="time"`, `type="datetime-local"` hoặc `type="month"`. Người dùng đánh giá các ô này là xấu, và mỗi trình duyệt hiện mỗi kiểu. Ô nhập số phải mở bàn phím số trên điện thoại. Bạn đặt `inputMode="numeric"` cho số nguyên và `inputMode="decimal"` cho số lẻ. Ô nhập tiền dùng `MoneyField`, để người dùng đọc được số lớn khi gõ.
+
+Một số form vẫn còn `select` mặc định. Khi bạn làm `select` mới, bạn hỏi người dùng có muốn component tuỳ biến hay không.
 
 ## 2. Phản hồi cho mỗi thao tác
 

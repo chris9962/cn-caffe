@@ -109,7 +109,8 @@ Các điểm bắt buộc trong mẫu:
 |---|---|
 | Ô văn bản bắt buộc | `z.string().trim().min(1, "X là bắt buộc.")` |
 | Ô có định dạng | Thêm `.refine(check, "X phải ...")` sau `.min(1, ...)`. Lỗi đầu tiên là lỗi hiện ra |
-| Ô số | `register("x", { valueAsNumber: true })` và `z.number({ error: "X là bắt buộc." })`. Ô trống cho giá trị `NaN`, và `z.number` báo câu "là bắt buộc" |
+| Ô số | `register("x", { valueAsNumber: true })` và `z.number({ error: "X là bắt buộc." })`. Ô trống cho giá trị `NaN`, và `z.number` báo câu "là bắt buộc". Ô có `inputMode="numeric"` hoặc `"decimal"` |
+| Ô tiền | `MoneyField` qua `Controller`. Schema `z.string().min(1, "X là bắt buộc.")`. Hàm `save` đổi sang số bằng `Number(value)` |
 | Số nguyên dương | `.int("X phải là số nguyên dương.").min(1, "X phải là số nguyên dương.")` |
 | Ô không bắt buộc | `z.string().trim()` |
 | `select` | `z.enum([...])` với đúng các giá trị của kiểu trong `types/` |

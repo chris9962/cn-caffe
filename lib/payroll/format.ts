@@ -1,7 +1,11 @@
 const moneyFormatter = new Intl.NumberFormat("vi-VN");
 
+export function formatAmount(amount: number): string {
+  return moneyFormatter.format(amount);
+}
+
 export function formatMoney(amount: number): string {
-  return `${moneyFormatter.format(amount)} đ`;
+  return `${formatAmount(amount)} đ`;
 }
 
 export function formatSignedMoney(amount: number): string {

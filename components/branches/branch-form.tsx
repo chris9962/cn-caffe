@@ -242,6 +242,7 @@ export function BranchForm({ branch, onSaved }: BranchFormProps) {
         label="Bán kính (m)"
         required
         type="number"
+        inputMode="numeric"
         step="any"
         min={1}
         {...register("radiusM", { valueAsNumber: true })}

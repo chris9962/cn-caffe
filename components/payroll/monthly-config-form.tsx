@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { MoneyField } from "@/components/ui/money-field";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { FormSkeleton } from "@/components/ui/skeleton";
 import { TimeField } from "@/components/ui/time-field";
@@ -82,15 +83,11 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
           <label htmlFor="overtime-rate" className="ui-label">
             Lương tăng ca bán thời gian (đồng/giờ)
           </label>
-          <input
+          <MoneyField
             id="overtime-rate"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            step={1}
             required
             value={overtimeHourlyRate}
-            onChange={(event) => setOvertimeHourlyRate(event.target.value)}
+            onChange={setOvertimeHourlyRate}
             aria-describedby="overtime-rate-hint"
             className="ui-field"
           />
@@ -126,15 +123,11 @@ function MonthlyConfigFields({ config, onSaved }: { config: MonthlyConfig; onSav
             <label htmlFor="full-time-overtime-rate" className="ui-label">
               Lương tăng ca toàn thời gian (đồng/giờ)
             </label>
-            <input
+            <MoneyField
               id="full-time-overtime-rate"
-              type="number"
-              inputMode="numeric"
-              min={0}
-              step={1}
               required
               value={fullTimeOvertimeRate}
-              onChange={(event) => setFullTimeOvertimeRate(event.target.value)}
+              onChange={setFullTimeOvertimeRate}
               aria-describedby="full-time-overtime-hint"
               className="ui-field"
             />

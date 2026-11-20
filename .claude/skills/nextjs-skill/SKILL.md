@@ -61,6 +61,7 @@ Danh sách này là bản tóm tắt. Chi tiết và ví dụ nằm trong các f
 **Form**
 - Form dùng `react-hook-form` và `zod`, ô văn bản dùng `TextField`.
 - Ô bắt buộc chỉ có dấu `*` đỏ. Không thêm câu "Mục có dấu * là bắt buộc".
+- Ô nhập số có `inputMode` để mở bàn phím số. Ô nhập tiền dùng `MoneyField`, tự định dạng `100.000` khi gõ.
 - Lỗi hiện dưới ô khi người dùng rời ô, rồi cập nhật theo từng ký tự.
 - Ô trống báo "X là bắt buộc.". Ô sai định dạng nói rõ định dạng đúng.
 - Lỗi server sau khi bấm nút hiện bằng toast lỗi, không hiện trong form.

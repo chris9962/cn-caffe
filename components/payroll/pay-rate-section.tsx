@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { DateField } from "@/components/ui/date-field";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { Modal } from "@/components/ui/modal";
+import { MoneyField } from "@/components/ui/money-field";
 import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
 import { useFetch } from "@/hooks/use-fetch";
 import { useMutation } from "@/hooks/use-mutation";
@@ -149,17 +150,7 @@ export function PayRateSection({ employee }: PayRateSectionProps) {
             <label htmlFor="rate-amount" className="ui-label">
               Số tiền (đồng{UNIT})
             </label>
-            <input
-              id="rate-amount"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              step={1}
-              required
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-              className="ui-field"
-            />
+            <MoneyField id="rate-amount" required value={amount} onChange={setAmount} className="ui-field" />
           </div>
           <DateField label="Áp dụng từ ngày" value={effectiveFrom} onChange={setEffectiveFrom} />
         </div>

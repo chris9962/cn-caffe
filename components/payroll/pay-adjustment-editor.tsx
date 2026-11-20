@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { ErrorMessage } from "@/components/ui/error-message";
+import { MoneyField } from "@/components/ui/money-field";
 import { useMutation } from "@/hooks/use-mutation";
 import { formatSignedMoney } from "@/lib/payroll/format";
 import type { PayAdjustment, Payslip } from "@/types/payroll";
@@ -97,17 +98,7 @@ export function PayAdjustmentEditor({ payslip, onChanged }: PayAdjustmentEditorP
             <label htmlFor="adjustment-amount" className="ui-label">
               Số tiền (đồng)
             </label>
-            <input
-              id="adjustment-amount"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              step={1}
-              required
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-              className="ui-field"
-            />
+            <MoneyField id="adjustment-amount" required value={amount} onChange={setAmount} className="ui-field" />
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="adjustment-note" className="ui-label">
